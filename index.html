@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lycée de Kigali — Strive to Excel</title>
+<link rel="stylesheet" href="style.css">
+
+<base target="_blank">
+</head>
+<body>
+<canvas id="clickspark-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+<canvas id="starfield"></canvas>
+<div id="cursor-spotlight"></div>
+
+<div id="land">
+  <nav class="nav">
+    <div class="nav-in">
+      <div class="logo"><div class="logo-i">LDK</div><span class="editable" data-key="schoolName">Lycée de Kigali</span></div>
+      <div class="nav-l">
+        <a href="#" onclick="sc('about')">About</a>
+        <a href="#" onclick="sc('achieve')">Achievements</a>
+        <a href="#" onclick="sc('acad')">Academics</a>
+        <a href="#" onclick="sc('staff')">Staff</a>
+        <a href="#" onclick="sc('contact')">Contact</a>
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="btn btn-p" onclick="openL()">Portal Login</button>
+      </div>
+      <button class="nav-burger" onclick="toggleMobileNav()" id="navBurgerBtn" aria-label="Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="navBurgerIcon"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="nav-mobile-panel" id="navMobilePanel">
+      <a href="#" onclick="sc('about');toggleMobileNav()">About</a>
+      <a href="#" onclick="sc('achieve');toggleMobileNav()">Achievements</a>
+      <a href="#" onclick="sc('acad');toggleMobileNav()">Academics</a>
+      <a href="#" onclick="sc('staff');toggleMobileNav()">Staff</a>
+      <a href="#" onclick="sc('contact');toggleMobileNav()">Contact</a>
+      <button class="btn btn-g" onclick="toggleTheme()">Toggle Theme</button>
+      <button class="btn btn-p" onclick="openL();toggleMobileNav()">Portal Login</button>
+    </div>
+  </nav>
+
+
+  <section class="hero">
+    <div class="hero-orb orb-1"></div>
+    <div class="hero-orb orb-2"></div>
+    <div class="hero-orb orb-3"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-globe-wrap"><canvas id="globe-canvas"></canvas></div>
+    <canvas id="starfield-fg" style="position:absolute;inset:0;z-index:2;pointer-events:none;"></canvas>
+    <div class="shooting-star" style="top:10%;left:10%;animation-delay:0s"></div>
+    <div class="shooting-star" style="top:30%;left:60%;animation-delay:2s"></div>
+    <div class="shooting-star" style="top:50%;left:30%;animation-delay:4s"></div>
+    <div class="hero-in" id="heroIn">
+      <div class="rv on">
+        <div class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span class="editable" data-key="heroBadge">Est. 1975 — Excellence in Education</span>
+        </div>
+        <h1>Strive to <span class="gradient-text">Excel</span></h1>
+        <p class="hero-sub editable" data-key="heroSub">Where future leaders are forged through academic rigor, discipline, and innovation. Join over 6,000 alumni who started their journey under the stars of Kigali.</p>
+        <div class="hero-cta">
+          <button class="btn btn-a" style="padding:14px 28px;font-size:15px" onclick="sc('about')">Explore LDK <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+          <button class="btn-outline" onclick="openL()">Student Portal</button>
+        </div>
+      </div>
+      <div class="hero-st rv d2 on" id="heroStats">
+        <div><h3 class="editable" data-key="stat1">1,400+</h3><p class="editable" data-key="stat1Label">Current students</p></div>
+        <div><h3 class="editable" data-key="stat2">6,000+</h3><p class="editable" data-key="stat2Label">Alumni worldwide</p></div>
+        <div><h3 class="editable" data-key="stat3">50+</h3><p class="editable" data-key="stat3Label">Dedicated staff</p></div>
+        <div><h3 class="editable" data-key="stat4">50</h3><p class="editable" data-key="stat4Label">Years of excellence</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="about">
+    <div class="sec-h rv"><h2 class="editable" data-key="aboutTitle">About Lycée de Kigali</h2><p class="editable" data-key="aboutDesc">A partnership between the Government of Rwanda and parents, nurturing enlightened and dignified ladies and gentlemen rooted in academic standards.</p></div>
+    <div class="g3">
+      <div class="card card-tilt rv d1">
+        <div class="c-i c-b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <h3 class="editable" data-key="visionTitle">Our Vision</h3><p class="editable" data-key="visionDesc">To be the center of Excellency enlightened and dignified ladies and gentlemen rooted in academic standards.</p>
+      </div>
+      <div class="card card-tilt rv d2">
+        <div class="c-i c-g"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3 class="editable" data-key="missionTitle">Our Mission</h3><p class="editable" data-key="missionDesc">To provide capable high quality academics through teamwork and to address world trends.</p>
+      </div>
+      <div class="card card-tilt rv d3">
+        <div class="c-i c-o"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <h3 class="editable" data-key="mottoTitle">Our Motto</h3><p class="editable" data-key="mottoDesc">"Strive to excel" — A commitment to continuous improvement and the pursuit of greatness.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="achieve" style="padding-top:60px">
+    <div class="sec-h rv"><h2 class="editable" data-key="achieveTitle">Our Constellation of Achievements</h2><p class="editable" data-key="achieveDesc">Decades of excellence that shine bright like stars in Rwanda's educational sky.</p></div>
+    <div class="bento-grid rv d2">
+      <div class="magic-card magic-card--glow magic-card-tilt" data-bento>
+        <span class="edit-badge" onclick="editBento(0)">Edit</span>
+        <div class="magic-card__label editable" data-key="bento0Label">Excellence</div>
+        <div><div class="magic-card__title editable" data-key="bento0Title">Best Performing School in Kigali</div>
+        <div class="magic-card__desc editable" data-key="bento0Desc">Ranked #1 among all secondary schools in Kigali City for three consecutive years (2022-2024) by the Rwanda Education Board.</div></div>
+      </div>
+      <div class="magic-card magic-card--glow magic-card-tilt" data-bento>
+        <span class="edit-badge" onclick="editBento(1)">Edit</span>
+        <div class="magic-card__label editable" data-key="bento1Label">University Placement</div>
+        <div><div class="magic-card__title editable" data-key="bento1Title">98% University Admission Rate</div>
+        <div class="magic-card__desc editable" data-key="bento1Desc">Nearly every graduate secures placement at top universities in Rwanda, Uganda, Kenya, and abroad including Harvard, Makerere, and University of Rwanda.</div></div>
+      </div>
+      <div class="magic-card magic-card--glow magic-card-tilt" data-bento>
+        <span class="edit-badge" onclick="editBento(2)">Edit</span>
+        <div class="magic-card__label editable" data-key="bento2Label">Science & Innovation</div>
+        <div><div class="magic-card__title editable" data-key="bento2Title">National Science Fair Champions</div>
+        <div class="magic-card__desc editable" data-key="bento2Desc">Stream 1 students won the Rwanda National Science Fair 2024 with a renewable energy project now being piloted in Nyarugenge District.</div></div>
+      </div>
+      <div class="magic-card magic-card--glow magic-card-tilt" data-bento>
+        <span class="edit-badge" onclick="editBento(3)">Edit</span>
+        <div class="magic-card__label editable" data-key="bento3Label">Languages</div>
+        <div><div class="magic-card__title editable" data-key="bento3Title">Francophonie Gold Medal</div>
+        <div class="magic-card__desc editable" data-key="bento3Desc">First place in the National French Language Competition for five straight years. Our debate team represents Rwanda at the Francophonie Games.</div></div>
+      </div>
+      <div class="magic-card magic-card--glow magic-card-tilt" data-bento>
+        <span class="edit-badge" onclick="editBento(4)">Edit</span>
+        <div class="magic-card__label editable" data-key="bento4Label">Sports</div>
+        <div><div class="magic-card__title editable" data-key="bento4Title">National Basketball Champions</div>
+        <div class="magic-card__desc editable" data-key="bento4Desc">Senior boys' basketball team won the Rwanda Secondary Schools Championship 2024. Three players selected for the national U-18 squad.</div></div>
+      </div>
+      <div class="magic-card magic-card--glow magic-card-tilt" data-bento>
+        <span class="edit-badge" onclick="editBento(5)">Edit</span>
+        <div class="magic-card__label editable" data-key="bento5Label">Alumni</div>
+        <div><div class="magic-card__title editable" data-key="bento5Title">Leaders Across Africa</div>
+        <div class="magic-card__desc editable" data-key="bento5Desc">Our alumni include ministers, CEOs, engineers, and doctors shaping Rwanda and the continent. The LDK Alumni Network spans 12 countries.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-alt">
+    <div class="g4 rv">
+      <div class="ach-card ach-card-tilt rv d1">
+        <div class="ach-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <div class="ach-num" data-count="98">0</div><div class="ach-label editable" data-key="achLabel1">% University Placement</div>
+      </div>
+      <div class="ach-card ach-card-tilt rv d2">
+        <div class="ach-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="ach-num" data-count="3">0</div><div class="ach-label editable" data-key="achLabel2">Consecutive #1 Rankings</div>
+      </div>
+      <div class="ach-card ach-card-tilt rv d3">
+        <div class="ach-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <div class="ach-num" data-count="6000">0</div><div class="ach-label editable" data-key="achLabel3">Alumni Worldwide</div>
+      </div>
+      <div class="ach-card ach-card-tilt rv d4">
+        <div class="ach-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="ach-num" data-count="50">0</div><div class="ach-label editable" data-key="achLabel4">Years of Excellence</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="acad">
+    <div class="sec-h rv"><h2 class="editable" data-key="acadTitle">Academic Programs</h2><p class="editable" data-key="acadDesc">Comprehensive O-Level and A-Level education with Rwanda's modern streaming system.</p></div>
+    <div class="g2">
+      <div class="str str-tilt rv d1">
+        <div class="str-h"><h3 class="editable" data-key="olevelTitle">O-Level Program</h3><span class="editable" data-key="olevelSub">Ordinary Level — Senior 1 to Senior 3</span></div>
+        <div class="str-b">
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="olevel1">Mathematics & Sciences</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="olevel2">Languages (English, French, Kinyarwanda)</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="olevel3">Social Studies & Humanities</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="olevel4">ICT & Entrepreneurship</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="str str-tilt rv d2">
+        <div class="str-h"><h3 class="editable" data-key="alevelTitle">A-Level Program</h3><span class="editable" data-key="alevelSub">Advanced Level — Senior 4 to Senior 6</span></div>
+        <div class="str-b">
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel1"><strong>Stream 1:</strong> Sciences (Math, Physics, Chem, Bio)</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel2"><strong>Stream 2:</strong> Humanities (History, Econ, Lit, Geo)</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel3"><strong>Stream 3:</strong> Mixed Sciences & Languages</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-alt">
+    <div class="sec-h rv"><h2 class="editable" data-key="digitalTitle">Digital Campus Features</h2><p class="editable" data-key="digitalDesc">Modern systems designed to save time for staff and empower students.</p></div>
+    <div class="g4">
+      <div class="card card-tilt rv d1">
+        <div class="c-i c-b"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3 class="editable" data-key="feat1Title">Smart Attendance</h3><p class="editable" data-key="feat1Desc">Staff mark attendance on their phones. Data auto-submits to the Discipline Office — no more paper rounds.</p>
+      </div>
+      <div class="card card-tilt rv d2">
+        <div class="c-i c-g"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3 class="editable" data-key="feat2Title">Discipline Tracker</h3><p class="editable" data-key="feat2Desc">Students view their marks, see reasons for deductions, and know who made the decision. Full transparency.</p>
+      </div>
+      <div class="card card-tilt rv d3">
+        <div class="c-i c-o"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <h3 class="editable" data-key="feat3Title">Absence Justification</h3><p class="editable" data-key="feat3Desc">Students submit absence reasons with proof. Staff review and approve digitally. No more back-and-forth.</p>
+      </div>
+      <div class="card card-tilt rv d4">
+        <div class="c-i c-r"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <h3 class="editable" data-key="feat4Title">Role-Based Access</h3><p class="editable" data-key="feat4Desc">Headmaster, Discipline Staff, and Dean of Studies each have tailored dashboards with relevant controls.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="staff">
+    <div class="sec-h rv"><h2 class="editable" data-key="staffTitle">Leadership Team</h2><p class="editable" data-key="staffDesc">Meet the dedicated professionals guiding Lycée de Kigali.</p></div>
+    <div class="g4" id="staffGrid">
+      <div class="card stf stf-tilt rv d1" data-staff-id="0">
+        <span class="edit-badge" onclick="editStaff(0)">Edit</span>
+        <div class="stf-a">JM</div><h4 class="editable" data-key="staff0Name">Jean Mfurayase</h4><p class="editable" data-key="staff0Role">Headmaster</p><span class="stf-t editable" data-key="staff0Tag">Super Admin</span>
+      </div>
+      <div class="card stf stf-tilt rv d2" data-staff-id="1">
+        <span class="edit-badge" onclick="editStaff(1)">Edit</span>
+        <div class="stf-a">MP</div><h4 class="editable" data-key="staff1Name">Manirakiza Paulin</h4><p class="editable" data-key="staff1Role">Dean of Studies</p><span class="stf-t editable" data-key="staff1Tag">Academic Admin</span>
+      </div>
+      <div class="card stf stf-tilt rv d3" data-staff-id="2">
+        <span class="edit-badge" onclick="editStaff(2)">Edit</span>
+        <div class="stf-a">TK</div><h4 class="editable" data-key="staff2Name">Theogene Kabalisa</h4><p class="editable" data-key="staff2Role">Dean of Discipline</p><span class="stf-t editable" data-key="staff2Tag">Discipline Admin</span>
+      </div>
+      <div class="card stf stf-tilt rv d4" data-staff-id="3">
+        <span class="edit-badge" onclick="editStaff(3)">Edit</span>
+        <div class="stf-a">IT</div><h4 class="editable" data-key="staff3Name">IT Administrator</h4><p class="editable" data-key="staff3Role">Systems & Support</p><span class="stf-t editable" data-key="staff3Tag">Technical</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-alt" id="contact">
+    <div class="sec-h rv"><h2 class="editable" data-key="contactTitle">Get in Touch</h2><p class="editable" data-key="contactDesc">Located in Kiyovu Cell, Nyarugenge Sector, Kigali, Rwanda.</p></div>
+    <div class="g3">
+      <div class="card card-tilt rv d1" style="text-align:center">
+        <div class="c-i c-b" style="margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3 class="editable" data-key="contact1Title">Address</h3>
+        <p><a href="https://maps.google.com/?q=KK+2+Avenue+Kigali+Rwanda" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" class="editable" data-key="contact1Text">KK 2 Avenue<br>Kigali, Rwanda</a></p>
+      </div>
+      <div class="card card-tilt rv d2" style="text-align:center">
+        <div class="c-i c-g" style="margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <h3 class="editable" data-key="contact2Title">Email</h3>
+        <p><a href="mailto:kigalilycee2022@gmail.com" style="color:inherit;text-decoration:none" class="editable" data-key="contact2Text">kigalilycee2022@gmail.com</a></p>
+      </div>
+      <div class="card card-tilt rv d3" style="text-align:center">
+        <div class="c-i c-o" style="margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+        <h3 class="editable" data-key="contact3Title">Phone</h3>
+        <p><a href="tel:+250791166095" style="color:inherit;text-decoration:none;display:block" class="editable" data-key="contact3Text">+250 791 166 095</a><a href="tel:+250782426054" style="color:inherit;text-decoration:none;display:block">+250 782 426 054</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ft">
+    <div class="ft-in">
+      <div class="ft-top">
+        <div class="ft-logo"><div>LDK</div><div><div style="font-weight:700;font-size:16px" class="editable" data-key="footerName">Lycée de Kigali</div><div style="font-size:13px;opacity:0.7" class="editable" data-key="footerMotto">Strive to excel</div></div></div>
+        <div class="ft-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Support</a></div>
+      </div>
+      <div class="ft-bot editable" data-key="footerCopy">© 2025 Lycée de Kigali. Government of Rwanda & Parents Partnership. All rights reserved.</div>
+    </div>
+  </footer>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="mod" id="loginM">
+  <div class="mod-c">
+    <button class="mod-x" onclick="closeL()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:56px;height:56px;background:var(--p);color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:700;font-size:18px">LDK</div>
+      <h2>Portal Login</h2><p>Access your personalized dashboard</p>
+    </div>
+    <div class="tabs" style="margin:0 auto 24px">
+      <button class="tab on" onclick="setR('student')" id="t-stu">Student</button>
+      <button class="tab" onclick="setR('staff')" id="t-sta">Staff</button>
+      <button class="tab" onclick="setR('admin')" id="t-adm">Admin</button>
+    </div>
+    <div class="fg"><label class="lab">ID / Email</label><input type="text" class="inp" id="lid" placeholder="e.g. LDK-2023-001" value="LDK-2023-001"></div>
+    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter password" value="password"></div>
+    <div class="fg hidden" id="arole"><label class="lab">Admin Role</label><select class="sel" id="asel"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option><option value="dean">Dean of Studies</option></select></div>
+    <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="doL()">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></button>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Demo: Use any ID and "password" to login</p></div>
+  </div>
+</div>
+
+<!-- STUDENT PORTAL -->
+<div class="port" id="stuP">
+  <aside class="side">
+    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Student Portal</span></div>
+    <ul class="side-nav">
+      <li><a href="#" class="on" onclick="sTab('sd')" id="nsd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
+      <li><a href="#" onclick="sTab('sdi')" id="nsdi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Discipline</a></li>
+      <li><a href="#" onclick="sTab('sab')" id="nsab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Absence</a></li>
+      <li><a href="#" onclick="sTab('san')" id="nsan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Announcements</a></li>
+      <li><a href="#" onclick="sTab('snot')" id="nsnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications <span style="margin-left:auto;background:var(--r);color:#fff;font-size:10px;padding:2px 6px;border-radius:100px" id="sNotifBadge">3</span></a></li>
+    </ul>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
+  </aside>
+  <main class="main">
+    <div class="ph">
+      <div><h1 id="st">Dashboard</h1><p>Welcome back, Jean-Paul Manirafasha</p></div>
+      <div class="pu">
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="notif-bell" onclick="sTab('snot')" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-badge" id="bellBadge">3</span>
+        </div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600">Jean-Paul M.</div><div style="font-size:12px;color:var(--t3)">Senior 5 — Stream 1</div></div>
+        <div class="pu-a" style="background:linear-gradient(135deg,var(--a),#8b5cf6)">JM</div>
+        <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
+      </div>
+    </div>
+    <div id="v-sd">
+      <div class="g4" style="margin-bottom:32px">
+        <div class="stc"><h4>Discipline Points</h4><div class="v" style="color:var(--g)">35/40</div><div class="ch" style="color:var(--g)">+2 this term</div></div>
+        <div class="stc"><h4>Attendance Rate</h4><div class="v" style="color:var(--a)">96.5%</div><div class="ch" style="color:var(--g)">Excellent</div></div>
+        <div class="stc"><h4>Absences</h4><div class="v" style="color:var(--w)">3</div><div class="ch">2 justified, 1 pending</div></div>
+        <div class="stc"><h4>Class Rank</h4><div class="v" style="color:var(--p)">#12</div><div class="ch">of 145 students</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:16px">Recent Discipline Activity</h3>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border-radius:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;color:var(--g);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">+2 points — Class participation</div><div style="font-size:12px;color:var(--t3)">Mr. Ndayisaba — 2 days ago</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border-radius:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#fee2e2;color:var(--r);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">-1 point — Late to assembly</div><div style="font-size:12px;color:var(--t3)">Mrs. Uwimana — 5 days ago</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border-radius:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;color:var(--g);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">+3 points — School event volunteer</div><div style="font-size:12px;color:var(--t3)">Mr. Habimana — 2 weeks ago</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">Upcoming Schedule</h3>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;background:var(--s3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:11px;font-weight:600;color:var(--t3)">AUG</div><div style="font-size:18px;font-weight:700">12</div></div>
+              <div><div style="font-size:14px;font-weight:600">Mathematics Exam</div><div style="font-size:12px;color:var(--t3)">08:00 AM — Room B12</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;background:var(--s3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:11px;font-weight:600;color:var(--t3)">AUG</div><div style="font-size:18px;font-weight:700">14</div></div>
+              <div><div style="font-size:14px;font-weight:600">Physics Lab Practical</div><div style="font-size:12px;color:var(--t3)">10:30 AM — Science Lab</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;background:var(--s3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:11px;font-weight:600;color:var(--t3)">AUG</div><div style="font-size:18px;font-weight:700">18</div></div>
+              <div><div style="font-size:14px;font-weight:600">Chemistry Test</div><div style="font-size:12px;color:var(--t3)">02:00 PM — Room A5</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="v-sdi" class="hidden">
+      <div class="card" style="margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px"><h3>Discipline Record</h3><span class="tag tag-pr">Current: 35/40 points</span></div>
+        <table class="tbl">
+          <thead><tr><th>Date</th><th>Reason</th><th>Points</th><th>By</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Aug 5, 2025</td><td>Class participation award</td><td style="color:var(--g);font-weight:700">+2</td><td>Mr. Ndayisaba</td><td><span class="tag tag-ap">Approved</span></td></tr>
+            <tr><td>Aug 2, 2025</td><td>Late to morning assembly</td><td style="color:var(--r);font-weight:700">-1</td><td>Mrs. Uwimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
+            <tr><td>Jul 28, 2025</td><td>Helping organize school event</td><td style="color:var(--g);font-weight:700">+3</td><td>Mr. Habimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
+            <tr><td>Jul 20, 2025</td><td>Uniform violation</td><td style="color:var(--r);font-weight:700">-1</td><td>Mrs. Uwimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
+            <tr><td>Jul 15, 2025</td><td>Perfect attendance week</td><td style="color:var(--g);font-weight:700">+1</td><td>Mr. Ndayisaba</td><td><span class="tag tag-ap">Approved</span></td></tr>
+            <tr><td>Jul 10, 2025</td><td>Disrupting class</td><td style="color:var(--r);font-weight:700">-2</td><td>Mrs. Uwimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
+            <tr><td>Jul 5, 2025</td><td>Helping new student</td><td style="color:var(--g);font-weight:700">+2</td><td>Mr. Habimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:20px">Points Breakdown</h3>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Academic Conduct</span><span style="font-weight:700">14/16</span></div><div class="prog"><div class="prog-f" style="width:87.5%;background:var(--g)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Punctuality</span><span style="font-weight:700">8/10</span></div><div class="prog"><div class="prog-f" style="width:80%;background:var(--g)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Participation</span><span style="font-weight:700">7/8</span></div><div class="prog"><div class="prog-f" style="width:87.5%;background:var(--g)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Uniform & Appearance</span><span style="font-weight:700">6/6</span></div><div class="prog"><div class="prog-f" style="width:100%;background:var(--g)"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="v-sab" class="hidden">
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:20px">Submit Absence Justification</h3>
+          <div class="fg"><label class="lab">Absence Date</label><input type="date" class="inp" id="adate"></div>
+          <div class="fg"><label class="lab">Reason Category</label><select class="sel" id="areason"><option>Medical / Health</option><option>Family Emergency</option><option>Official School Activity</option><option>Transportation Issue</option><option>Other</option></select></div>
+          <div class="fg"><label class="lab">Detailed Explanation</label><textarea class="txa" id="adetail" placeholder="Explain your absence in detail..."></textarea></div>
+          <div class="fg"><label class="lab">Proof Document</label>
+            <input type="file" id="aproofFile" accept="image/*,.pdf" style="display:none" onchange="handleProofFileChange(this)">
+            <div class="photo-zone" id="aproofZone" onclick="document.getElementById('aproofFile').click()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 8px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Click to upload medical certificate or proof document</div>
+          </div>
+          <button class="btn btn-a" style="width:100%;justify-content:center;padding:12px" onclick="subAbs()">Submit Justification</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:20px">My Absence History</h3>
+          <div id="absenceHistory" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </div>
+    </div>
+    <div id="v-san" class="hidden">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card" style="border-left:4px solid var(--a)">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><h3 style="font-size:16px">Term 2 Exams Schedule Released</h3><span style="font-size:12px;color:var(--t3)">Aug 7, 2025</span></div>
+          <p style="font-size:14px;color:var(--t2)">The Term 2 examination timetable has been published. All students are required to check their individual schedules in the portal. Exams begin on August 12th.</p>
+        </div>
+        <div class="card" style="border-left:4px solid var(--w)">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><h3 style="font-size:16px">Uniform Policy Update</h3><span style="font-size:12px;color:var(--t3)">Aug 5, 2025</span></div>
+          <p style="font-size:14px;color:var(--t2)">Starting next term, all students must wear the new school badge on their blazers. Badges will be distributed during registration week.</p>
+        </div>
+        <div class="card" style="border-left:4px solid var(--g)">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><h3 style="font-size:16px">Science Fair Winners Announced</h3><span style="font-size:12px;color:var(--t3)">Aug 3, 2025</span></div>
+          <p style="font-size:14px;color:var(--t2)">Congratulations to Stream 1 students for winning the inter-class science fair! Award ceremony Friday at 2 PM in the main hall.</p>
+        </div>
+        <div class="card" style="border-left:4px solid var(--r)">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px"><h3 style="font-size:16px">Important: Fee Payment Deadline</h3><span style="font-size:12px;color:var(--t3)">Aug 1, 2025</span></div>
+          <p style="font-size:14px;color:var(--t2)">All outstanding school fees must be cleared by August 15th. Students with unpaid fees will not be allowed to sit for Term 2 exams.</p>
+        </div>
+      </div>
+    </div>
+    <div id="v-snot" class="hidden">
+      <div class="card" style="margin-bottom:24px">
+        <h3 style="margin-bottom:20px">My Notifications</h3>
+        <div id="studentNotifList">
+          <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">Discipline Mark Added</span><span class="notif-priority high">High</span></div>
+              <span class="notif-time">2 hours ago</span>
+            </div>
+            <div class="notif-body">You received +5 points for outstanding class participation in Mathematics. Keep up the excellent work!</div>
+            <div class="notif-sender">From: Mr. Ndayisaba — Mathematics Dept</div>
+          </div>
+          <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">Absence Justification Update</span><span class="notif-priority normal">Normal</span></div>
+              <span class="notif-time">5 hours ago</span>
+            </div>
+            <div class="notif-body">Your absence justification for August 6th has been reviewed and approved by Mrs. Uwimana.</div>
+            <div class="notif-sender">From: Discipline Office</div>
+          </div>
+          <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">Exam Schedule Reminder</span><span class="notif-priority high">High</span></div>
+              <span class="notif-time">1 day ago</span>
+            </div>
+            <div class="notif-body">Your Mathematics exam is scheduled for August 12th at 08:00 AM in Room B12. Please arrive 15 minutes early.</div>
+            <div class="notif-sender">From: Dean of Studies</div>
+          </div>
+          <div class="notif-item notif-item-tilt read" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">School Event Volunteer</span><span class="notif-priority low">Low</span></div>
+              <span class="notif-time">3 days ago</span>
+            </div>
+            <div class="notif-body">Thank you for volunteering at the Science Fair. You have been awarded +10 discipline points.</div>
+            <div class="notif-sender">From: Mr. Habimana — Events Coordinator</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- STAFF PORTAL -->
+<div class="port" id="staP">
+  <aside class="side">
+    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Staff Portal</span></div>
+    <ul class="side-nav">
+      <li><a href="#" class="on" onclick="staTab('stad')" id="ntad"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
+      <li><a href="#" onclick="staTab('staat')" id="ntaat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Mark Attendance</a></li>
+      <li><a href="#" onclick="staTab('stajs')" id="ntjs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Justifications</a></li>
+      <li><a href="#" onclick="staTab('stadm')" id="ntadm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Discipline Marks</a></li>
+      <li><a href="#" onclick="staTab('stnot')" id="ntnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications <span style="margin-left:auto;background:var(--r);color:#fff;font-size:10px;padding:2px 6px;border-radius:100px" id="stNotifBadge">2</span></a></li>
+    </ul>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
+  </aside>
+  <main class="main">
+    <div class="ph">
+      <div><h1 id="stat">Dashboard</h1><p>Welcome, Mrs. Uwimana — Discipline Department</p></div>
+      <div class="pu">
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="notif-bell" onclick="staTab('stnot')" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-badge" id="stBellBadge">2</span>
+        </div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600">Mrs. Uwimana</div><div style="font-size:12px;color:var(--t3)">Discipline Officer</div></div>
+        <div class="pu-a" style="background:var(--a)">UW</div>
+        <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
+      </div>
+    </div>
+    <div id="v-stad">
+      <div class="g4" style="margin-bottom:32px">
+        <div class="stc"><h4>Students Present</h4><div class="v" style="color:var(--g)" id="staffPresentCount">1,284</div><div class="ch" style="color:var(--g)" id="staffPresentPct">92% today</div></div>
+        <div class="stc"><h4>Students Absent</h4><div class="v" style="color:var(--r)" id="staffAbsentCount">116</div><div class="ch" id="staffAbsentPct">8% today</div></div>
+        <div class="stc"><h4>Pending Justifications</h4><div class="v" style="color:var(--w)" id="staffPendingJust">23</div><div class="ch">Awaiting review</div></div>
+        <div class="stc"><h4>Discipline Reports</h4><div class="v" style="color:var(--p)" id="staffDisciplineReports">45</div><div class="ch">This session</div></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px">Recent Activity</h3>
+        <table class="tbl">
+          <thead><tr><th>Time</th><th>Action</th><th>By</th><th>Details</th></tr></thead>
+          <tbody id="staffActivityBody">
+            <tr><td colspan="4" style="text-align:center;color:var(--t3)">No activity yet this session.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="v-staat" class="hidden">
+      <div class="card" style="margin-bottom:24px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Class</label><select class="sel" id="atclass" onchange="loadAtt()"><option>S5 Stream 1</option><option>S5 Stream 2</option><option>S5 Stream 3</option><option>S4 Stream 1</option><option>S4 Stream 2</option><option>S4 Stream 3</option></select></div>
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Date</label><input type="date" class="inp" id="atdate"></div>
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Period</label><select class="sel"><option>Morning (1-2)</option><option>Afternoon (3-4)</option><option>Full Day</option></select></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:15px">Student List — <span id="atcname">S5 Stream 1</span></h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-s" style="font-size:12px" onclick="markAll(true)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> All Present</button>
+            <button class="btn btn-d" style="font-size:12px" onclick="markAll(false)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> All Absent</button>
+          </div>
+        </div>
+        <div id="atlist"></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:10px">
+          <button class="btn btn-g" onclick="saveAttDraft()">Save Draft</button>
+          <button class="btn btn-a" onclick="subAtt()">Submit to Discipline Office</button>
+        </div>
+      </div>
+    </div>
+    <div id="v-stajs" class="hidden">
+      <div class="card">
+        <h3 style="margin-bottom:16px">Pending Justifications</h3>
+        <div id="pendingJustifications" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+    </div>
+    <div id="v-stadm" class="hidden">
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:20px">Add Discipline Mark <span style="font-size:13px;color:var(--t3);font-weight:400">(Max 40 per term)</span></h3>
+          <div class="fg"><label class="lab">Student</label><select class="sel" id="dmstu"><option>Jean-Paul Manirafasha (LDK-2023-001)</option><option>Claire Umutoni (LDK-2023-045)</option><option>Patrick Habyarimana (LDK-2022-089)</option><option>Marie Mukamana (LDK-2023-112)</option><option>Jean Bosco Ndayisaba (LDK-2024-034)</option></select></div>
+          <div class="fg"><label class="lab">Points</label><div style="display:flex;gap:8px"><button class="btn btn-s" style="flex:1" onclick="setDM(1)">+1</button><button class="btn btn-s" style="flex:1" onclick="setDM(2)">+2</button><button class="btn btn-s" style="flex:1" onclick="setDM(3)">+3</button><button class="btn btn-s" style="flex:1" onclick="setDM(5)">+5</button><button class="btn btn-s" style="flex:1" onclick="setDM(10)">+10</button></div></div>
+          <div class="fg"><label class="lab">Or Deduct</label><div style="display:flex;gap:8px"><button class="btn btn-d" style="flex:1" onclick="setDM(-1)">-1</button><button class="btn btn-d" style="flex:1" onclick="setDM(-2)">-2</button><button class="btn btn-d" style="flex:1" onclick="setDM(-3)">-3</button><button class="btn btn-d" style="flex:1" onclick="setDM(-5)">-5</button><button class="btn btn-d" style="flex:1" onclick="setDM(-10)">-10</button></div></div>
+          <div class="fg"><label class="lab">Reason</label><input type="text" class="inp" id="dmreason" placeholder="e.g. Late to class, Helping others, etc."></div>
+          <div class="fg"><label class="lab">Category</label><select class="sel" id="dmcategory"><option>Academic Conduct</option><option>Punctuality</option><option>Participation</option><option>Uniform & Appearance</option><option>Behavior</option></select></div>
+          <button class="btn btn-a" style="width:100%;justify-content:center;padding:12px" onclick="addDM()">Add Discipline Mark</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:20px">Recent Discipline Actions</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="padding:12px;background:var(--s2);border-radius:10px;display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;color:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700">+2</div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">Jean-Paul Manirafasha</div><div style="font-size:12px;color:var(--t3)">Class participation — Mr. Ndayisaba — Aug 5</div></div>
+            </div>
+            <div style="padding:12px;background:var(--s2);border-radius:10px;display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#fee2e2;color:var(--r);display:flex;align-items:center;justify-content:center;font-weight:700">-1</div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">Jean-Paul Manirafasha</div><div style="font-size:12px;color:var(--t3)">Late to assembly — Mrs. Uwimana — Aug 2</div></div>
+            </div>
+            <div style="padding:12px;background:var(--s2);border-radius:10px;display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;color:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700">+3</div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">Claire Umutoni</div><div style="font-size:12px;color:var(--t3)">School event volunteer — Mr. Habimana — Jul 28</div></div>
+            </div>
+            <div style="padding:12px;background:var(--s2);border-radius:10px;display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:50%;background:#fee2e2;color:var(--r);display:flex;align-items:center;justify-content:center;font-weight:700">-1</div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">Patrick Habyarimana</div><div style="font-size:12px;color:var(--t3)">Uniform violation — Mrs. Uwimana — Jul 20</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="v-stnot" class="hidden">
+      <div class="card">
+        <h3 style="margin-bottom:20px">Staff Notifications</h3>
+        <div id="staffNotifList">
+          <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">New Absence Justification</span><span class="notif-priority high">High</span></div>
+              <span class="notif-time">30 min ago</span>
+            </div>
+            <div class="notif-body">Jean-Paul Manirafasha (S5 Stream 1) has submitted an absence justification for August 6th. Please review and approve or reject.</div>
+            <div class="notif-sender">System Alert</div>
+          </div>
+          <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">Attendance Submission Reminder</span><span class="notif-priority normal">Normal</span></div>
+              <span class="notif-time">2 hours ago</span>
+            </div>
+            <div class="notif-body">You have a pending attendance draft for S5 Stream 1 from yesterday that has not been submitted to the Discipline Office.</div>
+            <div class="notif-sender">From: Dean of Studies</div>
+          </div>
+          <div class="notif-item notif-item-tilt read" onclick="markRead(this)">
+            <div class="notif-top">
+              <div><span class="notif-title">Staff Meeting</span><span class="notif-priority low">Low</span></div>
+              <span class="notif-time">1 day ago</span>
+            </div>
+            <div class="notif-body">General staff meeting scheduled for Friday at 3:00 PM in the Conference Room. All teaching staff are required to attend.</div>
+            <div class="notif-sender">From: Headmaster's Office</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADMIN PORTAL -->
+<div class="port" id="admP">
+  <aside class="side">
+    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Admin Portal</span></div>
+    <ul class="side-nav" id="admNav">
+      <li><a href="#" class="on" onclick="admTab('admd')" id="nadmd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
+      <li><a href="#" onclick="admTab('admu')" id="nadmu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Users</a></li>
+      <li><a href="#" onclick="admTab('admbi')" id="nadmbi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Bulk Import</a></li>
+      <li><a href="#" onclick="admTab('admr')" id="nadmr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Reports</a></li>
+      <li><a href="#" onclick="admTab('admran')" id="nadmran"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Rankings</a></li>
+      <li><a href="#" onclick="admTab('admnot')" id="nadmnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications</a></li>
+      <li><a href="#" onclick="admTab('adms')" id="nadms"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Settings</a></li>
+    </ul>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
+  </aside>
+  <main class="main">
+    <div class="ph">
+      <div><h1 id="adt">Dashboard</h1><p id="adtp">Welcome, Headmaster — Full System Access</p></div>
+      <div class="pu">
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="notif-bell" onclick="admTab('admnot')" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600" id="adn">Headmaster</div><div style="font-size:12px;color:var(--t3)" id="adrole">Super Admin</div></div>
+        <div class="pu-a" id="adav" style="background:var(--r)">HM</div>
+        <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
+      </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div id="v-admd">
+      <div class="g4" style="margin-bottom:32px">
+        <div class="stc"><h4>Total Students</h4><div class="v" style="color:var(--a)" id="dashTotalStudents">1,400</div><div class="ch">+23 new this term</div></div>
+        <div class="stc"><h4>Total Staff</h4><div class="v" style="color:var(--p)">52</div><div class="ch">3 on leave</div></div>
+        <div class="stc"><h4>Attendance Today</h4><div class="v" style="color:var(--g)" id="dashAttendanceToday">91.7%</div><div class="ch" style="color:var(--g)">Above target</div></div>
+        <div class="stc"><h4>Pending Issues</h4><div class="v" style="color:var(--w)" id="dashPendingIssues">18</div><div class="ch">Require attention</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:16px">Attendance Overview</h3>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 1</span><span style="font-weight:700" id="attOverviewVal-S1">94%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S1" style="width:94%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 2</span><span style="font-weight:700" id="attOverviewVal-S2">89%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S2" style="width:89%;background:var(--w)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 3</span><span style="font-weight:700" id="attOverviewVal-S3">96%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S3" style="width:96%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 4</span><span style="font-weight:700" id="attOverviewVal-S4">91%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S4" style="width:91%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 5</span><span style="font-weight:700" id="attOverviewVal-S5">88%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S5" style="width:88%;background:var(--w)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 6</span><span style="font-weight:700" id="attOverviewVal-S6">93%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S6" style="width:93%;background:var(--g)"></div></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">System Activity</h3>
+          <table class="tbl">
+            <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+            <tbody id="adminActivityBody">
+              <tr><td colspan="4" style="text-align:center;color:var(--t3)">No activity yet this session.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN USERS -->
+    <div id="v-admu" class="hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <h3>All Users</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" class="inp" id="userSearch" placeholder="Search by name or ID..." oninput="filterUsers()" style="width:260px">
+            <button class="btn btn-a" onclick="admTab('admbi')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Bulk Import</button>
+            <button class="btn btn-a" onclick="addUser()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add User</button>
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="tbl" id="userTable">
+            <thead><tr><th>Photo</th><th>ID</th><th>Name</th><th>Role</th><th>Class/Dept</th><th>Discipline</th><th>Academic</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="userTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BULK IMPORT -->
+    <div id="v-admbi" class="hidden">
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:16px">Bulk Student Import</h3>
+          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Paste your student list below. Format: <code style="background:var(--s3);padding:2px 6px;border-radius:4px">Name, ID, Gender, Class, Stream, Level</code>. The system will auto-classify them.</p>
+          <div class="fg">
+            <label class="lab">Paste Student Data (CSV format)</label>
+            <textarea class="import-area" id="bulkImportArea" placeholder="Example:
+Jean-Paul Manirafasha, LDK-2023-001, M, S5, Stream 1, A-Level
+Claire Umutoni, LDK-2023-045, F, S4, Stream 2, A-Level
+Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-g" onclick="clearImport()">Clear</button>
+            <button class="btn btn-a" onclick="previewImport()" style="flex:1;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview & Validate</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">Import Guide</h3>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--t2)">
+            <div style="padding:12px;background:var(--s2);border-radius:10px">
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">1. Required Columns</div>
+              <div>Name, Student ID, Gender (M/F), Class (S1-S6), Stream (Stream 1-3), Level (O-Level/A-Level)</div>
+            </div>
+            <div style="padding:12px;background:var(--s2);border-radius:10px">
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">2. Auto-Classification</div>
+              <div>Students are automatically grouped by Class and Stream. No manual sorting needed.</div>
+            </div>
+            <div style="padding:12px;background:var(--s2);border-radius:10px">
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">3. Validation</div>
+              <div>The system checks for duplicate IDs, invalid classes, and missing fields before importing.</div>
+            </div>
+            <div style="padding:12px;background:var(--s2);border-radius:10px">
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">4. After Import</div>
+              <div>All students immediately appear in attendance lists, rankings, and discipline tracking.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="importPreviewSection" class="hidden" style="margin-top:24px">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3>Import Preview</h3>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="importStats" style="font-size:13px;color:var(--t3)"></span>
+              <button class="btn btn-a" onclick="confirmImport()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Confirm Import</button>
+            </div>
+          </div>
+          <div class="import-preview" id="importPreviewTable"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN REPORTS -->
+    <div id="v-admr" class="hidden">
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:16px">Attendance Report</h3>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Week 1</span><span style="font-weight:700">93%</span></div><div class="prog"><div class="prog-f" style="width:93%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Week 2</span><span style="font-weight:700">91%</span></div><div class="prog"><div class="prog-f" style="width:91%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Week 3</span><span style="font-weight:700">89%</span></div><div class="prog"><div class="prog-f" style="width:89%;background:var(--w)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Week 4</span><span style="font-weight:700">94%</span></div><div class="prog"><div class="prog-f" style="width:94%;background:var(--g)"></div></div></div>
+          </div>
+          <button class="btn btn-g" style="width:100%;margin-top:16px;justify-content:center" onclick="downloadReport(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Full Report</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">Discipline Report</h3>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Points Added</span><span style="font-weight:700;color:var(--g)">+342</span></div><div class="prog"><div class="prog-f" style="width:68%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Points Deducted</span><span style="font-weight:700;color:var(--r)">-128</span></div><div class="prog"><div class="prog-f" style="width:32%;background:var(--r)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Net Change</span><span style="font-weight:700;color:var(--g)">+214</span></div><div class="prog"><div class="prog-f" style="width:70%;background:var(--g)"></div></div></div>
+          </div>
+          <button class="btn btn-g" style="width:100%;margin-top:16px;justify-content:center" onclick="downloadReport(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Full Report</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN RANKINGS -->
+    <div id="v-admran" class="hidden">
+      <div class="tabs" style="margin-bottom:24px">
+        <button class="tab on" onclick="setRankTab('discipline')" id="rt-discipline">Class Rankings</button>
+        <button class="tab" onclick="setRankTab('academic')" id="rt-academic">Academic Rankings</button>
+        <button class="tab" onclick="setRankTab('students')" id="rt-students">Top 30 Students</button>
+        <button class="tab" onclick="setRankTab('attention')" id="rt-attention">Needs Attention</button>
+        <button class="tab" onclick="setRankTab('leaders')" id="rt-leaders">Class Leaders</button>
+      </div>
+
+      <div id="rank-discipline">
+        <div class="rank-card rank-card-tilt">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="font-size:16px">Complete Class Discipline Rankings</h3>
+            <span style="font-size:12px;color:var(--t3)">All classes sorted by average discipline points</span>
+          </div>
+          <div class="rank-full-list" id="allClassRankings"></div>
+        </div>
+      </div>
+
+      <div id="rank-academic" class="hidden">
+        <div class="rank-card rank-card-tilt">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="font-size:16px">Complete Academic Performance Rankings</h3>
+            <span style="font-size:12px;color:var(--t3)">All classes sorted by average academic score</span>
+          </div>
+          <div class="rank-full-list" id="allAcademicRankings"></div>
+        </div>
+      </div>
+
+      <div id="rank-students" class="hidden">
+        <div class="g2">
+          <div class="rank-card rank-card-tilt">
+            <h3 style="margin-bottom:20px;font-size:16px">Top 30 Overall Performers</h3>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Combined discipline + academic performance index</p>
+            <div class="rank-full-list" id="top30Overall"></div>
+          </div>
+          <div class="rank-card rank-card-tilt">
+            <h3 style="margin-bottom:20px;font-size:16px">Top 30 Most Disciplined</h3>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Highest discipline points across all classes</p>
+            <div class="rank-full-list" id="top30Discipline"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="rank-attention" class="hidden">
+        <div class="g2">
+          <div class="rank-card rank-card-tilt" style="border:1px solid var(--r)">
+            <h3 style="margin-bottom:20px;font-size:16px;color:var(--r)">Students Needing Attention</h3>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Students with discipline below 20/40 or academic below 60%</p>
+            <div class="rank-full-list" id="needsAttentionList"></div>
+          </div>
+          <div class="rank-card rank-card-tilt" style="border:1px solid var(--w)">
+            <h3 style="margin-bottom:20px;font-size:16px;color:var(--w)">Classes Below Target</h3>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Classes with average discipline under 20/40 or academic under 70%</p>
+            <div class="rank-full-list" id="classesBelowTarget"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="rank-leaders" class="hidden">
+        <div class="rank-card rank-card-tilt">
+          <h3 style="margin-bottom:20px;font-size:16px">Student Leaders by Class</h3>
+          <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Top performer in each class — the student with the highest combined index</p>
+          <div class="rank-full-list" id="classLeadersList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN NOTIFICATIONS -->
+    <div id="v-admnot" class="hidden">
+      <div class="g2">
+        <div class="compose-card compose-card-tilt">
+          <h3 style="margin-bottom:20px">Compose Notification</h3>
+          <div class="fg"><label class="lab">Title</label><input type="text" class="inp" id="notifTitle" placeholder="e.g. Exam Schedule Update"></div>
+          <div class="fg"><label class="lab">Message</label><textarea class="txa" id="notifBody" placeholder="Write your message here..."></textarea></div>
+          <div class="fg"><label class="lab">Priority</label><div style="display:flex;gap:8px">
+            <button class="rec-tag on" id="p-high" onclick="setPriority('high')" style="flex:1;justify-content:center">High</button>
+            <button class="rec-tag" id="p-normal" onclick="setPriority('normal')" style="flex:1;justify-content:center">Normal</button>
+            <button class="rec-tag" id="p-low" onclick="setPriority('low')" style="flex:1;justify-content:center">Low</button>
+          </div></div>
+          <div class="fg"><label class="lab">Recipients</label><div class="recipient-tags">
+            <button class="rec-tag on" id="r-all" onclick="toggleRec('all')">Whole School</button>
+            <button class="rec-tag" id="r-students" onclick="toggleRec('students')">All Students</button>
+            <button class="rec-tag" id="r-staff" onclick="toggleRec('staff')">All Staff</button>
+            <button class="rec-tag" id="r-s5" onclick="toggleRec('s5')">Senior 5</button>
+            <button class="rec-tag" id="r-s6" onclick="toggleRec('s6')">Senior 6</button>
+            <button class="rec-tag" id="r-s1" onclick="toggleRec('s1')">Senior 1</button>
+            <button class="rec-tag" id="r-discipline" onclick="toggleRec('discipline')">Discipline Dept</button>
+            <button class="rec-tag" id="r-teachers" onclick="toggleRec('teachers')">Teachers</button>
+          </div></div>
+          <div class="fg"><label class="lab">Or Search Individual</label><input type="text" class="inp" id="indivSearch" placeholder="Type student or staff name..." oninput="searchIndividual()"></div>
+          <div id="indivResults" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px"></div>
+          <button class="btn btn-a" style="width:100%;justify-content:center;padding:12px" onclick="sendNotification()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Notification</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:20px">Sent Notifications</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="notif-item notif-item-tilt read">
+              <div class="notif-top"><div><span class="notif-title">Term 2 Exams Schedule</span><span class="notif-priority high">High</span></div><span class="notif-time">Aug 7</span></div>
+              <div class="notif-body">The Term 2 examination timetable has been published. All students are required to check their individual schedules.</div>
+              <div class="notif-sender">To: Whole School | 1,452 recipients</div>
+            </div>
+            <div class="notif-item notif-item-tilt read">
+              <div class="notif-top"><div><span class="notif-title">Uniform Policy Update</span><span class="notif-priority normal">Normal</span></div><span class="notif-time">Aug 5</span></div>
+              <div class="notif-body">Starting next term, all students must wear the new school badge on their blazers.</div>
+              <div class="notif-sender">To: All Students | 1,400 recipients</div>
+            </div>
+            <div class="notif-item notif-item-tilt read">
+              <div class="notif-top"><div><span class="notif-title">Staff Meeting</span><span class="notif-priority low">Low</span></div><span class="notif-time">Aug 3</span></div>
+              <div class="notif-body">General staff meeting scheduled for Friday at 3:00 PM in the Conference Room.</div>
+              <div class="notif-sender">To: All Staff | 52 recipients</div>
+            </div>
+            <div class="notif-item notif-item-tilt read">
+              <div class="notif-top"><div><span class="notif-title">Fee Payment Reminder</span><span class="notif-priority high">High</span></div><span class="notif-time">Aug 1</span></div>
+              <div class="notif-body">All outstanding school fees must be cleared by August 15th.</div>
+              <div class="notif-sender">To: Whole School | 1,452 recipients</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN SETTINGS -->
+    <div id="v-adms" class="hidden">
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:20px">System Settings</h3>
+          <div class="fg"><label class="lab">School Name</label><input type="text" class="inp" id="setSchoolName" value="Lycée de Kigali"></div>
+          <div class="fg"><label class="lab">School Motto</label><input type="text" class="inp" id="setMotto" value="Strive to excel"></div>
+          <div class="fg"><label class="lab">Academic Year</label><input type="text" class="inp" id="setYear" value="2024-2025"></div>
+          <div class="fg"><label class="lab">Current Term</label><select class="sel" id="setTerm"><option>Term 1</option><option selected>Term 2</option><option>Term 3</option></select></div>
+          <button class="btn btn-a" style="width:100%;justify-content:center" onclick="saveSettings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Settings</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:20px">Landing Page Editor</h3>
+          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Enable edit mode on the landing page to modify text directly by clicking on any content.</p>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-a" style="flex:1;justify-content:center" onclick="enableEditMode()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Enable Edit Mode</button>
+            <button class="btn btn-g" style="flex:1;justify-content:center" onclick="exportData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export Data</button>
+          </div>
+          <div style="margin-top:16px;padding:16px;background:var(--s2);border-radius:10px">
+            <div style="font-size:13px;color:var(--t3)">Data Status</div>
+            <div style="font-size:14px;font-weight:600;margin-top:4px" id="dataStatusText">All systems operational</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:24px">
+        <h3 style="margin-bottom:20px">Danger Zone</h3>
+        <div style="padding:16px;background:#fef2f2;border:1px solid #fee2e2;border-radius:10px;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:600;color:var(--r);margin-bottom:4px">Reset All Data</div>
+          <div style="font-size:13px;color:var(--t2)">This will clear all attendance, discipline, and absence records. Cannot be undone.</div>
+        </div>
+        <button class="btn btn-d" style="width:100%;justify-content:center" onclick="resetAllData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Reset All Data</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- EDIT MODE BAR -->
+<div class="admin-edit-bar" id="editBar">
+  <span style="font-size:14px;font-weight:600">Edit Mode Active</span>
+  <span style="font-size:12px;opacity:0.7">Click any text to edit. Changes save automatically.</span>
+  <button class="btn btn-a btn-sm" onclick="saveEdits()">Save Changes</button>
+  <button class="btn btn-g btn-sm" onclick="disableEditMode()">Done</button>
+</div>
+
+
+<!-- AI ASSISTANT -->
+<div id="ai-assistant" style="display:none;position:fixed;bottom:24px;right:24px;z-index:500;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <div id="ai-chat-panel" style="display:none;width:360px;max-width:calc(100vw - 48px);height:480px;background:var(--s1);border:1px solid var(--b);border-radius:16px;box-shadow:var(--sh2);flex-direction:column;overflow:hidden;margin-bottom:12px">
+    <div style="padding:16px;background:var(--p);color:#fff;display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 013 3v7a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+      <div><div style="font-weight:600;font-size:14px">LDK AI Assistant</div><div style="font-size:11px;opacity:0.8">Powered by on-device intelligence</div></div>
+      <button onclick="toggleAI()" style="margin-left:auto;background:none;border:none;color:#fff;cursor:pointer;padding:4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="ai-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:13px;line-height:1.5">
+      <div style="align-self:flex-start;max-width:85%;padding:10px 14px;background:var(--s2);border-radius:12px;border-bottom-left-radius:4px;color:var(--t2)">Hello! I'm your LDK assistant. I can help you with:<br>• Student data & rankings<br>• Generating CSV/spreadsheets<br>• Explaining dashboard metrics<br>• Attendance insights<br><br>What would you like to know?</div>
+    </div>
+    <div style="padding:12px;border-top:1px solid var(--b);display:flex;gap:8px">
+      <input type="text" id="ai-input" placeholder="Ask me anything..." style="flex:1;padding:10px 14px;border:1px solid var(--b);border-radius:10px;font-size:13px;background:var(--s1);color:var(--t);outline:none" onkeypress="if(event.key==='Enter')sendAIMessage()">
+      <button onclick="sendAIMessage()" style="padding:10px 14px;background:var(--a);color:#fff;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+  </div>
+  <button id="ai-fab" onclick="toggleAI()" style="width:56px;height:56px;border-radius:50%;background:var(--a);color:#fff;border:none;box-shadow:var(--sh2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 013 3v7a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
