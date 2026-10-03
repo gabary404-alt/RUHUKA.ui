@@ -8,8 +8,9 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // Serve the existing website for all routes except the AI endpoint.
     if (url.pathname !== CHAT_PATH) {
-      return new Response("Not found", { status: 404 });
+      return env.ASSETS.fetch(request);
     }
 
     if (request.method !== "POST") {
@@ -28,8 +29,6 @@ export default {
 
     try {
       const body = await request.text();
-
-      // Reject malformed JSON before forwarding it to the upstream API.
       JSON.parse(body);
 
       const upstream = await fetch(EJOCHAT_URL, {
@@ -41,15 +40,14 @@ export default {
         body
       });
 
-      const responseBody = await upstream.text();
-      return new Response(responseBody, {
+      return new Response(upstream.body, {
         status: upstream.status,
         headers: {
           "Content-Type": upstream.headers.get("Content-Type") || "application/json",
           "Cache-Control": "no-store"
         }
       });
-    } catch (error) {
+    } catch {
       return Response.json(
         { error: "Could not process the AI request. Please try again." },
         { status: 502 }
