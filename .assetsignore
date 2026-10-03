@@ -1,0 +1,6 @@
+.git/
+.wrangler/
+netlify/
+netlify.toml
+worker.js
+wrangler.jsonc
