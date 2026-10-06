@@ -266,14 +266,18 @@
     <button class="mod-x" onclick="closeL()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div style="text-align:center;margin-bottom:24px">
       <div style="width:56px;height:56px;background:var(--p);color:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:700;font-size:18px">LDK</div>
-      <h2>Portal Login</h2><p>Sign in with your school account</p>
+      <h2>Portal Login</h2><p>Access your personalized dashboard</p>
     </div>
-    <div style="margin-bottom:24px;padding:12px 14px;background:var(--s2);border:1px solid var(--b);border-radius:10px;text-align:center;font-size:12px;color:var(--t2)">
-      Your portal and permissions are determined automatically by your account role.
+    <div class="tabs" style="margin:0 auto 24px">
+      <button class="tab on" onclick="setR('student')" id="t-stu">Student</button>
+      <button class="tab" onclick="setR('staff')" id="t-sta">Staff</button>
+      <button class="tab" onclick="setR('admin')" id="t-adm">Admin</button>
     </div>
-    <div class="fg"><label class="lab">Email</label><input type="email" class="inp" id="lid" placeholder="Enter your school email" autocomplete="email"></div>
-    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter password" autocomplete="current-password"></div>
-    <button class="btn btn-p" id="loginSubmitBtn" style="width:100%;justify-content:center;padding:12px" onclick="doL()">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></button>
+    <div class="fg"><label class="lab">ID / Email</label><input type="text" class="inp" id="lid" placeholder="e.g. LDK-2023-001" value="LDK-2023-001"></div>
+    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter password" value="password"></div>
+    <div class="fg hidden" id="arole"><label class="lab">Admin Role</label><select class="sel" id="asel"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option><option value="dean">Dean of Studies</option></select></div>
+    <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="doL()">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></button>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Demo: Use any ID and "password" to login</p></div>
   </div>
 </div>
 
@@ -951,8 +955,6 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
   <button id="ai-fab" onclick="toggleAI()" style="width:56px;height:56px;border-radius:50%;background:var(--a);color:#fff;border:none;box-shadow:var(--sh2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 013 3v7a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
