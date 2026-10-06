@@ -882,122 +882,28 @@ function sc(id) {
   if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ===== SUPABASE AUTHENTICATION =====
-let curRole = null;
-let currentProfile = null;
-
-function openL() {
-  document.getElementById('loginM').classList.add('on');
+// ===== LOGIN =====
+let curRole = 'student';
+function openL() { document.getElementById('loginM').classList.add('on'); }
+function closeL() { document.getElementById('loginM').classList.remove('on'); }
+function setR(r) {
+  curRole = r;
+  document.querySelectorAll('#loginM .tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('t-' + r.substring(0, 3)).classList.add('on');
+  document.getElementById('arole').classList.toggle('hidden', r !== 'admin');
 }
-
-function closeL() {
-  document.getElementById('loginM').classList.remove('on');
-}
-
-async function doL() {
-  const email = document.getElementById('lid').value.trim();
-  const password = document.getElementById('lpw').value;
-  const button = document.getElementById('loginSubmitBtn');
-
-  if (!email || !password) {
-    toast('Please enter your email and password');
-    return;
-  }
-
-  button.disabled = true;
-  button.style.opacity = '0.7';
-
-  try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) throw error;
-
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('id, full_name, role')
-      .eq('auth_user_id', data.user.id)
-      .single();
-
-    if (profileError) throw profileError;
-
-    currentProfile = profile;
-    curRole = profile.role;
-
-    closeL();
-    document.getElementById('land').classList.add('hidden');
-    document.querySelectorAll('.port').forEach(p => p.classList.remove('on'));
-
-    if (profile.role === 'student') {
-      document.getElementById('stuP').classList.add('on');
-    } else if (['teacher', 'staff', 'dean', 'discipline'].includes(profile.role)) {
-      document.getElementById('staP').classList.add('on');
-      loadAtt();
-      updateStaffDashboardStats();
-      populateDMStudentDropdown();
-    } else if (profile.role === 'headmaster') {
-      document.getElementById('admP').classList.add('on');
-      setupAdmin('headmaster');
-      renderUserTable();
-      updateDashboardStats();
-      renderAllClassRankings();
-      renderAllAcademicRankings();
-      renderTop30Overall();
-      renderTop30Discipline();
-      renderNeedsAttention();
-      renderClassesBelowTarget();
-      renderClassLeaders();
-    } else {
-      await supabaseClient.auth.signOut();
-      currentProfile = null;
-      curRole = null;
-      throw new Error('Your account has an invalid school role.');
-    }
-
-    toast('Welcome, ' + (profile.full_name || 'User') + '!');
-    checkAIVisibility();
-  } catch (error) {
-    console.error('Login error:', error);
-    toast(error.message || 'Sign in failed. Please check your credentials.');
-  } finally {
-    button.disabled = false;
-    button.style.opacity = '1';
-  }
-}
-
-async function restoreAuthSession() {
-  const { data, error } = await supabaseClient.auth.getSession();
-
-  if (error || !data.session) return;
-
-  const { data: profile, error: profileError } = await supabaseClient
-    .from('profiles')
-    .select('id, full_name, role')
-    .eq('auth_user_id', data.session.user.id)
-    .single();
-
-  if (profileError || !profile) {
-    await supabaseClient.auth.signOut();
-    return;
-  }
-
-  currentProfile = profile;
-  curRole = profile.role;
+function doL() {
+  const id = document.getElementById('lid').value;
+  const pw = document.getElementById('lpw').value;
+  if (!id || !pw) { toast('Please enter ID and password'); return; }
+  closeL();
   document.getElementById('land').classList.add('hidden');
-  document.querySelectorAll('.port').forEach(p => p.classList.remove('on'));
-
-  if (profile.role === 'student') {
-    document.getElementById('stuP').classList.add('on');
-  } else if (['teacher', 'staff', 'dean', 'discipline'].includes(profile.role)) {
-    document.getElementById('staP').classList.add('on');
-    loadAtt();
-    updateStaffDashboardStats();
-    populateDMStudentDropdown();
-  } else if (profile.role === 'headmaster') {
+  if (curRole === 'student') { document.getElementById('stuP').classList.add('on'); }
+  else if (curRole === 'staff') { document.getElementById('staP').classList.add('on'); loadAtt(); updateStaffDashboardStats(); populateDMStudentDropdown(); }
+  else {
+    const ar = document.getElementById('asel').value;
     document.getElementById('admP').classList.add('on');
-    setupAdmin('headmaster');
+    setupAdmin(ar);
     renderUserTable();
     updateDashboardStats();
     renderAllClassRankings();
@@ -1007,30 +913,17 @@ async function restoreAuthSession() {
     renderNeedsAttention();
     renderClassesBelowTarget();
     renderClassLeaders();
-  } else {
-    await supabaseClient.auth.signOut();
-    currentProfile = null;
-    curRole = null;
-    return;
   }
-
-  checkAIVisibility();
+  toast('Welcome back!'); checkAIVisibility();
 }
-
-async function logout() {
-  const { error } = await supabaseClient.auth.signOut();
-  if (error) console.error('Logout error:', error);
-
-  currentProfile = null;
-  curRole = null;
+function logout() {
   document.querySelectorAll('.port').forEach(p => p.classList.remove('on'));
   document.getElementById('land').classList.remove('hidden');
   window.scrollTo(0, 0);
-  toast('Logged out successfully');
-  checkAIVisibility();
+  toast('Logged out successfully'); checkAIVisibility();
 }
 
-// ===== STUDENT TABS =====
+// // ===== STUDENT TABS =====
 function sTab(t) {
   document.querySelectorAll('#stuP .side-nav a').forEach(a => a.classList.remove('on'));
   document.getElementById('n' + t).classList.add('on');
@@ -2082,4 +1975,3 @@ loadSettings();
 loadJustifications();
 loadSavedNotifications();
 checkAIVisibility();
-restoreAuthSession();
