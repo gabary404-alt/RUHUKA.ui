@@ -923,7 +923,7 @@ function logout() {
   toast('Logged out successfully'); checkAIVisibility();
 }
 
-// // ===== STUDENT TABS =====
+// ===== STUDENT TABS =====
 function sTab(t) {
   document.querySelectorAll('#stuP .side-nav a').forEach(a => a.classList.remove('on'));
   document.getElementById('n' + t).classList.add('on');
