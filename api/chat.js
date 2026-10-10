@@ -5,7 +5,7 @@ const EJO_CHAT_URL = "https://api.ejolabs.com/api/v1/subiza";
 const MAX_BODY_BYTES = 50_000;
 const MAX_MESSAGES = 30;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
 
@@ -92,4 +92,4 @@ export default async function handler(req, res) {
     console.error("EjoLabs connection failed:", error instanceof Error ? error.message : "Unknown error");
     return res.status(502).json({ error: "Unable to connect to the AI service right now." });
   }
-}
+};
