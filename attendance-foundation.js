@@ -49,11 +49,11 @@
 
     if (role === 'student') {
       document.getElementById('stuP').classList.add('on');
-      window.CURRENT_STUDENT = null;
+      CURRENT_STUDENT = null;
       client().from('students').select('id,school_id,full_name,class_name,gender,discipline_points')
         .eq('auth_user_id', activeUser.id).maybeSingle().then(function (result) {
           if (!result.error && result.data) {
-            window.CURRENT_STUDENT = {
+            CURRENT_STUDENT = {
               dbId: result.data.id, id: result.data.school_id, name: result.data.full_name,
               class: result.data.class_name, disciplinePoints: result.data.discipline_points || 0
             };
