@@ -273,11 +273,11 @@
       <button class="tab" onclick="setR('staff')" id="t-sta">Staff</button>
       <button class="tab" onclick="setR('admin')" id="t-adm">Admin</button>
     </div>
-    <div class="fg"><label class="lab">ID / Email</label><input type="text" class="inp" id="lid" placeholder="e.g. LDK-2023-001" value="LDK-2023-001"></div>
-    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter password" value="password"></div>
+    <div class="fg"><label class="lab">ID / Email</label><input type="email" class="inp" id="lid" placeholder="Your school email" autocomplete="username"></div>
+    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter your password" autocomplete="current-password"></div>
     <div class="fg hidden" id="arole"><label class="lab">Admin Role</label><select class="sel" id="asel"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option><option value="dean">Dean of Studies</option></select></div>
     <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="doL()">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></button>
-    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Demo: Use any ID and "password" to login</p></div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Use your registered school email and password. If your account is not set up yet, contact the headmaster.</p></div>
   </div>
 </div>
 
@@ -512,7 +512,7 @@
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
           <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Class</label><select class="sel" id="atclass" onchange="loadAtt()"><option>S5 Stream 1</option><option>S5 Stream 2</option><option>S5 Stream 3</option><option>S4 Stream 1</option><option>S4 Stream 2</option><option>S4 Stream 3</option></select></div>
           <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Date</label><input type="date" class="inp" id="atdate"></div>
-          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Period</label><select class="sel"><option>Morning (1-2)</option><option>Afternoon (3-4)</option><option>Full Day</option></select></div>
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Period</label><select class="sel" id="atperiod"><option value="morning">Morning (1-2)</option><option value="afternoon">Afternoon (3-4)</option><option value="full_day" selected>Full Day</option></select></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <h3 style="font-size:15px">Student List — <span id="atcname">S5 Stream 1</span></h3>
@@ -694,12 +694,19 @@
           <h3 style="margin-bottom:16px">Bulk Student Import</h3>
           <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Paste your student list below. Format: <code style="background:var(--s3);padding:2px 6px;border-radius:4px">Name, ID, Gender, Class, Stream, Level</code>. The system will auto-classify them.</p>
           <div class="fg">
-            <label class="lab">Paste Student Data (CSV format)</label>
-            <textarea class="import-area" id="bulkImportArea" placeholder="Example:
-Jean-Paul Manirafasha, LDK-2023-001, M, S5, Stream 1, A-Level
-Claire Umutoni, LDK-2023-045, F, S4, Stream 2, A-Level
-Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
+            <label class="lab">What are you importing?</label>
+            <select class="sel" id="bulkImportType" onchange="setImportType()">
+              <option value="students">Student records</option>
+              <option value="discipline">Discipline marks and reasons</option>
+              <option value="academic">Academic results</option>
+            </select>
           </div>
+          <div class="fg">
+            <label class="lab">Choose a CSV file (Excel / Google Sheets) or paste its contents below</label>
+            <input type="file" class="inp" id="bulkImportFile" accept=".csv,text/csv" style="margin-bottom:10px">
+            <textarea class="import-area" id="bulkImportArea" placeholder="Choose an import type to see the required column names."></textarea>
+          </div>
+          <button class="btn btn-g" onclick="downloadImportTemplate()" style="width:100%;justify-content:center;margin-bottom:12px">Download CSV Template</button>
           <div style="display:flex;gap:10px">
             <button class="btn btn-g" onclick="clearImport()">Clear</button>
             <button class="btn btn-a" onclick="previewImport()" style="flex:1;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview & Validate</button>
@@ -915,6 +922,11 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
       </div>
       <div class="card" style="margin-top:24px">
         <h3 style="margin-bottom:20px">Danger Zone</h3>
+        <div style="padding:16px;background:var(--s2);border:1px solid var(--b);border-radius:10px;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Remove fictional test students</div>
+          <div style="font-size:13px;color:var(--t2);margin-bottom:12px">Deletes only records explicitly marked as demo, along with their attendance, discipline and academic test records. Real student records are not selected.</div>
+          <button class="btn btn-d" style="width:100%;justify-content:center" onclick="deleteDemoStudents()">Delete Demo Students</button>
+        </div>
         <div style="padding:16px;background:#fef2f2;border:1px solid #fee2e2;border-radius:10px;margin-bottom:16px">
           <div style="font-size:14px;font-weight:600;color:var(--r);margin-bottom:4px">Reset All Data</div>
           <div style="font-size:13px;color:var(--t2)">This will clear all attendance, discipline, and absence records. Cannot be undone.</div>
@@ -955,6 +967,8 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
   <button id="ai-fab" onclick="toggleAI()" style="width:56px;height:56px;border-radius:50%;background:var(--a);color:#fff;border:none;box-shadow:var(--sh2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 013 3v7a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
+<script src="attendance-foundation.js"></script>
 </body>
 </html>
