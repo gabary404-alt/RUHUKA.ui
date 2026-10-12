@@ -388,6 +388,36 @@
           boarding_status: field(row, ['boarding_status']) || 'unknown',
           date_of_birth: field(row, ['date_of_birth']) || null,
           parent_phone: field(row, ['parent_phone']) || null, is_active: true, is_demo: false });
+      } else if (type === 'student_updates') {
+        const schoolId = field(row, ['school_id', 'student_id', 'id']);
+        const update = { school_id: schoolId };
+        ['full_name', 'class_name', 'stream', 'boarding_status', 'date_of_birth', 'parent_phone'].forEach(function (key) {
+          if (field(row, [key])) update[key] = field(row, [key]);
+        });
+        const genderRaw = field(row, ['gender']).toLowerCase();
+        if (genderRaw) {
+          if (!['m', 'f', 'male', 'female', 'other'].includes(genderRaw)) errors.push('Row ' + line + ': gender must be M, F or other.');
+          else update.gender = genderRaw === 'm' ? 'male' : genderRaw === 'f' ? 'female' : genderRaw;
+        }
+        if (!schoolId || Object.keys(update).length === 1) {
+          errors.push('Row ' + line + ': school_id and at least one field to update are required.'); return;
+        }
+        if (update.boarding_status && !['boarding', 'day', 'unknown'].includes(update.boarding_status.toLowerCase())) {
+          errors.push('Row ' + line + ': boarding_status must be boarding, day or unknown.'); return;
+        }
+        prepared.push(update);
+      } else if (type === 'attendance') {
+        const schoolId = field(row, ['school_id', 'student_id', 'id']);
+        const date = field(row, ['attendance_date', 'date']);
+        const status = field(row, ['status']).toLowerCase();
+        const period = (field(row, ['period']) || 'full_day').toLowerCase();
+        if (!schoolId || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date) ||
+            !['present', 'absent', 'late', 'excused'].includes(status) ||
+            !['morning', 'afternoon', 'full_day'].includes(period)) {
+          errors.push('Row ' + line + ': require school_id, date as YYYY-MM-DD, status (present/absent/late/excused), and period (morning/afternoon/full_day).'); return;
+        }
+        prepared.push({ school_id: schoolId, attendance_date: date, status: status, period: period,
+          note: field(row, ['note']) || null });
       } else if (type === 'discipline') {
         const schoolId = field(row, ['school_id', 'student_id', 'id']);
         const points = Number(field(row, ['points_change', 'points', 'mark']));
@@ -456,8 +486,9 @@
       if (!result.errors.length) {
         const seen = new Set();
         result.rows.forEach(function (row) {
-          const key = type === 'students' ? row.school_id
-            : type === 'academic' ? [row.school_id, row.subject, row.assessment, row.term, row.academic_year].join('|') : null;
+          const key = type === 'students' || type === 'student_updates' ? row.school_id
+            : type === 'academic' ? [row.school_id, row.subject, row.assessment, row.term, row.academic_year].join('|')
+            : type === 'attendance' ? [row.school_id, row.attendance_date, row.period].join('|') : null;
           if (key && seen.has(key)) result.errors.push('Duplicate row for ' + key + '. Remove duplicate rows before importing.');
           if (key) seen.add(key);
         });
@@ -477,6 +508,8 @@
       document.getElementById('importPreviewSection').classList.remove('hidden');
       document.getElementById('importStats').textContent = result.rows.length + ' valid row(s)';
       const columns = type === 'students' ? ['school_id', 'full_name', 'gender', 'class_name']
+        : type === 'student_updates' ? ['school_id', 'full_name', 'gender', 'class_name', 'boarding_status', 'parent_phone']
+        : type === 'attendance' ? ['school_id', 'attendance_date', 'status', 'period', 'note']
         : type === 'discipline' ? ['school_id', 'points_change', 'note', 'term']
         : ['school_id', 'subject', 'marks_obtained', 'marks_possible', 'term', 'academic_year'];
       let table = '<div class="data-table-wrap"><table class="tbl"><thead><tr>' +
@@ -499,7 +532,43 @@
     const button = document.querySelector('#importPreviewSection button[onclick="confirmImport()"]');
     if (button) { button.disabled = true; button.textContent = 'Importing…'; }
     try {
-      if (pendingType === 'students') {
+      if (pendingType === 'student_updates') {
+        for (let i = 0; i < pendingRows.length; i += 100) {
+          const batch = pendingRows.slice(i, i + 100);
+          const ids = batch.map(function (r) { return r.school_id; });
+          const existing = await client().from('students').select('school_id').in('school_id', ids);
+          if (existing.error) throw existing.error;
+          const found = new Set((existing.data || []).map(function (r) { return r.school_id; }));
+          const missing = ids.filter(function (id) { return !found.has(id); });
+          if (missing.length) throw new Error('Student IDs not found: ' + missing.slice(0, 10).join(', ') + '. No updates were made to this batch.');
+          for (const row of batch) {
+            const schoolId = row.school_id; const changes = Object.assign({}, row); delete changes.school_id;
+            const updated = await client().from('students').update(changes).eq('school_id', schoolId);
+            if (updated.error) throw updated.error;
+          }
+        }
+      } else if (pendingType === 'attendance') {
+        const ids = Array.from(new Set(pendingRows.map(function (r) { return r.school_id; })));
+        const found = [];
+        for (let i = 0; i < ids.length; i += 100) {
+          const result = await client().from('students').select('id,school_id').in('school_id', ids.slice(i, i + 100));
+          if (result.error) throw result.error;
+          found.push.apply(found, result.data || []);
+        }
+        const bySchoolId = new Map(found.map(function (s) { return [s.school_id, s.id]; }));
+        const missing = ids.filter(function (id) { return !bySchoolId.has(id); });
+        if (missing.length) throw new Error('Student IDs not found: ' + missing.slice(0, 10).join(', ') + '. Import students first.');
+        const records = pendingRows.map(function (r) { return {
+          student_id: bySchoolId.get(r.school_id), attendance_date: r.attendance_date, status: r.status,
+          period: r.period, note: r.note, marked_by: activeUser.id
+        }; });
+        for (let i = 0; i < records.length; i += 100) {
+          const result = await client().from('attendance_records').upsert(records.slice(i, i + 100), {
+            onConflict: 'student_id,attendance_date,period'
+          });
+          if (result.error) throw result.error;
+        }
+      } else if (pendingType === 'students') {
         const importIds = Array.from(new Set(pendingRows.map(function (r) { return r.school_id; })));
         const existingIds = [];
         for (let i = 0; i < importIds.length; i += 100) {
