@@ -146,11 +146,13 @@
         stream: (String(s.class || '').match(/Stream\s*\d+/i) || [null])[0],
         boarding_status: 'unknown',
         is_active: true,
+        discipline_points: Math.max(0, Math.min(40, Number(s.disciplinePoints) || 40)),
         is_demo: true
       };
     });
-    for (let i = 0; i < payload.length; i += 100) {
-      const result = await client().from('students').upsert(payload.slice(i, i + 100), {
+    const uniquePayload = Array.from(new Map(payload.map(function (student) { return [student.school_id, student]; })).values());
+    for (let i = 0; i < uniquePayload.length; i += 100) {
+      const result = await client().from('students').upsert(uniquePayload.slice(i, i + 100), {
         onConflict: 'school_id', ignoreDuplicates: true
       });
       if (result.error) throw result.error;
@@ -347,6 +349,12 @@
     return '';
   }
 
+  function simpleHash(value) {
+    let hash = 2166136261;
+    for (let i = 0; i < value.length; i++) { hash ^= value.charCodeAt(i); hash = Math.imul(hash, 16777619); }
+    return (hash >>> 0).toString(16);
+  }
+
   function prepareImportRows(type, rows) {
     const errors = [];
     const prepared = [];
@@ -372,9 +380,11 @@
         if (!schoolId || !Number.isFinite(points) || points === 0 || points < -120 || points > 120 || !note) {
           errors.push('Row ' + line + ': school_id, a non-zero points_change (-120 to 120), and note are required.'); return;
         }
-        prepared.push({ school_id: schoolId, points_change: points, note: note,
+        const disciplineRow = { school_id: schoolId, points_change: points, note: note,
           term: field(row, ['term']) || null, academic_year: field(row, ['academic_year', 'year']) || null,
-          category: field(row, ['category']) || null });
+          category: field(row, ['category']) || null };
+        disciplineRow.source_key = 'csv-' + simpleHash(JSON.stringify({ row: line, data: disciplineRow }));
+        prepared.push(disciplineRow);
       } else if (type === 'academic') {
         const schoolId = field(row, ['school_id', 'student_id', 'id']);
         const subject = field(row, ['subject']);
@@ -501,10 +511,12 @@
         if (pendingType === 'discipline') {
           const records = pendingRows.map(function (r) { return {
             student_id: bySchoolId.get(r.school_id), points_change: r.points_change, note: r.note,
-            term: r.term, academic_year: r.academic_year, category: r.category, created_by: activeUser.id
+            term: r.term, academic_year: r.academic_year, category: r.category, source_key: r.source_key, created_by: activeUser.id
           }; });
           for (let i = 0; i < records.length; i += 100) {
-            const result = await client().from('discipline_records').insert(records.slice(i, i + 100));
+            const result = await client().from('discipline_records').upsert(records.slice(i, i + 100), {
+              onConflict: 'student_id,source_key', ignoreDuplicates: true
+            });
             if (result.error) throw result.error;
           }
         } else {
@@ -514,9 +526,34 @@
             academic_year: r.academic_year, imported_by: activeUser.id
           }; });
           for (let i = 0; i < records.length; i += 100) {
-            const result = await client().from('academic_results').insert(records.slice(i, i + 100));
+            const result = await client().from('academic_results').upsert(records.slice(i, i + 100), {
+              onConflict: 'student_id,subject,assessment,term,academic_year'
+            });
             if (result.error) throw result.error;
           }
+          const academicRows = [];
+          for (let i = 0; i < found.length; i += 100) {
+            const result = await client().from('academic_results').select('student_id,marks_obtained,marks_possible')
+              .in('student_id', found.slice(i, i + 100).map(function (s) { return s.id; }));
+            if (result.error) throw result.error;
+            academicRows.push.apply(academicRows, result.data || []);
+          }
+          const totals = new Map();
+          academicRows.forEach(function (r) {
+            const total = totals.get(r.student_id) || { obtained: 0, possible: 0 };
+            total.obtained += Number(r.marks_obtained); total.possible += Number(r.marks_possible);
+            totals.set(r.student_id, total);
+          });
+          const scoresBySchoolId = new Map();
+          found.forEach(function (student) {
+            const total = totals.get(student.id);
+            if (total && total.possible > 0) scoresBySchoolId.set(student.school_id, Math.round(total.obtained * 100 / total.possible));
+          });
+          window.schoolData.students = (window.schoolData.students || []).map(function (student) {
+            return scoresBySchoolId.has(student.id) ? Object.assign({}, student, { academicScore: scoresBySchoolId.get(student.id) }) : student;
+          });
+          if (typeof window.saveStudents === 'function') window.saveStudents();
+          if (typeof window.computeClassStats === 'function') window.computeClassStats();
         }
       }
       pendingRows = []; pendingType = '';
