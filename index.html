@@ -691,8 +691,8 @@
     <div id="v-admbi" class="hidden">
       <div class="g2">
         <div class="card">
-          <h3 style="margin-bottom:16px">Bulk Student Import</h3>
-          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Paste your student list below. Format: <code style="background:var(--s3);padding:2px 6px;border-radius:4px">Name, ID, Gender, Class, Stream, Level</code>. The system will auto-classify them.</p>
+          <h3 style="margin-bottom:16px">Bulk School Data Import</h3>
+          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Choose whether you are importing students, discipline marks, or academic results. Download the matching CSV template, fill it in, then preview and validate before saving.</p>
           <div class="fg">
             <label class="lab">What are you importing?</label>
             <select class="sel" id="bulkImportType" onchange="setImportType()">
@@ -716,20 +716,20 @@
           <h3 style="margin-bottom:16px">Import Guide</h3>
           <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--t2)">
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">1. Required Columns</div>
-              <div>Name, Student ID, Gender (M/F), Class (S1-S6), Stream (Stream 1-3), Level (O-Level/A-Level)</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">1. Choose the import type</div>
+              <div>Student records, discipline marks with reasons, or academic results. Each type has its own CSV template.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">2. Auto-Classification</div>
-              <div>Students are automatically grouped by Class and Stream. No manual sorting needed.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">2. Use the template</div>
+              <div>Keep the column names from the downloaded template. For student records, use class names such as S5 Stream 1.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">3. Validation</div>
-              <div>The system checks for duplicate IDs, invalid classes, and missing fields before importing.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">3. Preview & validation</div>
+              <div>The system checks required fields, marks, student IDs, and duplicate student IDs before saving.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">4. After Import</div>
-              <div>All students immediately appear in attendance lists, rankings, and discipline tracking.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">4. Saved records</div>
+              <div>Student records become available for attendance. Academic results update saved academic percentages; discipline entries keep their reasons and term details.</div>
             </div>
           </div>
         </div>
