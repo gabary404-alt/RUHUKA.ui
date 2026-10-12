@@ -454,6 +454,8 @@
     const area = document.getElementById('bulkImportArea');
     const examples = {
       students: 'school_id,full_name,gender,class_name,stream,boarding_status,date_of_birth,parent_phone\nLDK-TEST-001,Sample Student,F,S5 Stream 1,Stream 1,boarding,2008-03-12,+2507...',
+      student_updates: 'school_id,full_name,gender,class_name,stream,boarding_status,date_of_birth,parent_phone\nLDK-TEST-001,Updated Student,F,S5 Stream 1,Stream 1,day,2008-03-12,+250700000000',
+      attendance: 'school_id,attendance_date,status,period,note\nLDK-TEST-001,2026-10-12,present,full_day,Present in class',
       discipline: 'school_id,points_change,note,term,academic_year,category\nLDK-TEST-001,-2,Late to class,Term 1,2026,Behaviour',
       academic: 'school_id,subject,assessment,marks_obtained,marks_possible,term,academic_year\nLDK-TEST-001,Mathematics,Term exam,78,100,Term 1,2026'
     };
@@ -466,6 +468,8 @@
     const type = document.getElementById('bulkImportType').value;
     const templates = {
       students: 'school_id,full_name,gender,class_name,stream,boarding_status,date_of_birth,parent_phone\nLDK-TEST-001,Sample Student,F,S5 Stream 1,Stream 1,boarding,2008-03-12,+250700000000\n',
+      student_updates: 'school_id,full_name,gender,class_name,stream,boarding_status,date_of_birth,parent_phone\nLDK-TEST-001,Updated Student,F,S5 Stream 1,Stream 1,day,2008-03-12,+250700000000\n',
+      attendance: 'school_id,attendance_date,status,period,note\nLDK-TEST-001,2026-10-12,present,full_day,Present in class\n',
       discipline: 'school_id,points_change,note,term,academic_year,category\nLDK-TEST-001,-2,Late to class,Term 1,2026,Behaviour\n',
       academic: 'school_id,subject,assessment,marks_obtained,marks_possible,term,academic_year\nLDK-TEST-001,Mathematics,Term exam,78,100,Term 1,2026\n'
     };
