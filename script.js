@@ -165,6 +165,7 @@ function generateDemoData() {
     });
   });
 
+  students.forEach(function (student) { student.isDemo = true; });
   window.schoolData.students = students;
   computeClassStats();
 }
