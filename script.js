@@ -165,6 +165,7 @@ function generateDemoData() {
     });
   });
 
+  students.forEach(function (student) { student.isDemo = true; });
   window.schoolData.students = students;
   computeClassStats();
 }
@@ -939,7 +940,7 @@ function sTab(t) {
 // "Pending Justifications" queue — approving/rejecting on the staff side
 // now actually updates what the student sees, instead of the two views
 // being disconnected static lists.
-const CURRENT_STUDENT = { name: 'Jean-Paul Manirafasha', id: 'LDK-2023-001', class: 'S5 Stream 1' };
+let CURRENT_STUDENT = { name: 'Jean-Paul Manirafasha', id: 'LDK-2023-001', class: 'S5 Stream 1' };
 
 function seedJustifications() {
   return [
