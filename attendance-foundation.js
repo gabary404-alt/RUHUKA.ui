@@ -13,6 +13,11 @@
   let activeProfile = null;
   let activeUser = null;
 
+  function localDateString(date) {
+    const d = date || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
   function client() {
     if (!db) {
       if (!window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -112,9 +117,14 @@
       }
       const chosen = document.getElementById('t-stu').classList.contains('on') ? 'student'
         : document.getElementById('t-sta').classList.contains('on') ? 'staff' : 'admin';
-      if (chosen === 'student' && profile.role !== 'student') throw new Error('This account is not registered as a student.');
-      if (chosen === 'staff' && !['teacher', 'staff', 'dean', 'discipline'].includes(profile.role)) throw new Error('This account is not registered as staff.');
-      if (chosen === 'admin' && profile.role !== 'headmaster') throw new Error('Only the headmaster account can open the admin portal.');
+      const roleMismatch = (chosen === 'student' && profile.role !== 'student') ||
+        (chosen === 'staff' && !['teacher', 'staff', 'dean', 'discipline'].includes(profile.role)) ||
+        (chosen === 'admin' && profile.role !== 'headmaster');
+      if (roleMismatch) {
+        await auth.auth.signOut(); activeUser = null;
+        throw new Error(chosen === 'admin' ? 'Only the headmaster account can open the admin portal.'
+          : chosen === 'student' ? 'This account is not registered as a student.' : 'This account is not registered as staff.');
+      }
       setPortal(profile.role, profile);
     } catch (error) {
       console.error('RUHUKA sign-in error:', error);
@@ -189,8 +199,8 @@
     if (!list || !classSelect || !activeUser) return;
     const cls = classSelect.value;
     const dateInput = document.getElementById('atdate');
-    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
-    const date = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
+    if (dateInput && !dateInput.value) dateInput.value = localDateString();
+    const date = dateInput ? dateInput.value : localDateString();
     const period = selectedPeriod();
     document.getElementById('atcname').textContent = cls;
     list.innerHTML = '<div style="padding:18px;color:var(--t3)">Loading students and saved attendance…</div>';
@@ -254,6 +264,7 @@
       window._currentAttStudents = students.map(function (s) {
         return { dbId: s.id, id: s.school_id, name: s.full_name, class: s.class_name, gender: s.gender, isDemo: s.is_demo };
       });
+      if (typeof window.applyAttDraft === 'function') window.applyAttDraft();
     } catch (error) {
       console.error('Attendance load failed:', error);
       list.innerHTML = '<div style="padding:20px;color:var(--r)">Could not load attendance: ' + esc(error.message) + '</div>';
@@ -264,7 +275,7 @@
     if (!activeUser) { say('Please sign in first.'); return; }
     const rows = Array.from(document.querySelectorAll('#atlist .at-r'));
     if (!rows.length) { say('There are no students to save for this class.'); return; }
-    const date = document.getElementById('atdate').value || new Date().toISOString().slice(0, 10);
+    const date = document.getElementById('atdate').value || localDateString();
     const period = selectedPeriod();
     const records = rows.map(function (row) {
       const buttons = row.querySelectorAll('.tog-btn');
@@ -295,7 +306,7 @@
 
   async function refreshAttendanceStats() {
     if (!activeUser) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     const [studentsResult, attendanceResult] = await Promise.all([
       client().from('students').select('id', { count: 'exact', head: true }).eq('is_active', true),
       client().from('attendance_records').select('status').eq('attendance_date', today)
@@ -476,13 +487,20 @@
     if (button) { button.disabled = true; button.textContent = 'Importing…'; }
     try {
       if (pendingType === 'students') {
+        const importIds = Array.from(new Set(pendingRows.map(function (r) { return r.school_id; })));
+        const existingIds = [];
+        for (let i = 0; i < importIds.length; i += 100) {
+          const existing = await client().from('students').select('school_id').in('school_id', importIds.slice(i, i + 100));
+          if (existing.error) throw existing.error;
+          existingIds.push.apply(existingIds, (existing.data || []).map(function (r) { return r.school_id; }));
+        }
+        if (existingIds.length) throw new Error('These student IDs already exist and were not changed: ' + Array.from(new Set(existingIds)).slice(0, 10).join(', ') + '. Delete test demo students or correct the IDs before importing.');
         const rows = pendingRows.map(function (row) {
           const copy = Object.assign({}, row);
-          delete copy.school_id;
-          return Object.assign({ school_id: row.school_id }, copy);
+          return copy;
         });
         for (let i = 0; i < rows.length; i += 100) {
-          const result = await client().from('students').upsert(rows.slice(i, i + 100), { onConflict: 'school_id' });
+          const result = await client().from('students').insert(rows.slice(i, i + 100));
           if (result.error) throw result.error;
         }
         const mapped = pendingRows.map(function (row) {
@@ -625,7 +643,7 @@
     });
     const period = document.getElementById('atperiod');
     const date = document.getElementById('atdate');
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     if (date && !date.value) date.value = today;
     if (period) period.addEventListener('change', function () { loadAtt(); });
     if (date) date.addEventListener('change', function () { loadAtt(); });
