@@ -696,9 +696,11 @@
           <div class="fg">
             <label class="lab">What are you importing?</label>
             <select class="sel" id="bulkImportType" onchange="setImportType()">
-              <option value="students">Student records</option>
+              <option value="students">New student records</option>
+              <option value="student_updates">Update existing student details</option>
               <option value="discipline">Discipline marks and reasons</option>
               <option value="academic">Academic results</option>
+              <option value="attendance">Attendance records</option>
             </select>
           </div>
           <div class="fg">
@@ -717,7 +719,7 @@
           <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--t2)">
             <div style="padding:12px;background:var(--s2);border-radius:10px">
               <div style="font-weight:600;color:var(--t);margin-bottom:4px">1. Choose the import type</div>
-              <div>Student records, discipline marks with reasons, or academic results. Each type has its own CSV template.</div>
+              <div>Student records, student-detail updates, discipline, academic results, or attendance. Each type has its own CSV template.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
               <div style="font-weight:600;color:var(--t);margin-bottom:4px">2. Use the template</div>
