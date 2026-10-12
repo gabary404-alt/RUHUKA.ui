@@ -62,3 +62,12 @@ The staff attendance screen reads active students from the database, loads any s
 ## Important testing limitation
 
 A real Supabase Auth user and matching active `profiles` row are required before sign-in can work. The code cannot securely create the first headmaster Auth account from a browser page. Verify login, permissions, attendance save/reload, imports and demo cleanup in the branch preview before merging or deploying.
+
+
+### Update existing student details
+
+Required: `school_id` plus at least one field to update. Optional: `full_name,gender,class_name,stream,boarding_status,date_of_birth,parent_phone`. This option updates existing IDs only and does not create new students.
+
+### Attendance records
+
+Required: `school_id,attendance_date,status`; optional: `period,note`. Date format is `YYYY-MM-DD`; status is `present`, `absent`, `late`, or `excused`; period is `morning`, `afternoon`, or `full_day`. The student must already exist. Importing the same student/date/period updates that attendance entry.
