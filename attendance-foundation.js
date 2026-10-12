@@ -320,6 +320,10 @@
     const present = records.filter(function (r) { return r.status !== 'absent'; }).length;
     const absent = records.filter(function (r) { return r.status === 'absent'; }).length;
     const pct = records.length ? Math.round(present * 100 / records.length) : 0;
+    const summary = document.getElementById('savedAttendanceSummary');
+    if (summary) summary.textContent = records.length
+      ? localDateString() + ': ' + records.length + ' marked · ' + present + ' present · ' + absent + ' absent · ' + pct + '% present among marked students.'
+      : localDateString() + ': no attendance has been submitted yet.';
     const setText = function (id, value) { const el = document.getElementById(id); if (el) el.textContent = value; };
     setText('dashTotalStudents', total.toLocaleString());
     setText('dashAttendanceToday', records.length ? pct + '%' : '—');
@@ -449,6 +453,15 @@
       if (!source) { say('Choose a CSV file or paste CSV rows first.'); return; }
       const raw = parseCSV(source);
       const result = prepareImportRows(type, raw);
+      if (!result.errors.length) {
+        const seen = new Set();
+        result.rows.forEach(function (row) {
+          const key = type === 'students' ? row.school_id
+            : type === 'academic' ? [row.school_id, row.subject, row.assessment, row.term, row.academic_year].join('|') : null;
+          if (key && seen.has(key)) result.errors.push('Duplicate row for ' + key + '. Remove duplicate rows before importing.');
+          if (key) seen.add(key);
+        });
+      }
       if (result.errors.length) {
         pendingRows = []; pendingType = '';
         document.getElementById('importPreviewSection').classList.remove('hidden');
@@ -595,6 +608,8 @@
     document.getElementById('importPreviewSection').classList.add('hidden');
     pendingRows = []; pendingType = '';
   };
+
+  window.refreshAttendanceStats = refreshAttendanceStats;
 
   window.deleteDemoStudents = async function () {
     if (!activeUser || !activeProfile || activeProfile.role !== 'headmaster') {
