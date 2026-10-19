@@ -175,9 +175,9 @@
         <div class="str-h"><h3 class="editable" data-key="alevelTitle">A-Level Program</h3><span class="editable" data-key="alevelSub">Advanced Level — Senior 4 to Senior 6</span></div>
         <div class="str-b">
           <ul>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel1"><strong>Stream 1:</strong> Sciences (Math, Physics, Chem, Bio)</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel2"><strong>Stream 2:</strong> Humanities (History, Econ, Lit, Geo)</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel3"><strong>Stream 3:</strong> Mixed Sciences & Languages</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel1"><strong>Stream 1:</strong> Sciences (Math, Physics, Chem, Bio)</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel2"><strong>Stream 2:</strong> Humanities (History, Econ, Lit, Geo)</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span class="editable" data-key="alevel3"><strong>Stream 3:</strong> Mixed Sciences & Languages</span></li>
           </ul>
         </div>
       </div>
@@ -260,6 +260,32 @@
   </footer>
 </div>
 
+<!-- STUDENT RECORD MODAL -->
+<div class="mod" id="studentM">
+  <div class="mod-c" style="max-width:760px;max-height:90vh;overflow:auto">
+    <button class="mod-x" onclick="closeStudentForm()" aria-label="Close student form"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h2 id="studentFormTitle">Add Student</h2>
+    <p>Create or update a student record. The student ID is the stable matching key for imports and future login integration.</p>
+    <form id="studentForm" onsubmit="saveStudentForm(event)">
+      <div class="g2">
+        <div class="fg"><label class="lab" for="studentId">Student ID</label><input class="inp" id="studentId" required maxlength="40"></div>
+        <div class="fg"><label class="lab" for="studentName">Full name</label><input class="inp" id="studentName" required maxlength="120"></div>
+        <div class="fg"><label class="lab" for="studentGender">Gender</label><select class="sel" id="studentGender"><option value="">Not specified</option><option value="F">Female</option><option value="M">Male</option></select></div>
+        <div class="fg"><label class="lab" for="studentClass">Class and stream</label><input class="inp" id="studentClass" placeholder="S5 Stream 1" required maxlength="60"></div>
+        <div class="fg"><label class="lab" for="studentLevel">Level</label><select class="sel" id="studentLevel"><option>O-Level</option><option>A-Level</option></select></div>
+        <div class="fg"><label class="lab" for="studentStatus">Status</label><select class="sel" id="studentStatus"><option>Active</option><option>Transferred</option><option>Graduated</option><option>Archived</option></select></div>
+        <div class="fg"><label class="lab" for="guardianName">Parent / guardian</label><input class="inp" id="guardianName" maxlength="120"></div>
+        <div class="fg"><label class="lab" for="guardianPhone">Guardian phone</label><input class="inp" id="guardianPhone" type="tel" maxlength="40"></div>
+        <div class="fg"><label class="lab" for="guardianEmail">Guardian email</label><input class="inp" id="guardianEmail" type="email" maxlength="160"></div>
+        <div class="fg"><label class="lab" for="studentAcademic">Current academic score (%)</label><input class="inp" id="studentAcademic" type="number" min="0" max="100" step="0.1"></div>
+        <div class="fg"><label class="lab">Official discipline total</label><div class="inp" id="studentDisciplineReadOnly" aria-live="polite">Only updated through a reviewed official import.</div></div>
+        <div class="fg"><label class="lab" for="studentAttendance">Attendance rate (%)</label><input class="inp" id="studentAttendance" type="number" min="0" max="100" step="0.1"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px"><button type="button" class="btn btn-g" onclick="closeStudentForm()">Cancel</button><button type="submit" class="btn btn-a">Save Student</button></div>
+    </form>
+  </div>
+</div>
+
 <!-- LOGIN MODAL -->
 <div class="mod" id="loginM">
   <div class="mod-c">
@@ -272,12 +298,13 @@
       <button class="tab on" onclick="setR('student')" id="t-stu">Student</button>
       <button class="tab" onclick="setR('staff')" id="t-sta">Staff</button>
       <button class="tab" onclick="setR('admin')" id="t-adm">Admin</button>
+      <button class="tab" onclick="setR('parent')" id="t-par">Parent</button>
     </div>
-    <div class="fg"><label class="lab">ID / Email</label><input type="email" class="inp" id="lid" placeholder="Your school email" autocomplete="username"></div>
-    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter your password" autocomplete="current-password"></div>
+    <div class="fg"><label class="lab">ID / Email</label><input type="text" class="inp" id="lid" placeholder="e.g. LDK-2023-001" value="LDK-2023-001"></div>
+    <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter password" value="password"></div>
     <div class="fg hidden" id="arole"><label class="lab">Admin Role</label><select class="sel" id="asel"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option><option value="dean">Dean of Studies</option></select></div>
     <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="doL()">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></button>
-    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Use your registered school email and password. If your account is not set up yet, contact the headmaster.</p></div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Demo: Use any ID and "password" to login</p></div>
   </div>
 </div>
 
@@ -296,88 +323,25 @@
   </aside>
   <main class="main">
     <div class="ph">
-      <div><h1 id="st">Dashboard</h1><p>Welcome back, Jean-Paul Manirafasha</p></div>
-      <div class="pu">
-        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        </button>
-        <div class="notif-bell" onclick="sTab('snot')" title="Notifications">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <span class="notif-badge" id="bellBadge">3</span>
-        </div>
-        <div style="text-align:right"><div style="font-size:14px;font-weight:600">Jean-Paul M.</div><div style="font-size:12px;color:var(--t3)">Senior 5 — Stream 1</div></div>
-        <div class="pu-a" style="background:linear-gradient(135deg,var(--a),#8b5cf6)">JM</div>
-        <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
-      </div>
+      <div><h1 id="st">Dashboard</h1><p>Welcome back, <span id="studentPortalName">Jean-Paul Manirafasha</span></p></div>
+      <div class="pu"><div style="text-align:right"><div style="font-size:14px;font-weight:600" id="studentPortalNameShort">Jean-Paul M.</div><div style="font-size:12px;color:var(--t3)" id="studentPortalClass">Senior 5 — Stream 1</div></div><button class="btn btn-g" onclick="logout()">Logout</button></div>
     </div>
     <div id="v-sd">
       <div class="g4" style="margin-bottom:32px">
-        <div class="stc"><h4>Discipline Points</h4><div class="v" style="color:var(--g)">35/40</div><div class="ch" style="color:var(--g)">+2 this term</div></div>
-        <div class="stc"><h4>Attendance Rate</h4><div class="v" style="color:var(--a)">96.5%</div><div class="ch" style="color:var(--g)">Excellent</div></div>
-        <div class="stc"><h4>Absences</h4><div class="v" style="color:var(--w)">3</div><div class="ch">2 justified, 1 pending</div></div>
-        <div class="stc"><h4>Class Rank</h4><div class="v" style="color:var(--p)">#12</div><div class="ch">of 145 students</div></div>
+        <div class="stc"><h4>Official Discipline</h4><div class="v" style="color:var(--g)" id="studentDisciplineTotal">--/40</div><div class="ch" id="studentDisciplineUpdated">Waiting for official import</div></div>
+        <div class="stc"><h4>Attendance Rate</h4><div class="v" style="color:var(--a)" id="studentAttendanceRate">--%</div><div class="ch">Recorded sessions</div></div>
+        <div class="stc"><h4>Absences</h4><div class="v" style="color:var(--w)" id="studentAbsenceCount">--</div><div class="ch">From saved attendance</div></div>
+        <div class="stc"><h4>Class Rank</h4><div class="v" style="color:var(--p)" id="studentClassRank">--</div><div class="ch" id="studentSchoolRank">School rank --</div></div>
       </div>
       <div class="g2">
-        <div class="card">
-          <h3 style="margin-bottom:16px">Recent Discipline Activity</h3>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border-radius:10px">
-              <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;color:var(--g);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-              <div style="flex:1"><div style="font-size:14px;font-weight:600">+2 points — Class participation</div><div style="font-size:12px;color:var(--t3)">Mr. Ndayisaba — 2 days ago</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border-radius:10px">
-              <div style="width:36px;height:36px;border-radius:50%;background:#fee2e2;color:var(--r);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-              <div style="flex:1"><div style="font-size:14px;font-weight:600">-1 point — Late to assembly</div><div style="font-size:12px;color:var(--t3)">Mrs. Uwimana — 5 days ago</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border-radius:10px">
-              <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;color:var(--g);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-              <div style="flex:1"><div style="font-size:14px;font-weight:600">+3 points — School event volunteer</div><div style="font-size:12px;color:var(--t3)">Mr. Habimana — 2 weeks ago</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <h3 style="margin-bottom:16px">Upcoming Schedule</h3>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:48px;height:48px;background:var(--s3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:11px;font-weight:600;color:var(--t3)">AUG</div><div style="font-size:18px;font-weight:700">12</div></div>
-              <div><div style="font-size:14px;font-weight:600">Mathematics Exam</div><div style="font-size:12px;color:var(--t3)">08:00 AM — Room B12</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:48px;height:48px;background:var(--s3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:11px;font-weight:600;color:var(--t3)">AUG</div><div style="font-size:18px;font-weight:700">14</div></div>
-              <div><div style="font-size:14px;font-weight:600">Physics Lab Practical</div><div style="font-size:12px;color:var(--t3)">10:30 AM — Science Lab</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:48px;height:48px;background:var(--s3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:11px;font-weight:600;color:var(--t3)">AUG</div><div style="font-size:18px;font-weight:700">18</div></div>
-              <div><div style="font-size:14px;font-weight:600">Chemistry Test</div><div style="font-size:12px;color:var(--t3)">02:00 PM — Room A5</div></div>
-            </div>
-          </div>
-        </div>
+        <div class="card"><h3 style="margin-bottom:16px">Recent Discipline Activity</h3><div id="studentRecentDiscipline" style="display:flex;flex-direction:column;gap:12px"></div></div>
+        <div class="card"><h3 style="margin-bottom:16px">Upcoming Schedule</h3><p style="color:var(--t2)">School timetable details will appear here when connected to the academic calendar.</p></div>
       </div>
     </div>
     <div id="v-sdi" class="hidden">
       <div class="card" style="margin-bottom:24px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px"><h3>Discipline Record</h3><span class="tag tag-pr">Current: 35/40 points</span></div>
-        <table class="tbl">
-          <thead><tr><th>Date</th><th>Reason</th><th>Points</th><th>By</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>Aug 5, 2025</td><td>Class participation award</td><td style="color:var(--g);font-weight:700">+2</td><td>Mr. Ndayisaba</td><td><span class="tag tag-ap">Approved</span></td></tr>
-            <tr><td>Aug 2, 2025</td><td>Late to morning assembly</td><td style="color:var(--r);font-weight:700">-1</td><td>Mrs. Uwimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
-            <tr><td>Jul 28, 2025</td><td>Helping organize school event</td><td style="color:var(--g);font-weight:700">+3</td><td>Mr. Habimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
-            <tr><td>Jul 20, 2025</td><td>Uniform violation</td><td style="color:var(--r);font-weight:700">-1</td><td>Mrs. Uwimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
-            <tr><td>Jul 15, 2025</td><td>Perfect attendance week</td><td style="color:var(--g);font-weight:700">+1</td><td>Mr. Ndayisaba</td><td><span class="tag tag-ap">Approved</span></td></tr>
-            <tr><td>Jul 10, 2025</td><td>Disrupting class</td><td style="color:var(--r);font-weight:700">-2</td><td>Mrs. Uwimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
-            <tr><td>Jul 5, 2025</td><td>Helping new student</td><td style="color:var(--g);font-weight:700">+2</td><td>Mr. Habimana</td><td><span class="tag tag-ap">Approved</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card">
-        <h3 style="margin-bottom:20px">Points Breakdown</h3>
-        <div style="display:flex;flex-direction:column;gap:18px">
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Academic Conduct</span><span style="font-weight:700">14/16</span></div><div class="prog"><div class="prog-f" style="width:87.5%;background:var(--g)"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Punctuality</span><span style="font-weight:700">8/10</span></div><div class="prog"><div class="prog-f" style="width:80%;background:var(--g)"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Participation</span><span style="font-weight:700">7/8</span></div><div class="prog"><div class="prog-f" style="width:87.5%;background:var(--g)"></div></div></div>
-          <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px"><span>Uniform & Appearance</span><span style="font-weight:700">6/6</span></div><div class="prog"><div class="prog-f" style="width:100%;background:var(--g)"></div></div></div>
-        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px"><h3>Discipline Record</h3><span class="tag tag-pr" id="studentDisciplineBadge">Official total: --/40</span></div>
+        <div class="data-table-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Reason</th><th>Points / Total</th><th>Recorded by / source</th><th>Status</th></tr></thead><tbody id="studentDisciplineHistory"></tbody></table></div>
       </div>
     </div>
     <div id="v-sab" class="hidden">
@@ -510,13 +474,13 @@
     <div id="v-staat" class="hidden">
       <div class="card" style="margin-bottom:24px">
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
-          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Class</label><select class="sel" id="atclass" onchange="loadAtt()"><option>S5 Stream 1</option><option>S5 Stream 2</option><option>S5 Stream 3</option><option>S4 Stream 1</option><option>S4 Stream 2</option><option>S4 Stream 3</option></select></div>
-          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Date</label><input type="date" class="inp" id="atdate"></div>
-          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Period</label><select class="sel" id="atperiod"><option value="morning">Morning (1-2)</option><option value="afternoon">Afternoon (3-4)</option><option value="full_day" selected>Full Day</option></select></div>
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Class</label><select class="sel" id="atclass" onchange="loadAtt()"></select></div>
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Date</label><input type="date" class="inp" id="atdate" onchange="loadAtt()"></div>
+          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Period</label><select class="sel" id="atperiod" onchange="loadAtt()"><option>Morning (1-2)</option><option>Afternoon (3-4)</option><option>Full Day</option></select></div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
           <h3 style="font-size:15px">Student List — <span id="atcname">S5 Stream 1</span></h3>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-s" style="font-size:12px" onclick="markAll(true)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> All Present</button>
             <button class="btn btn-d" style="font-size:12px" onclick="markAll(false)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> All Absent</button>
           </div>
@@ -543,7 +507,8 @@
           <div class="fg"><label class="lab">Or Deduct</label><div style="display:flex;gap:8px"><button class="btn btn-d" style="flex:1" onclick="setDM(-1)">-1</button><button class="btn btn-d" style="flex:1" onclick="setDM(-2)">-2</button><button class="btn btn-d" style="flex:1" onclick="setDM(-3)">-3</button><button class="btn btn-d" style="flex:1" onclick="setDM(-5)">-5</button><button class="btn btn-d" style="flex:1" onclick="setDM(-10)">-10</button></div></div>
           <div class="fg"><label class="lab">Reason</label><input type="text" class="inp" id="dmreason" placeholder="e.g. Late to class, Helping others, etc."></div>
           <div class="fg"><label class="lab">Category</label><select class="sel" id="dmcategory"><option>Academic Conduct</option><option>Punctuality</option><option>Participation</option><option>Uniform & Appearance</option><option>Behavior</option></select></div>
-          <button class="btn btn-a" style="width:100%;justify-content:center;padding:12px" onclick="addDM()">Add Discipline Mark</button>
+          <button class="btn btn-a" style="width:100%;justify-content:center;padding:12px" onclick="addDM()">Log Official-System Action</button>
+          <p style="font-size:12px;color:var(--t3);margin-top:10px">This records who reported the official action and why. It does not alter the official total; only a verified discipline import updates that score.</p>
         </div>
         <div class="card">
           <h3 style="margin-bottom:20px">Recent Discipline Actions</h3>
@@ -602,6 +567,103 @@
   </main>
 </div>
 
+<!-- PARENT PORTAL -->
+<div class="port" id="parP">
+  <aside class="side">
+    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Parent Portal</span></div>
+    <ul class="side-nav">
+      <li><a href="#" class="on" onclick="pTab('pdash')" id="npdash"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
+      <li><a href="#" onclick="pTab('pstudent')" id="npstudent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Student Info</a></li>
+      <li><a href="#" onclick="pTab('pnotes')" id="npnotes"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Messages</a></li>
+      <li><a href="#" onclick="pTab('pnotif')" id="npnotif"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications</a></li>
+    </ul>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
+  </aside>
+  <main class="main">
+    <div class="ph">
+      <div><h1 id="parentTitle">Dashboard</h1><p>Welcome, Parent Portal — school updates at a glance</p></div>
+      <div class="pu">
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="notif-bell" onclick="pTab('pnotif')" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-badge">3</span>
+        </div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600">Mrs. Mukamana</div><div style="font-size:12px;color:var(--t3)">Parent of Jean-Paul</div></div>
+        <div class="pu-a" style="background:linear-gradient(135deg,var(--g),#0ea5e9)">MM</div>
+        <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
+      </div>
+    </div>
+
+    <div id="v-pdash">
+      <div class="g4" style="margin-bottom:32px">
+        <div class="stc"><h4>Attendance</h4><div class="v" style="color:var(--g)" id="parentAttendanceValue">96.5%</div><div class="ch" style="color:var(--g)">Excellent trend</div></div>
+        <div class="stc"><h4>Academic</h4><div class="v" style="color:var(--a)" id="parentAcademicValue">88%</div><div class="ch">Strong performance</div></div>
+        <div class="stc"><h4>Discipline</h4><div class="v" style="color:var(--p)" id="parentDisciplineValue">35/40</div><div class="ch">Positive behavior</div></div>
+        <div class="stc"><h4>Class Rank</h4><div class="v" style="color:var(--w)" id="parentRankValue">#12 of 145</div><div class="ch">This term</div></div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <h3 style="margin-bottom:16px">Student Snapshot</h3>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:12px;border:1px solid var(--b);border-radius:12px;background:var(--s2)">
+            <div class="pu-a" style="background:linear-gradient(135deg,var(--a),var(--r));width:52px;height:52px;font-size:18px">JM</div>
+            <div>
+              <div style="font-weight:700;font-size:18px" id="parentStudentName">Jean-Paul Manirafasha</div>
+              <div style="color:var(--t3);font-size:13px" id="parentStudentClass">S5 Stream 1</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;padding:10px 12px;background:var(--s2);border-radius:10px"><span style="color:var(--t3)">Next exam</span><strong id="parentExamValue">Mathematics</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 12px;background:var(--s2);border-radius:10px"><span style="color:var(--t3)">Overall status</span><strong id="parentStatusValue">On track</strong></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">School Updates</h3>
+          <div id="parentNotifList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="v-pstudent" class="hidden">
+      <div class="card">
+        <h3 style="margin-bottom:18px">Student Information</h3>
+        <table class="tbl" style="width:100%">
+          <tbody id="parentStudentTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="v-pnotes" class="hidden">
+      <div class="card">
+        <h3 style="margin-bottom:16px">Message to School</h3>
+        <div class="fg"><label class="lab">Subject</label><input type="text" class="inp" placeholder="e.g. Request for academic support"></div>
+        <div class="fg"><label class="lab">Message</label><textarea class="txa" placeholder="Write your message here..."></textarea></div>
+        <button class="btn btn-a" style="justify-content:center;width:100%">Send Message</button>
+      </div>
+    </div>
+
+    <div id="v-pnotif" class="hidden">
+      <div class="card">
+        <h3 style="margin-bottom:16px">Parent Notifications</h3>
+        <div id="parentNotifListDetailed">
+          <div class="notif-item unread" onclick="markRead(this)">
+            <div class="notif-top"><div><span class="notif-title">Term 2 exam timetable published</span><span class="notif-priority high">High</span></div><span class="notif-time">Today</span></div>
+            <div class="notif-body">The full exam timetable has been published for all Senior 5 students. Kindly review your child's schedule.</div>
+            <div class="notif-sender">From: Dean of Studies</div>
+          </div>
+          <div class="notif-item read" onclick="markRead(this)">
+            <div class="notif-top"><div><span class="notif-title">Attendance summary</span><span class="notif-priority normal">Normal</span></div><span class="notif-time">Yesterday</span></div>
+            <div class="notif-body">Your child has an attendance rate of 96.5% and remains on track academically.</div>
+            <div class="notif-sender">From: Discipline Office</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <!-- ADMIN PORTAL -->
 <div class="port" id="admP">
   <aside class="side">
@@ -636,31 +698,26 @@
     <!-- ADMIN DASHBOARD -->
     <div id="v-admd">
       <div class="g4" style="margin-bottom:32px">
-        <div class="stc"><h4>Total Students</h4><div class="v" style="color:var(--a)" id="dashTotalStudents">1,400</div><div class="ch">+23 new this term</div></div>
-        <div class="stc"><h4>Total Staff</h4><div class="v" style="color:var(--p)">52</div><div class="ch">3 on leave</div></div>
-        <div class="stc"><h4>Attendance Today</h4><div class="v" style="color:var(--g)" id="dashAttendanceToday">91.7%</div><div class="ch" style="color:var(--g)">Above target</div></div>
-        <div class="stc"><h4>Pending Issues</h4><div class="v" style="color:var(--w)" id="dashPendingIssues">18</div><div class="ch">Require attention</div></div>
+        <div class="stc"><h4>Total Students</h4><div class="v" style="color:var(--a)" id="dashTotalStudents">0</div><div class="ch">Active roster</div></div>
+        <div class="stc"><h4>Total Staff</h4><div class="v" style="color:var(--p)">52</div><div class="ch">Staff directory</div></div>
+        <div class="stc"><h4>Attendance Today</h4><div class="v" style="color:var(--g)" id="dashAttendanceToday">0%</div><div class="ch" style="color:var(--g)">From submitted sessions</div></div>
+        <div class="stc"><h4>Pending Issues</h4><div class="v" style="color:var(--w)" id="dashPendingIssues">0</div><div class="ch">Require attention</div></div>
       </div>
       <div class="g2">
         <div class="card">
           <h3 style="margin-bottom:16px">Attendance Overview</h3>
           <div style="display:flex;flex-direction:column;gap:14px">
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 1</span><span style="font-weight:700" id="attOverviewVal-S1">94%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S1" style="width:94%;background:var(--g)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 2</span><span style="font-weight:700" id="attOverviewVal-S2">89%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S2" style="width:89%;background:var(--w)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 3</span><span style="font-weight:700" id="attOverviewVal-S3">96%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S3" style="width:96%;background:var(--g)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 4</span><span style="font-weight:700" id="attOverviewVal-S4">91%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S4" style="width:91%;background:var(--g)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 5</span><span style="font-weight:700" id="attOverviewVal-S5">88%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S5" style="width:88%;background:var(--w)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 6</span><span style="font-weight:700" id="attOverviewVal-S6">93%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S6" style="width:93%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 1</span><span id="attOverviewVal-S1">0%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S1" style="width:0%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 2</span><span id="attOverviewVal-S2">0%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S2" style="width:0%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 3</span><span id="attOverviewVal-S3">0%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S3" style="width:0%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 4</span><span id="attOverviewVal-S4">0%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S4" style="width:0%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 5</span><span id="attOverviewVal-S5">0%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S5" style="width:0%;background:var(--g)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Senior 6</span><span id="attOverviewVal-S6">0%</span></div><div class="prog"><div class="prog-f" id="attOverviewBar-S6" style="width:0%;background:var(--g)"></div></div></div>
           </div>
         </div>
         <div class="card">
           <h3 style="margin-bottom:16px">System Activity</h3>
-          <table class="tbl">
-            <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
-            <tbody id="adminActivityBody">
-              <tr><td colspan="4" style="text-align:center;color:var(--t3)">No activity yet this session.</td></tr>
-            </tbody>
-          </table>
+          <table class="tbl"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="adminActivityBody"><tr><td colspan="4" style="text-align:center;color:var(--t3)">No activity yet this session.</td></tr></tbody></table>
         </div>
       </div>
     </div>
@@ -672,13 +729,14 @@
           <h3>All Users</h3>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <input type="text" class="inp" id="userSearch" placeholder="Search by name or ID..." oninput="filterUsers()" style="width:260px">
+            <label style="display:flex;align-items:center;gap:6px;color:var(--t2);font-size:13px"><input type="checkbox" id="includeArchivedStudents" onchange="renderUserTable()"> Include archived</label>
             <button class="btn btn-a" onclick="admTab('admbi')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Bulk Import</button>
-            <button class="btn btn-a" onclick="addUser()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add User</button>
+            <button class="btn btn-a" onclick="addUser()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Student</button>
           </div>
         </div>
         <div class="data-table-wrap">
           <table class="tbl" id="userTable">
-            <thead><tr><th>Photo</th><th>ID</th><th>Name</th><th>Role</th><th>Class/Dept</th><th>Discipline</th><th>Academic</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Photo</th><th>ID</th><th>Name</th><th>Class</th><th>Discipline</th><th>Academic</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="userTableBody">
               <!-- Populated by JS -->
             </tbody>
@@ -691,24 +749,17 @@
     <div id="v-admbi" class="hidden">
       <div class="g2">
         <div class="card">
-          <h3 style="margin-bottom:16px">Bulk School Data Import</h3>
-          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Choose whether you are importing students, discipline marks, or academic results. Download the matching CSV template, fill it in, then preview and validate before saving.</p>
+          <h3 style="margin-bottom:16px">Bulk Student Import</h3>
+          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Import a roster, academic results, or official discipline data. Preview validates every row before saving; imported IDs are matched and updated rather than duplicated.</p>
+          <div class="fg"><label class="lab" for="importType">Import type</label><select class="sel" id="importType"><option value="students">Student roster</option><option value="academics">Academic results</option><option value="attendance">Attendance records</option><option value="discipline">Official discipline snapshot / event (review required)</option></select></div>
           <div class="fg">
-            <label class="lab">What are you importing?</label>
-            <select class="sel" id="bulkImportType" onchange="setImportType()">
-              <option value="students">New student records</option>
-              <option value="student_updates">Update existing student details</option>
-              <option value="discipline">Discipline marks and reasons</option>
-              <option value="academic">Academic results</option>
-              <option value="attendance">Attendance records</option>
-            </select>
+            <label class="lab">Paste Student Data (CSV format)</label>
+            <input type="file" class="inp" id="importFile" accept=".csv,text/csv" onchange="loadImportFile(event)" style="margin-bottom:10px">
+            <textarea class="import-area" id="bulkImportArea" placeholder="Example:
+Jean-Paul Manirafasha, LDK-2023-001, M, S5, Stream 1, A-Level
+Claire Umutoni, LDK-2023-045, F, S4, Stream 2, A-Level
+Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
           </div>
-          <div class="fg">
-            <label class="lab">Choose a CSV file (Excel / Google Sheets) or paste its contents below</label>
-            <input type="file" class="inp" id="bulkImportFile" accept=".csv,text/csv" style="margin-bottom:10px">
-            <textarea class="import-area" id="bulkImportArea" placeholder="Choose an import type to see the required column names."></textarea>
-          </div>
-          <button class="btn btn-g" onclick="downloadImportTemplate()" style="width:100%;justify-content:center;margin-bottom:12px">Download CSV Template</button>
           <div style="display:flex;gap:10px">
             <button class="btn btn-g" onclick="clearImport()">Clear</button>
             <button class="btn btn-a" onclick="previewImport()" style="flex:1;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview & Validate</button>
@@ -718,20 +769,20 @@
           <h3 style="margin-bottom:16px">Import Guide</h3>
           <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--t2)">
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">1. Choose the import type</div>
-              <div>Student records, student-detail updates, discipline, academic results, or attendance. Each type has its own CSV template.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">1. Required Columns</div>
+              <div>Roster: name,id,gender,class,stream,level,guardian_name,guardian_phone,guardian_email,academic_score,status. Academic: id,term,subject,score,max_score,date. Attendance: id,date,class,period,status. Discipline: id,discipline_points,reason,change,recorded_by,date,source.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">2. Use the template</div>
-              <div>Keep the column names from the downloaded template. For student records, use class names such as S5 Stream 1.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">2. Auto-Classification</div>
+              <div>Existing student IDs are updated. New IDs create student records. Discipline files are staged and do not update totals until an administrator reviews and verifies the source.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">3. Preview & validation</div>
-              <div>The system checks required fields, marks, student IDs, and duplicate student IDs before saving.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">3. Validation</div>
+              <div>The system checks IDs, scores, statuses, and required fields. Attendance accepts present/absent/late/excused and common equivalents.</div>
             </div>
             <div style="padding:12px;background:var(--s2);border-radius:10px">
-              <div style="font-weight:600;color:var(--t);margin-bottom:4px">4. Saved records</div>
-              <div>Student records become available for attendance. Academic results update saved academic percentages; discipline entries keep their reasons and term details.</div>
+              <div style="font-weight:600;color:var(--t);margin-bottom:4px">4. After Import</div>
+              <div>All students immediately appear in attendance lists, rankings, and discipline tracking.</div>
             </div>
           </div>
         </div>
@@ -744,6 +795,14 @@
               <span id="importStats" style="font-size:13px;color:var(--t3)"></span>
               <button class="btn btn-a" onclick="confirmImport()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Confirm Import</button>
             </div>
+            <div class="card" style="margin-top:24px">
+              <h3 style="margin-bottom:16px">Import review queue</h3>
+              <div id="importReviewQueue" style="display:flex;flex-direction:column;gap:12px"></div>
+            </div>
+            <div class="card" style="margin-top:24px">
+              <h3 style="margin-bottom:16px">Audit history</h3>
+              <div class="data-table-wrap"><table class="tbl"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Details</th></tr></thead><tbody id="auditHistoryBody"></tbody></table></div>
+            </div>
           </div>
           <div class="import-preview" id="importPreviewTable"></div>
         </div>
@@ -752,19 +811,27 @@
 
     <!-- ADMIN REPORTS -->
     <div id="v-admr" class="hidden">
+      <div class="card" style="margin-bottom:20px">
+        <h3 style="margin-bottom:14px">Report period</h3>
+        <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+          <div class="fg" style="margin:0;min-width:190px"><label class="lab" for="reportFrom">From</label><input type="date" class="inp" id="reportFrom" onchange="updateReportSummary()"></div>
+          <div class="fg" style="margin:0;min-width:190px"><label class="lab" for="reportTo">To</label><input type="date" class="inp" id="reportTo" onchange="updateReportSummary()"></div>
+          <div style="font-size:13px;color:var(--t2);padding:10px 0" id="reportSummary">Reports use recorded school data.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn btn-g btn-sm" onclick="downloadAcademicReport()">Academic CSV</button><button class="btn btn-g btn-sm" onclick="downloadStudentReport()">Student Roster CSV</button></div>
+      </div>
       <div class="g2">
         <div class="card">
           <h3 style="margin-bottom:16px">Attendance Report</h3>
-          <div id="savedAttendanceSummary" style="padding:16px;background:var(--s2);border-radius:10px;color:var(--t2);font-size:14px">Sign in to view attendance saved in the database.</div>
-          <button class="btn btn-g" style="width:100%;margin-top:16px;justify-content:center" onclick="refreshAttendanceStats()">Refresh live attendance summary</button>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="color:var(--t2)">Attendance exports are calculated from saved class sessions for the selected period.</div>
+          </div>
           <button class="btn btn-g" style="width:100%;margin-top:16px;justify-content:center" onclick="downloadReport(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Full Report</button>
         </div>
         <div class="card">
           <h3 style="margin-bottom:16px">Discipline Report</h3>
           <div style="display:flex;flex-direction:column;gap:14px">
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Points Added</span><span style="font-weight:700;color:var(--g)">+342</span></div><div class="prog"><div class="prog-f" style="width:68%;background:var(--g)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Points Deducted</span><span style="font-weight:700;color:var(--r)">-128</span></div><div class="prog"><div class="prog-f" style="width:32%;background:var(--r)"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:14px"><span>Net Change</span><span style="font-weight:700;color:var(--g)">+214</span></div><div class="prog"><div class="prog-f" style="width:70%;background:var(--g)"></div></div></div>
+            <div style="color:var(--t2)">History includes official snapshots and dated events with reasons, sources, and staff names.</div>
           </div>
           <button class="btn btn-g" style="width:100%;margin-top:16px;justify-content:center" onclick="downloadReport(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Full Report</button>
         </div>
@@ -805,7 +872,7 @@
         <div class="g2">
           <div class="rank-card rank-card-tilt">
             <h3 style="margin-bottom:20px;font-size:16px">Top 30 Overall Performers</h3>
-            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Combined discipline + academic performance index</p>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Average of discipline normalized from 40 and academic score from 100; students need both scores to rank.</p>
             <div class="rank-full-list" id="top30Overall"></div>
           </div>
           <div class="rank-card rank-card-tilt">
@@ -896,40 +963,20 @@
 
     <!-- ADMIN SETTINGS -->
     <div id="v-adms" class="hidden">
-      <div class="g2">
-        <div class="card">
-          <h3 style="margin-bottom:20px">System Settings</h3>
-          <div class="fg"><label class="lab">School Name</label><input type="text" class="inp" id="setSchoolName" value="Lycée de Kigali"></div>
-          <div class="fg"><label class="lab">School Motto</label><input type="text" class="inp" id="setMotto" value="Strive to excel"></div>
-          <div class="fg"><label class="lab">Academic Year</label><input type="text" class="inp" id="setYear" value="2024-2025"></div>
-          <div class="fg"><label class="lab">Current Term</label><select class="sel" id="setTerm"><option>Term 1</option><option selected>Term 2</option><option>Term 3</option></select></div>
-          <button class="btn btn-a" style="width:100%;justify-content:center" onclick="saveSettings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Settings</button>
+      <div class="card" style="margin-bottom:20px">
+        <h3 style="margin-bottom:16px">School Settings</h3>
+        <div class="g2">
+          <div class="fg"><label class="lab" for="setSchoolName">School name</label><input class="inp" id="setSchoolName"></div>
+          <div class="fg"><label class="lab" for="setMotto">Motto</label><input class="inp" id="setMotto"></div>
+          <div class="fg"><label class="lab" for="setYear">Academic year</label><input class="inp" id="setYear"></div>
+          <div class="fg"><label class="lab" for="setTerm">Current term</label><input class="inp" id="setTerm"></div>
         </div>
-        <div class="card">
-          <h3 style="margin-bottom:20px">Landing Page Editor</h3>
-          <p style="font-size:14px;color:var(--t2);margin-bottom:16px">Enable edit mode on the landing page to modify text directly by clicking on any content.</p>
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-a" style="flex:1;justify-content:center" onclick="enableEditMode()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Enable Edit Mode</button>
-            <button class="btn btn-g" style="flex:1;justify-content:center" onclick="exportData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export Data</button>
-          </div>
-          <div style="margin-top:16px;padding:16px;background:var(--s2);border-radius:10px">
-            <div style="font-size:13px;color:var(--t3)">Data Status</div>
-            <div style="font-size:14px;font-weight:600;margin-top:4px" id="dataStatusText">All systems operational</div>
-          </div>
-        </div>
+        <button class="btn btn-a" onclick="saveSettings()">Save Settings</button>
       </div>
       <div class="card" style="margin-top:24px">
         <h3 style="margin-bottom:20px">Danger Zone</h3>
-        <div style="padding:16px;background:var(--s2);border:1px solid var(--b);border-radius:10px;margin-bottom:16px">
-          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Remove fictional test students</div>
-          <div style="font-size:13px;color:var(--t2);margin-bottom:12px">Deletes only records explicitly marked as demo, along with their attendance, discipline and academic test records. Real student records are not selected.</div>
-          <button class="btn btn-d" style="width:100%;justify-content:center" onclick="deleteDemoStudents()">Delete Demo Students</button>
-        </div>
-        <div style="padding:16px;background:#fef2f2;border:1px solid #fee2e2;border-radius:10px;margin-bottom:16px">
-          <div style="font-size:14px;font-weight:600;color:var(--r);margin-bottom:4px">Reset All Data</div>
-          <div style="font-size:13px;color:var(--t2)">This will clear all attendance, discipline, and absence records. Cannot be undone.</div>
-        </div>
-        <button class="btn btn-d" style="width:100%;justify-content:center" onclick="resetAllData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Reset All Data</button>
+        <p style="font-size:13px;color:var(--t2);margin-bottom:16px">Reset demo data only. This clears browser-local attendance, discipline, academic, and import records.</p>
+        <button class="btn btn-d" onclick="resetAllData()">Reset Demo Data</button>
       </div>
     </div>
   </main>
@@ -965,8 +1012,6 @@
   <button id="ai-fab" onclick="toggleAI()" style="width:56px;height:56px;border-radius:50%;background:var(--a);color:#fff;border:none;box-shadow:var(--sh2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 013 3v7a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
-<script src="attendance-foundation.js"></script>
 </body>
 </html>

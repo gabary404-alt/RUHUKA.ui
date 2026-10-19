@@ -3,6 +3,11 @@ window.schoolData = {
   students: [],
   staff: [],
   classes: [],
+  attendanceRecords: [],
+  disciplineEvents: [],
+  academicRecords: [],
+  importBatches: [],
+  auditEvents: [],
   settings: {
     schoolName: 'Lycée de Kigali',
     motto: 'Strive to excel',
@@ -165,7 +170,6 @@ function generateDemoData() {
     });
   });
 
-  students.forEach(function (student) { student.isDemo = true; });
   window.schoolData.students = students;
   computeClassStats();
 }
@@ -180,6 +184,35 @@ function saveStudents() {
   } catch (e) {
     console.error('Could not save student data', e);
   }
+}
+function saveSchoolRecords() {
+  try {
+    ['attendanceRecords', 'disciplineEvents', 'academicRecords', 'importBatches', 'activityLog', 'auditEvents'].forEach(key => {
+      localStorage.setItem('ldk-' + key, JSON.stringify(window.schoolData[key] || []));
+    });
+  } catch (e) {
+    console.error('Could not save school records', e);
+    toast('Browser storage is full. Export a backup before continuing.');
+  }
+}
+function loadSchoolRecords() {
+  ['attendanceRecords', 'disciplineEvents', 'academicRecords', 'importBatches', 'activityLog', 'auditEvents'].forEach(key => {
+    try {
+      const saved = localStorage.getItem('ldk-' + key);
+      if (saved) window.schoolData[key] = JSON.parse(saved);
+    } catch (e) {
+      console.error('Could not load ' + key, e);
+      window.schoolData[key] = [];
+    }
+  });
+  window.schoolData.attendanceRecords = window.schoolData.attendanceRecords.flatMap(record => {
+    const status = normalizeAttendanceStatus(record.status);
+    if (!status) {
+      console.warn('Ignoring attendance record with an unsupported status', record.id);
+      return [];
+    }
+    return [{ ...record, status }];
+  });
 }
 function loadStudents() {
   const saved = localStorage.getItem('ldk-students');
@@ -196,7 +229,7 @@ function loadStudents() {
 
 function computeClassStats() {
   const classMap = {};
-  window.schoolData.students.forEach(s => {
+  window.schoolData.students.filter(s => s.status !== 'Archived').forEach(s => {
     if (!classMap[s.class]) {
       classMap[s.class] = { name: s.class, level: s.level, students: [], teacher: 'TBD' };
     }
@@ -204,59 +237,81 @@ function computeClassStats() {
   });
 
   window.schoolData.classes = Object.values(classMap).map(c => {
-    const avgDiscipline = Math.round(c.students.reduce((a, b) => a + b.disciplinePoints, 0) / c.students.length * 10) / 10;
-    const avgAcademic = Math.round(c.students.reduce((a, b) => a + b.academicScore, 0) / c.students.length * 10) / 10;
-    const avgAttendance = Math.round(c.students.reduce((a, b) => a + b.attendanceRate, 0) / c.students.length * 10) / 10;
+    const average = (key) => {
+      const values = c.students.map(student => numberOrNull(student[key])).filter(value => value !== null);
+      return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length * 10) / 10 : null;
+    };
     return {
       name: c.name,
       level: c.level,
       studentCount: c.students.length,
       teacher: c.teacher,
-      avgDiscipline: avgDiscipline,
-      avgAcademic: avgAcademic,
-      avgAttendance: avgAttendance
+      avgDiscipline: average('disciplinePoints'),
+      avgAcademic: average('academicScore'),
+      avgAttendance: average('attendanceRate')
     };
   });
 }
 
+function numberOrNull(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+function normalizedScore(student, key, maximum = 100) {
+  const value = numberOrNull(student[key]);
+  return value === null ? null : value / maximum * 100;
+}
+function combinedPerformanceIndex(student) {
+  const discipline = normalizedScore(student, 'disciplinePoints', 40);
+  const academic = normalizedScore(student, 'academicScore');
+  return discipline === null || academic === null ? null : (discipline + academic) / 2;
+}
 function getClassRankings() {
-  return [...window.schoolData.classes].sort((a, b) => b.avgDiscipline - a.avgDiscipline);
+  return [...window.schoolData.classes].sort((a, b) => (b.avgDiscipline ?? -1) - (a.avgDiscipline ?? -1));
 }
 
 function getAcademicRankings() {
-  return [...window.schoolData.classes].sort((a, b) => b.avgAcademic - a.avgAcademic);
+  return [...window.schoolData.classes].sort((a, b) => (b.avgAcademic ?? -1) - (a.avgAcademic ?? -1));
 }
 
 function getTop30Overall() {
-  return [...window.schoolData.students]
-    .map(s => ({ ...s, index: Math.round((s.disciplinePoints * 0.5 + s.academicScore * 0.5) * 10) / 10 }))
+  return window.schoolData.students.filter(s => s.status !== 'Archived' && combinedPerformanceIndex(s) !== null)
+    .map(s => ({ ...s, index: Math.round(combinedPerformanceIndex(s) * 10) / 10 }))
     .sort((a, b) => b.index - a.index)
     .slice(0, 30);
 }
 
 function getTop30Discipline() {
-  return [...window.schoolData.students]
+  return window.schoolData.students.filter(s => s.status !== 'Archived')
+    .filter(s => numberOrNull(s.disciplinePoints) !== null)
     .sort((a, b) => b.disciplinePoints - a.disciplinePoints)
     .slice(0, 30);
 }
 
 function getNeedsAttention() {
-  return window.schoolData.students.filter(s => s.disciplinePoints < 20 || s.academicScore < 60)
-    .sort((a, b) => (a.disciplinePoints + a.academicScore) - (b.disciplinePoints + b.academicScore));
+  return window.schoolData.students.filter(s => s.status !== 'Archived' &&
+    ((numberOrNull(s.disciplinePoints) !== null && Number(s.disciplinePoints) < 20) ||
+    (numberOrNull(s.academicScore) !== null && Number(s.academicScore) < 60)))
+    .sort((a, b) => (combinedPerformanceIndex(a) ?? 0) - (combinedPerformanceIndex(b) ?? 0));
 }
 
 function getClassesBelowTarget() {
-  return window.schoolData.classes.filter(c => c.avgDiscipline < 20 || c.avgAcademic < 70)
-    .sort((a, b) => (a.avgDiscipline + a.avgAcademic) - (b.avgDiscipline + b.avgAcademic));
+  return window.schoolData.classes.filter(c =>
+    (c.avgDiscipline !== null && c.avgDiscipline < 20) ||
+    (c.avgAcademic !== null && c.avgAcademic < 70))
+    .sort((a, b) => ((a.avgDiscipline ?? 40) / 40 + (a.avgAcademic ?? 100) / 100) -
+      ((b.avgDiscipline ?? 40) / 40 + (b.avgAcademic ?? 100) / 100));
 }
 
 function getClassLeaders() {
   const leaders = [];
   window.schoolData.classes.forEach(cls => {
-    const clsStudents = window.schoolData.students.filter(s => s.class === cls.name);
-    if (clsStudents.length > 0) {
-      const leader = clsStudents
-        .map(s => ({ ...s, index: Math.round((s.disciplinePoints * 0.5 + s.academicScore * 0.5) * 10) / 10 }))
+    const clsStudents = window.schoolData.students.filter(s => s.class === cls.name && s.status !== 'Archived');
+    const rankedStudents = clsStudents.filter(s => combinedPerformanceIndex(s) !== null);
+    if (rankedStudents.length > 0) {
+      const leader = rankedStudents
+        .map(s => ({ ...s, index: Math.round(combinedPerformanceIndex(s) * 10) / 10 }))
         .sort((a, b) => b.index - a.index)[0];
       leaders.push({ class: cls.name, student: leader });
     }
@@ -267,9 +322,12 @@ function getClassLeaders() {
 function getInitials(name) {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 }
+function getLocalDateString(date = new Date()) {
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+}
 
 function getAvatarColor(seed) {
-  const colors = ['linear-gradient(135deg,#3b82f6,#8b5cf6)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#d97706)','linear-gradient(135deg,#ec4899,#be185d)','linear-gradient(135deg,#06b6d4,#0891b2)','linear-gradient(135deg,#8b5cf6,#7c3aed)','linear-gradient(135deg,#14b8a6,#0d9488)','linear-gradient(135deg,#f97316,#ea580c)'];
+  const colors = ['linear-gradient(135deg,#15803d,#14532d)','linear-gradient(135deg,#16a34a,#166534)','linear-gradient(135deg,#f59e0b,#d97706)','linear-gradient(135deg,#dc2626,#991b1b)','linear-gradient(135deg,#4ade80,#15803d)','linear-gradient(135deg,#b91c1c,#7f1d1d)','linear-gradient(135deg,#14b8a6,#0d9488)','linear-gradient(135deg,#f97316,#ea580c)'];
   let hash = 0;
   for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
@@ -282,14 +340,15 @@ function renderAllClassRankings() {
   const rankings = getClassRankings();
   container.innerHTML = rankings.map((c, i) => {
     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const scoreClass = c.avgDiscipline >= 32 ? 'good' : c.avgDiscipline >= 20 ? 'avg' : 'bad';
+    const scoreClass = c.avgDiscipline === null ? 'avg' : c.avgDiscipline >= 32 ? 'good' : c.avgDiscipline >= 20 ? 'avg' : 'bad';
+    const disciplinePct = c.avgDiscipline === null ? 0 : c.avgDiscipline / 40 * 100;
     return `<div class="rank-row">
       <div class="rank-num ${rankClass}">${i + 1}</div>
-      <div class="rank-avatar" style="background:${getAvatarColor(c.name)}">${c.name.substring(0,2)}</div>
-      <div class="rank-info"><div class="rank-name">${c.name}</div><div class="rank-meta">${c.studentCount} students | ${c.level}</div></div>
-      <div style="text-align:right;min-width:80px"><div class="rank-score ${scoreClass}">${c.avgDiscipline}</div><div style="font-size:11px;color:var(--t3)">Avg Discipline</div></div>
+      <div class="rank-avatar" style="background:${getAvatarColor(c.name)}">${escapeHTML(c.name.substring(0,2))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(c.name)}</div><div class="rank-meta">${c.studentCount} students | ${escapeHTML(c.level)}</div></div>
+      <div style="text-align:right;min-width:80px"><div class="rank-score ${scoreClass}">${c.avgDiscipline === null ? 'N/A' : c.avgDiscipline + '/40'}</div><div style="font-size:11px;color:var(--t3)">Avg Discipline</div></div>
     </div>
-    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${(c.avgDiscipline / 40) * 100}%;background:var(--${scoreClass === 'good' ? 'g' : scoreClass === 'avg' ? 'w' : 'r'})"></div></div>`;
+    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${disciplinePct}%;background:var(--${scoreClass === 'good' ? 'g' : scoreClass === 'avg' ? 'w' : 'r'})"></div></div>`;
   }).join('');
 }
 
@@ -299,14 +358,14 @@ function renderAllAcademicRankings() {
   const rankings = getAcademicRankings();
   container.innerHTML = rankings.map((c, i) => {
     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const scoreClass = c.avgAcademic >= 80 ? 'good' : c.avgAcademic >= 65 ? 'avg' : 'bad';
+    const scoreClass = c.avgAcademic === null ? 'avg' : c.avgAcademic >= 80 ? 'good' : c.avgAcademic >= 65 ? 'avg' : 'bad';
     return `<div class="rank-row">
       <div class="rank-num ${rankClass}">${i + 1}</div>
-      <div class="rank-avatar" style="background:${getAvatarColor(c.name)}">${c.name.substring(0,2)}</div>
-      <div class="rank-info"><div class="rank-name">${c.name}</div><div class="rank-meta">${c.studentCount} students | ${c.level}</div></div>
-      <div style="text-align:right;min-width:80px"><div class="rank-score ${scoreClass}">${c.avgAcademic}%</div><div style="font-size:11px;color:var(--t3)">Avg Academic</div></div>
+      <div class="rank-avatar" style="background:${getAvatarColor(c.name)}">${escapeHTML(c.name.substring(0,2))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(c.name)}</div><div class="rank-meta">${c.studentCount} students | ${escapeHTML(c.level)}</div></div>
+      <div style="text-align:right;min-width:80px"><div class="rank-score ${scoreClass}">${c.avgAcademic === null ? 'N/A' : c.avgAcademic + '%'}</div><div style="font-size:11px;color:var(--t3)">Avg Academic</div></div>
     </div>
-    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${c.avgAcademic}%;background:var(--${scoreClass === 'good' ? 'g' : scoreClass === 'avg' ? 'w' : 'r'})"></div></div>`;
+    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${c.avgAcademic ?? 0}%;background:var(--${scoreClass === 'good' ? 'g' : scoreClass === 'avg' ? 'w' : 'r'})"></div></div>`;
   }).join('');
 }
 
@@ -318,8 +377,8 @@ function renderTop30Overall() {
     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     return `<div class="rank-row">
       <div class="rank-num ${rankClass}">${i + 1}</div>
-      <div class="avatar-md" style="background:${getAvatarColor(s.name)}">${getInitials(s.name)}</div>
-      <div class="rank-info"><div class="rank-name">${s.name}</div><div class="rank-meta">${s.class} | ${s.id}</div></div>
+      <div class="avatar-md" style="background:${getAvatarColor(s.name)}">${escapeHTML(getInitials(s.name))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(s.name)}</div><div class="rank-meta">${escapeHTML(s.class)} | ${escapeHTML(s.id)}</div></div>
       <div style="text-align:right"><div class="rank-score good">${s.index}</div><div style="font-size:11px;color:var(--t3)">Index</div></div>
     </div>`;
   }).join('');
@@ -333,8 +392,8 @@ function renderTop30Discipline() {
     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     return `<div class="rank-row">
       <div class="rank-num ${rankClass}">${i + 1}</div>
-      <div class="avatar-md" style="background:${getAvatarColor(s.name)}">${getInitials(s.name)}</div>
-      <div class="rank-info"><div class="rank-name">${s.name}</div><div class="rank-meta">${s.class} | ${s.id}</div></div>
+      <div class="avatar-md" style="background:${getAvatarColor(s.name)}">${escapeHTML(getInitials(s.name))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(s.name)}</div><div class="rank-meta">${escapeHTML(s.class)} | ${escapeHTML(s.id)}</div></div>
       <div style="text-align:right"><div class="rank-score good">${s.disciplinePoints}/40</div></div>
     </div>`;
   }).join('');
@@ -349,13 +408,14 @@ function renderNeedsAttention() {
     return;
   }
   container.innerHTML = list.map(s => {
-    const issue = s.disciplinePoints < 65 ? 'Discipline' : 'Academic';
-    const score = s.disciplinePoints < 65 ? s.disciplinePoints : s.academicScore;
+    const issues = [];
+    if (numberOrNull(s.disciplinePoints) !== null && Number(s.disciplinePoints) < 20) issues.push(`Discipline ${Number(s.disciplinePoints)}/40`);
+    if (numberOrNull(s.academicScore) !== null && Number(s.academicScore) < 60) issues.push(`Academic ${Number(s.academicScore)}%`);
     return `<div class="rank-row">
       <div class="rank-num" style="background:var(--r);color:#fff">!</div>
-      <div class="avatar-md" style="background:linear-gradient(135deg,var(--r),#dc2626)">${getInitials(s.name)}</div>
-      <div class="rank-info"><div class="rank-name">${s.name}</div><div class="rank-meta">${s.class} | ${s.id}</div></div>
-      <div style="text-align:right"><div class="rank-score bad">${score}</div><div style="font-size:11px;color:var(--t3)">${issue}</div></div>
+      <div class="avatar-md" style="background:linear-gradient(135deg,var(--r),#dc2626)">${escapeHTML(getInitials(s.name))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(s.name)}</div><div class="rank-meta">${escapeHTML(s.class)} | ${escapeHTML(s.id)}</div></div>
+      <div style="text-align:right"><div class="rank-score bad">${escapeHTML(issues.join(' · '))}</div><div style="font-size:11px;color:var(--t3)">Needs attention</div></div>
     </div>`;
   }).join('');
 }
@@ -369,14 +429,17 @@ function renderClassesBelowTarget() {
     return;
   }
   container.innerHTML = list.map(c => {
-    const issue = c.avgDiscipline < 75 ? `Discipline: ${c.avgDiscipline}` : `Academic: ${c.avgAcademic}%`;
+    const issues = [];
+    if (c.avgDiscipline !== null && c.avgDiscipline < 20) issues.push(`Discipline: ${c.avgDiscipline}/40`);
+    if (c.avgAcademic !== null && c.avgAcademic < 70) issues.push(`Academic: ${c.avgAcademic}%`);
+    const barWidth = Math.max(c.avgDiscipline === null ? 0 : c.avgDiscipline / 40 * 100, c.avgAcademic ?? 0);
     return `<div class="rank-row">
       <div class="rank-num" style="background:var(--w);color:#000">!</div>
-      <div class="rank-avatar" style="background:linear-gradient(135deg,var(--w),#d97706)">${c.name.substring(0,2)}</div>
-      <div class="rank-info"><div class="rank-name">${c.name}</div><div class="rank-meta">${c.studentCount} students</div></div>
-      <div style="text-align:right"><div class="rank-score avg">${issue}</div></div>
+      <div class="rank-avatar" style="background:linear-gradient(135deg,var(--w),#d97706)">${escapeHTML(c.name.substring(0,2))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(c.name)}</div><div class="rank-meta">${c.studentCount} students</div></div>
+      <div style="text-align:right"><div class="rank-score avg">${escapeHTML(issues.join(' · '))}</div></div>
     </div>
-    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${Math.min(c.avgDiscipline, c.avgAcademic)}%;background:var(--w)"></div></div>`;
+    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barWidth}%;background:var(--w)"></div></div>`;
   }).join('');
 }
 
@@ -388,11 +451,11 @@ function renderClassLeaders() {
     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     return `<div class="rank-class-header">
       <div class="rank-num ${rankClass}">${i + 1}</div>
-      <span>${l.class}</span>
+      <span>${escapeHTML(l.class)}</span>
     </div>
     <div class="rank-row" style="margin-bottom:16px">
-      <div class="avatar-lg" style="background:${getAvatarColor(l.student.name)}">${getInitials(l.student.name)}</div>
-      <div class="rank-info"><div class="rank-name">${l.student.name}</div><div class="rank-meta">${l.student.id} | Discipline: ${l.student.disciplinePoints} | Academic: ${l.student.academicScore}%</div></div>
+      <div class="avatar-lg" style="background:${getAvatarColor(l.student.name)}">${escapeHTML(getInitials(l.student.name))}</div>
+      <div class="rank-info"><div class="rank-name">${escapeHTML(l.student.name)}</div><div class="rank-meta">${escapeHTML(l.student.id)} | Discipline: ${numberOrNull(l.student.disciplinePoints) === null ? 'N/A' : Number(l.student.disciplinePoints) + '/40'} | Academic: ${numberOrNull(l.student.academicScore) === null ? 'N/A' : Number(l.student.academicScore) + '%'}</div></div>
       <div style="text-align:right"><div class="rank-score good">${l.student.index}</div><div style="font-size:11px;color:var(--t3)">Leader Index</div></div>
     </div>`;
   }).join('');
@@ -401,22 +464,28 @@ function renderClassLeaders() {
 function renderUserTable() {
   const tbody = document.getElementById('userTableBody');
   if (!tbody) return;
-  const students = window.schoolData.students.slice(0, 50); // Show first 50 for performance
+  const includeArchived = document.getElementById('includeArchivedStudents')?.checked;
+  const students = window.schoolData.students
+    .filter(s => includeArchived || s.status !== 'Archived')
+    .slice(0, 500);
   tbody.innerHTML = students.map(s => {
-    const dColor = s.disciplinePoints >= 85 ? 'var(--g)' : s.disciplinePoints >= 70 ? 'var(--w)' : 'var(--r)';
+    const dColor = s.disciplinePoints >= 32 ? 'var(--g)' : s.disciplinePoints >= 20 ? 'var(--w)' : 'var(--r)';
     const aColor = s.academicScore >= 80 ? 'var(--g)' : s.academicScore >= 65 ? 'var(--w)' : 'var(--r)';
+    const studentKey = encodeURIComponent(s.id);
     return `<tr>
-      <td><div class="avatar-sm" style="background:${getAvatarColor(s.name)}">${getInitials(s.name)}</div></td>
-      <td>${s.id}</td>
-      <td>${s.name}</td>
-      <td>Student</td>
-      <td>${s.class}</td>
-      <td style="color:${dColor};font-weight:700">${s.disciplinePoints}</td>
-      <td style="color:${aColor};font-weight:700">${s.academicScore}%</td>
-      <td><span class="tag tag-ap">${s.status}</span></td>
-      <td><button class="btn btn-g btn-sm" onclick="editStudent('${s.id}')">Edit</button></td>
+      <td><div class="avatar-sm" style="background:${getAvatarColor(s.name)}">${escapeHTML(getInitials(s.name))}</div></td>
+      <td>${escapeHTML(s.id)}</td>
+      <td>${escapeHTML(s.name)}</td>
+      <td>${escapeHTML(s.class || '')}</td>
+      <td style="color:${dColor};font-weight:700">${Number(s.disciplinePoints || 0)}</td>
+      <td style="color:${aColor};font-weight:700">${Number(s.academicScore || 0)}%</td>
+      <td><span class="tag ${s.status === 'Archived' ? 'tag-ab' : 'tag-ap'}">${escapeHTML(s.status || 'Active')}</span></td>
+      <td><div style="display:flex;gap:6px"><button class="btn btn-g btn-sm" onclick="viewStudent(decodeURIComponent('${studentKey}'))">Profile</button><button class="btn btn-a btn-sm" onclick="editStudent(decodeURIComponent('${studentKey}'))">Edit</button><button class="btn btn-d btn-sm" onclick="toggleStudentArchive(decodeURIComponent('${studentKey}'))">${s.status === 'Archived' ? 'Restore' : 'Archive'}</button></div></td>
     </tr>`;
   }).join('');
+}
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 }
 
 // ===== REAL-TIME DASHBOARD STATS =====
@@ -429,7 +498,7 @@ function renderUserTable() {
 // Admin views during a demo always shows the current state.
 function updateDashboardStats() {
   const totalEl = document.getElementById('dashTotalStudents');
-  if (totalEl) totalEl.textContent = window.schoolData.students.length.toLocaleString();
+  if (totalEl) totalEl.textContent = window.schoolData.students.filter(student => student.status !== 'Archived').length.toLocaleString();
 
   const { presentPct } = computeSchoolAttendanceToday();
   const attEl = document.getElementById('dashAttendanceToday');
@@ -468,8 +537,14 @@ function updateStaffDashboardStats() {
 // submitted -- so this always reflects the latest marks, on both
 // dashboards, without a separate daily log to keep in sync.
 function computeSchoolAttendanceToday() {
-  const students = window.schoolData.students;
+  const students = window.schoolData.students.filter(student => student.status !== 'Archived');
   if (!students.length) return { presentPct: 0, present: 0, absent: 0 };
+  const today = getLocalDateString();
+  const records = window.schoolData.attendanceRecords.filter(record => record.date === today && record.status !== 'excused');
+  if (records.length) {
+    const present = records.filter(record => record.status === 'present' || record.status === 'late').length;
+    return { presentPct: Math.round(present / records.length * 1000) / 10, present, absent: records.length - present };
+  }
   const avg = students.reduce((a, s) => a + s.attendanceRate, 0) / students.length;
   const presentPct = Math.round(avg * 10) / 10;
   const present = Math.round(students.length * avg / 100);
@@ -501,6 +576,20 @@ function logActivity(type, action, by, details) {
     type, action, by, details
   });
   if (window.schoolData.activityLog.length > 30) window.schoolData.activityLog.length = 30;
+  saveSchoolRecords();
+  renderAdminActivity();
+  renderStaffActivity();
+}
+
+function recordAuditEvent(actor, action, entityId, details) {
+  window.schoolData.auditEvents.unshift({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+    time: new Date().toISOString(),
+    actor, action, entityId: String(entityId ?? ''), details: String(details ?? '')
+  });
+  if (window.schoolData.auditEvents.length > 1000) window.schoolData.auditEvents.length = 1000;
+  saveSchoolRecords();
+  renderAuditHistory();
 }
 
 function renderAdminActivity() {
@@ -508,7 +597,7 @@ function renderAdminActivity() {
   if (!tbody) return;
   const rows = window.schoolData.activityLog.slice(0, 6);
   tbody.innerHTML = rows.length
-    ? rows.map(a => `<tr><td>${a.time}</td><td>${a.by}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('')
+    ? rows.map(a => `<tr><td>${escapeHTML(a.time)}</td><td>${escapeHTML(a.by)}</td><td>${escapeHTML(a.action)}</td><td>${escapeHTML(a.details)}</td></tr>`).join('')
     : '<tr><td colspan="4" style="text-align:center;color:var(--t3)">No activity yet this session.</td></tr>';
 }
 
@@ -517,7 +606,7 @@ function renderStaffActivity() {
   if (!tbody) return;
   const rows = window.schoolData.activityLog.slice(0, 6);
   tbody.innerHTML = rows.length
-    ? rows.map(a => `<tr><td>${a.time}</td><td>${a.action}</td><td>${a.by}</td><td>${a.details}</td></tr>`).join('')
+    ? rows.map(a => `<tr><td>${escapeHTML(a.time)}</td><td>${escapeHTML(a.action)}</td><td>${escapeHTML(a.by)}</td><td>${escapeHTML(a.details)}</td></tr>`).join('')
     : '<tr><td colspan="4" style="text-align:center;color:var(--t3)">No activity yet this session.</td></tr>';
 }
 
@@ -532,49 +621,152 @@ function populateDMStudentDropdown() {
   const sel = document.getElementById('dmstu');
   if (!sel) return;
   const prev = sel.value;
-  const sorted = [...window.schoolData.students].sort((a, b) => a.name.localeCompare(b.name));
-  sel.innerHTML = sorted.map(s => `<option>${s.name} (${s.id})</option>`).join('');
+  const sorted = window.schoolData.students.filter(s => s.status !== 'Archived').sort((a, b) => a.name.localeCompare(b.name));
+  sel.innerHTML = sorted.map(s => `<option value="${escapeHTML(s.name)} (${escapeHTML(s.id)})">${escapeHTML(s.name)} (${escapeHTML(s.id)})</option>`).join('');
   if (prev && sorted.some(s => (s.name + ' (' + s.id + ')') === prev)) sel.value = prev;
 }
 
 // ===== BULK IMPORT SYSTEM =====
 function clearImport() {
   document.getElementById('bulkImportArea').value = '';
+  document.getElementById('importFile').value = '';
   document.getElementById('importPreviewSection').classList.add('hidden');
+  delete window._pendingImport;
+  delete window._pendingImportType;
+}
+
+function loadImportFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (file.size > 5_000_000) {
+    event.target.value = '';
+    return toast('CSV file is too large. Maximum size is 5 MB.');
+  }
+  const reader = new FileReader();
+  reader.onload = () => { document.getElementById('bulkImportArea').value = String(reader.result || ''); };
+  reader.onerror = () => toast('Could not read that CSV file.');
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted && char === '"' && text[i + 1] === '"') { field += '"'; i++; }
+    else if (char === '"') quoted = !quoted;
+    else if (char === ',' && !quoted) { row.push(field.trim()); field = ''; }
+    else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && text[i + 1] === '\n') i++;
+      row.push(field.trim());
+      if (row.some(value => value !== '')) rows.push(row);
+      row = []; field = '';
+    } else field += char;
+  }
+  row.push(field.trim());
+  if (row.some(value => value !== '')) rows.push(row);
+  return rows;
+}
+
+function normalizeAttendanceStatus(value) {
+  const status = String(value ?? '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+  const aliases = {
+    present: 'present', p: 'present', here: 'present',
+    absent: 'absent', a: 'absent', missing: 'absent',
+    late: 'late', l: 'late', tardy: 'late',
+    excused: 'excused', e: 'excused', justified: 'excused', justifiedabsence: 'excused'
+  };
+  return aliases[status] || null;
 }
 
 function previewImport() {
   const raw = document.getElementById('bulkImportArea').value.trim();
   if (!raw) { toast('Please paste student data first'); return; }
-
-  const lines = raw.split('\n').filter(l => l.trim());
+  if (raw.length > 5_000_000) { toast('Import data is too large. Maximum size is 5 MB.'); return; }
+  const type = document.getElementById('importType').value;
+  const rows = parseCSV(raw);
+  if (!rows.length) { toast('No CSV rows found.'); return; }
+  if (rows.length > 10_001) { toast('Imports are limited to 10,000 data rows at a time.'); return; }
+  const normalize = value => value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  const first = rows[0].map(normalize);
+  const hasHeader = first.some(value => ['id', 'student_id', 'name', 'student_name'].includes(value));
+  const headers = hasHeader ? rows.shift().map(normalize) : [];
+  const aliases = {
+    id: ['id', 'student_id', 'studentid'], name: ['name', 'student_name', 'fullname', 'full_name'],
+    class: ['class', 'grade', 'form'], stream: ['stream'], level: ['level'], gender: ['gender', 'sex'],
+    guardianName: ['guardian_name', 'parent_name', 'guardian', 'parent'], guardianPhone: ['guardian_phone', 'parent_phone', 'phone'], guardianEmail: ['guardian_email', 'parent_email', 'email'],
+    academicScore: ['academic_score', 'academic', 'average', 'score'], disciplinePoints: ['discipline_points', 'discipline_total', 'discipline_score', 'discipline'],
+    status: ['status'], term: ['term', 'semester'], subject: ['subject', 'course'], score: ['score', 'mark'], maxScore: ['max_score', 'maximum', 'out_of'],
+    reason: ['reason', 'description', 'incident'], change: ['change', 'points_change', 'delta'], recordedBy: ['recorded_by', 'staff', 'teacher'], date: ['date', 'recorded_at'], source: ['source'],
+    period: ['period', 'session'], attendanceStatus: ['status', 'attendance_status']
+  };
+  const get = (row, key, positionalIndex) => {
+    if (!hasHeader) return row[positionalIndex] ?? '';
+    const idx = headers.findIndex(header => aliases[key].includes(header));
+    return idx < 0 ? '' : (row[idx] ?? '');
+  };
   const preview = [];
-  const errors = [];
   const seenIds = new Set();
-
-  lines.forEach((line, idx) => {
-    const parts = line.split(',').map(p => p.trim());
-    if (parts.length < 4) {
-      errors.push({ line: idx + 1, msg: 'Too few columns' });
-      return;
+  rows.forEach((row, index) => {
+    const item = { type, rowNumber: index + (hasHeader ? 2 : 1), validation: 'ok', msg: 'Ready' };
+    if (type === 'students') {
+      const cls = get(row, 'class', 3);
+      const stream = get(row, 'stream', 4);
+      item.name = get(row, 'name', 0);
+      item.id = get(row, 'id', 1);
+      item.gender = get(row, 'gender', 2);
+      item.class = cls && stream && !cls.toLowerCase().includes(stream.toLowerCase()) ? cls + ' ' + stream : cls;
+      item.level = get(row, 'level', 5) || (/^S[123]/i.test(cls) ? 'O-Level' : 'A-Level');
+      item.guardianName = get(row, 'guardianName', 6);
+      item.guardianPhone = get(row, 'guardianPhone', 7);
+      item.guardianEmail = get(row, 'guardianEmail', 8);
+      item.academicScore = get(row, 'academicScore', 9);
+      item.studentStatus = get(row, 'status', 11) || 'Active';
+      if (!item.name || !item.id || !item.class) { item.validation = 'err'; item.msg = 'Name, ID, and class required'; }
+      else if (item.gender && !['m', 'f', 'male', 'female'].includes(item.gender.toLowerCase())) { item.validation = 'err'; item.msg = 'Gender must be M, F, Male, or Female'; }
+      else if (!['active', 'transferred', 'graduated', 'archived'].includes(item.studentStatus.toLowerCase())) { item.validation = 'err'; item.msg = 'Unknown student status'; }
+      else if (item.academicScore !== '' && (!Number.isFinite(Number(item.academicScore)) || Number(item.academicScore) < 0 || Number(item.academicScore) > 100)) { item.validation = 'err'; item.msg = 'Academic score must be 0-100'; }
+    } else {
+      item.id = get(row, 'id', 0);
+      if (type === 'academics') {
+        item.term = get(row, 'term', 1); item.subject = get(row, 'subject', 2);
+        item.score = get(row, 'score', 3); item.maxScore = get(row, 'maxScore', 4); item.date = get(row, 'date', 5);
+        if (!item.id || item.score === '' || !Number.isFinite(Number(item.score)) || (item.maxScore && (!Number.isFinite(Number(item.maxScore)) || Number(item.maxScore) <= 0)) || Number(item.score) < 0 || Number(item.score) > Number(item.maxScore || 100)) { item.validation = 'err'; item.msg = 'Score must be within the maximum score'; }
+        else if (!window.schoolData.students.some(student => student.id.toLowerCase() === item.id.toLowerCase())) { item.validation = 'err'; item.msg = 'Student ID not found; import roster first'; }
+      } else if (type === 'attendance') {
+        item.date = get(row, 'date', 1);
+        item.class = get(row, 'class', 2) || window.schoolData.students.find(student => student.id.toLowerCase() === String(item.id).toLowerCase())?.class || '';
+        item.period = get(row, 'period', 3) || 'Full Day';
+        item.status = normalizeAttendanceStatus(get(row, 'attendanceStatus', 4));
+        if (!item.id || !item.date || !item.class || !item.status) {
+          item.validation = 'err'; item.msg = !item.status ? 'Unknown attendance status' : 'ID, date, and class required';
+        } else if (isNaN(Date.parse(item.date))) {
+          item.validation = 'err'; item.msg = 'Invalid attendance date';
+        } else if (!window.schoolData.students.some(student => student.id.toLowerCase() === String(item.id).toLowerCase())) {
+          item.validation = 'err'; item.msg = 'Student ID not found; import roster first';
+        }
+      } else {
+        item.disciplinePoints = get(row, 'disciplinePoints', 1); item.reason = get(row, 'reason', 2);
+        item.change = get(row, 'change', 3); item.recordedBy = get(row, 'recordedBy', 4); item.date = get(row, 'date', 5); item.source = get(row, 'source', 6);
+        if (!item.id) { item.validation = 'err'; item.msg = 'Student ID required'; }
+        else if (!window.schoolData.students.some(student => student.id.toLowerCase() === item.id.toLowerCase())) { item.validation = 'err'; item.msg = 'Student ID not found; import roster first'; }
+        else if (item.disciplinePoints !== '' && (!Number.isFinite(Number(item.disciplinePoints)) || Number(item.disciplinePoints) < 0 || Number(item.disciplinePoints) > 40)) { item.validation = 'err'; item.msg = 'Discipline total must be 0-40'; }
+      }
+      const matchedStudent = window.schoolData.students.find(student => student.id.toLowerCase() === String(item.id).toLowerCase());
+      item.name = matchedStudent?.name || item.id;
+      if (!item.class) item.class = matchedStudent?.class || '';
     }
-
-    const [name, id, gender, cls, stream, level] = parts;
-    const fullClass = cls + (stream ? ' ' + stream : '');
-    let status = 'ok';
-    let msg = 'Ready';
-
-    if (!name || !id) { status = 'err'; msg = 'Missing name or ID'; }
-    else if (seenIds.has(id)) { status = 'err'; msg = 'Duplicate ID'; }
-    else if (!/^S[1-6]/.test(cls)) { status = 'warn'; msg = 'Unusual class format'; }
-
-    seenIds.add(id);
-    preview.push({ name, id, gender: gender || 'M', class: fullClass, level: level || 'Unknown', status, msg });
+    const normalizedId = item.id.toLowerCase();
+    if (item.validation !== 'err' && type === 'students' && seenIds.has(normalizedId)) { item.validation = 'err'; item.msg = 'Duplicate ID in file'; }
+    if (type === 'students') seenIds.add(normalizedId);
+    if (item.validation === 'ok' && type === 'students' && !/^S[1-6]/i.test(item.class)) { item.validation = 'warn'; item.msg = 'Unusual class; review before import'; }
+    if (item.validation === 'ok' && type === 'students' && window.schoolData.students.some(student => student.id.toLowerCase() === item.id.toLowerCase())) item.msg = 'Will update existing student';
+    preview.push(item);
   });
 
-  const okCount = preview.filter(p => p.status === 'ok').length;
-  const warnCount = preview.filter(p => p.status === 'warn').length;
-  const errCount = preview.filter(p => p.status === 'err').length;
+  const okCount = preview.filter(p => p.validation === 'ok').length;
+  const warnCount = preview.filter(p => p.validation === 'warn').length;
+  const errCount = preview.filter(p => p.validation === 'err').length;
 
   document.getElementById('importStats').innerHTML = `
     <span class="import-status ok">${okCount} OK</span>
@@ -584,20 +776,20 @@ function previewImport() {
 
   const table = document.getElementById('importPreviewTable');
   table.innerHTML = `
-    <div class="import-row header"><div style="width:40px">#</div><div style="flex:1">Name</div><div style="width:120px">ID</div><div style="width:100px">Class</div><div style="width:80px">Status</div></div>
+    <div class="import-row header"><div style="width:40px">Row</div><div style="flex:1">Student / ID</div><div style="width:140px">Class / Details</div><div style="width:180px">Validation</div></div>
     ${preview.map((p, i) => `
       <div class="import-row">
-        <div style="width:40px">${i + 1}</div>
-        <div style="flex:1">${p.name}</div>
-        <div style="width:120px;font-family:monospace">${p.id}</div>
-        <div style="width:100px">${p.class}</div>
-        <div style="width:80px"><span class="import-status ${p.status}">${p.msg}</span></div>
+        <div style="width:40px">${p.rowNumber}</div>
+        <div style="flex:1">${escapeHTML(p.name || p.id || '')} <span style="font-family:monospace;color:var(--t3)">${escapeHTML(p.id || '')}</span></div>
+        <div style="width:140px">${escapeHTML(p.class || p.subject || p.reason || '')}</div>
+        <div style="width:180px"><span class="import-status ${p.validation}">${escapeHTML(p.msg)}</span></div>
       </div>
     `).join('')}
   `;
 
   document.getElementById('importPreviewSection').classList.remove('hidden');
-  window._pendingImport = preview.filter(p => p.status !== 'err');
+  window._pendingImport = preview.filter(p => p.validation !== 'err');
+  window._pendingImportType = type;
 }
 
 function confirmImport() {
@@ -606,61 +798,254 @@ function confirmImport() {
     return;
   }
 
-  window._pendingImport.forEach(p => {
-    window.schoolData.students.push({
-      id: p.id,
-      name: p.name,
-      gender: p.gender,
-      class: p.class,
-      level: p.level,
-      disciplinePoints: 25 + Math.floor(Math.random() * 15),
-      academicScore: 60 + Math.floor(Math.random() * 35),
-      attendanceRate: 90 + Math.floor(Math.random() * 10),
-      absences: Math.floor(Math.random() * 5),
-      status: 'Active',
-      photo: null
+  const type = window._pendingImportType;
+  const batchId = 'import-' + Date.now();
+  const rows = window._pendingImport;
+  if (type === 'discipline') {
+    window.schoolData.importBatches.unshift({
+      id: batchId, type, rows: rows.map(item => ({ ...item })),
+      createdAt: new Date().toISOString(), status: 'review'
     });
+    recordAuditEvent('Admin', 'Discipline import staged for review', batchId, `${rows.length} rows`);
+    saveSchoolRecords();
+    renderImportReviewQueue();
+    toast('Discipline import staged. Official totals remain unchanged until reviewed.');
+    finishImportPreview();
+    return;
+  }
+  window._pendingImport.forEach(item => {
+    const student = window.schoolData.students.find(existing => existing.id.toLowerCase() === String(item.id).toLowerCase());
+    if (type === 'students') {
+      const record = student || { id: item.id, absences: 0, photo: null, attendanceRate: 0, academicScore: 0, disciplinePoints: null };
+      Object.assign(record, {
+        id: item.id, name: item.name, gender: ['f', 'female'].includes(item.gender.toLowerCase()) ? 'F' : (item.gender ? 'M' : ''), class: item.class, level: item.level,
+        guardianName: item.guardianName || record.guardianName || '', guardianPhone: item.guardianPhone || record.guardianPhone || '',
+        guardianEmail: item.guardianEmail || record.guardianEmail || '', status: item.studentStatus || 'Active', archived: false
+      });
+      if (item.academicScore !== '') record.academicScore = Number(item.academicScore);
+      if (!student) window.schoolData.students.push(record);
+    } else if (type === 'academics') {
+      const score = Number(item.score), maxScore = Number(item.maxScore || 100);
+      const record = window.schoolData.academicRecords.find(existing => existing.studentId === student.id && existing.term === item.term && existing.subject === item.subject);
+      const values = { studentId: student.id, term: item.term, subject: item.subject, score, maxScore, date: item.date || getLocalDateString(), importedAt: new Date().toISOString(), importBatchId: batchId };
+      if (record) Object.assign(record, values);
+      else window.schoolData.academicRecords.push({ id: batchId + '-' + item.rowNumber, ...values });
+      student.academicTerm = item.term;
+    } else if (type === 'attendance') {
+      const key = record => record.studentId === student.id && record.date === item.date && record.className === item.class && record.period === item.period;
+      const existing = window.schoolData.attendanceRecords.find(key);
+      const values = {
+        studentId: student.id, date: item.date, className: item.class, period: item.period,
+        status: normalizeAttendanceStatus(item.status), submittedBy: 'Imported', updatedAt: new Date().toISOString()
+      };
+      if (existing) Object.assign(existing, values);
+      else window.schoolData.attendanceRecords.push({ id: batchId + '-' + item.rowNumber, ...values, createdAt: values.updatedAt });
+      recalculateAttendanceStats(student);
+    }
   });
-
+  const academicStudentIds = new Set(window._pendingImport.filter(item => type === 'academics').map(item => item.id.toLowerCase()));
+  academicStudentIds.forEach(id => {
+    const student = window.schoolData.students.find(item => item.id.toLowerCase() === id);
+    const records = window.schoolData.academicRecords.filter(record => record.studentId === student.id && record.term === student.academicTerm && record.maxScore > 0);
+    if (records.length) student.academicScore = Math.round(records.reduce((total, record) => total + record.score / record.maxScore * 100, 0) / records.length * 10) / 10;
+  });
+  window.schoolData.importBatches.unshift({ id: batchId, type, rows: rows.length, createdAt: new Date().toISOString(), status: 'applied' });
   computeClassStats();
   saveStudents();
+  saveSchoolRecords();
   renderUserTable();
+  populateDMStudentDropdown();
   updateDashboardStats();
-  toast(`Successfully imported ${window._pendingImport.length} students!`);
+  logActivity('import', type + ' import completed', 'Admin', rows.length + ' rows');
+  recordAuditEvent('Admin', type + ' import applied', batchId, `${rows.length} rows`);
+  toast(`Imported ${rows.length} ${type} rows.`);
+  finishImportPreview();
+}
+
+function finishImportPreview() {
   document.getElementById('importPreviewSection').classList.add('hidden');
   document.getElementById('bulkImportArea').value = '';
   delete window._pendingImport;
+  delete window._pendingImportType;
 }
 
-// ===== ADD SINGLE USER =====
-// Was previously a dead button (toast('Add user form would open') and nothing else).
-function addUser() {
-  const name = prompt('Full name:');
-  if (!name) return;
-  const suggestedId = 'LDK-' + new Date().getFullYear() + '-' + String(Math.floor(100 + Math.random() * 900));
-  const id = prompt('Student/Staff ID:', suggestedId);
-  if (!id) return;
-  if (window.schoolData.students.some(s => s.id === id)) {
-    toast('That ID is already in use — pick another.');
-    return;
+function reviewDisciplineImport(batchId, approve) {
+  const batch = window.schoolData.importBatches.find(item => item.id === batchId && item.type === 'discipline' && item.status === 'review');
+  if (!batch) return toast('This import is no longer awaiting review.');
+  const note = document.getElementById('review-note-' + batchId)?.value.trim() || '';
+  const verificationReference = document.getElementById('review-reference-' + batchId)?.value.trim() || '';
+  const verified = document.getElementById('review-verified-' + batchId)?.checked;
+  if (!note) return toast('Enter a review note before deciding this import.');
+  if (approve && (!verificationReference || !verified)) return toast('Enter the official source reference and confirm it was checked before approving.');
+  if (approve) {
+    batch.rows.forEach(item => {
+      const student = window.schoolData.students.find(existing => existing.id.toLowerCase() === String(item.id).toLowerCase());
+      if (!student) throw new Error('Student record disappeared while reviewing discipline import: ' + item.id);
+      const eventDate = item.date || getLocalDateString();
+      if (item.disciplinePoints !== '' && (!student.disciplineSnapshotDate || eventDate >= student.disciplineSnapshotDate)) {
+        student.disciplinePoints = Number(item.disciplinePoints);
+        student.disciplineSnapshotDate = eventDate;
+      }
+      window.schoolData.disciplineEvents.push({
+        id: batch.id + '-' + item.rowNumber, studentId: student.id, date: eventDate,
+        total: item.disciplinePoints === '' ? null : Number(item.disciplinePoints),
+        change: item.change === '' ? null : Number(item.change), reason: item.reason,
+        recordedBy: item.recordedBy, source: item.source || 'Official discipline import',
+        batchId: batch.id, importedAt: new Date().toISOString(), status: 'verified'
+      });
+    });
+    batch.status = 'approved';
+    computeClassStats();
+    saveStudents();
+    logActivity('import', 'Verified discipline import approved', 'Admin', batch.id + ' — ' + batch.rows.length + ' rows');
+  } else {
+    batch.status = 'rejected';
   }
-  const genderInput = prompt('Gender (M/F):', 'M');
-  if (genderInput === null) return;
-  const gender = genderInput.trim().toUpperCase().startsWith('F') ? 'F' : 'M';
-  const cls = prompt('Class (e.g. S5 Stream 1):', 'S5 Stream 1');
-  if (!cls) return;
-  const level = /^S[123]/.test(cls) ? 'O-Level' : 'A-Level';
+  batch.reviewedAt = new Date().toISOString();
+  batch.reviewedBy = document.getElementById('adn')?.textContent || 'Admin';
+  batch.reviewNote = note;
+  batch.verificationReference = verificationReference;
+  saveSchoolRecords();
+  recordAuditEvent(batch.reviewedBy, approve ? 'Verified discipline import approved' : 'Discipline import rejected', batch.id, note);
+  renderUserTable();
+  updateDashboardStats();
+  renderImportReviewQueue();
+  toast(approve ? 'Verified discipline import approved and applied.' : 'Discipline import rejected; official totals were not changed.');
+}
 
-  window.schoolData.students.push({
-    id, name, gender, class: cls, level,
-    disciplinePoints: 40, academicScore: 70, attendanceRate: 100,
-    absences: 0, status: 'Active', photo: null
+function renderImportReviewQueue() {
+  const container = document.getElementById('importReviewQueue');
+  if (!container) return;
+  const pending = window.schoolData.importBatches.filter(batch => batch.type === 'discipline' && batch.status === 'review');
+  container.innerHTML = pending.length ? pending.map(batch => {
+    const safeId = encodeURIComponent(batch.id);
+    return `<div style="padding:14px;border:1px solid var(--b);border-radius:10px">
+      <div style="font-weight:600">Discipline import · ${escapeHTML(batch.id)}</div>
+      <div style="font-size:12px;color:var(--t3);margin:4px 0 10px">${batch.rows.length} rows · staged ${escapeHTML(batch.createdAt)}</div>
+      <div class="fg"><label class="lab" for="review-note-${safeId}">Review note</label><input class="inp" id="review-note-${safeId}" maxlength="500" placeholder="Decision rationale"></div>
+      <div class="fg"><label class="lab" for="review-reference-${safeId}">Official source reference (approval only)</label><input class="inp" id="review-reference-${safeId}" maxlength="300" placeholder="Reference number or official document title"></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:10px 0"><input type="checkbox" id="review-verified-${safeId}"> I checked this import against the official source</label>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn btn-d btn-sm" onclick="reviewDisciplineImport(decodeURIComponent('${safeId}'),false)">Reject</button>
+        <button class="btn btn-a btn-sm" onclick="reviewDisciplineImport(decodeURIComponent('${safeId}'),true)">Approve verified import</button>
+      </div>
+    </div>`;
+  }).join('') : '<div style="color:var(--t3)">No discipline imports are awaiting review.</div>';
+  renderAuditHistory();
+}
+
+function renderAuditHistory() {
+  const tbody = document.getElementById('auditHistoryBody');
+  if (!tbody) return;
+  const events = window.schoolData.auditEvents.slice(0, 100);
+  tbody.innerHTML = events.length
+    ? events.map(event => `<tr><td>${escapeHTML(event.time)}</td><td>${escapeHTML(event.actor)}</td><td>${escapeHTML(event.action)}</td><td>${escapeHTML(event.entityId)} · ${escapeHTML(event.details)}</td></tr>`).join('')
+    : '<tr><td colspan="4" style="text-align:center;color:var(--t3)">No audit events recorded yet.</td></tr>';
+}
+
+// ===== STUDENT RECORD LIFECYCLE =====
+function addUser() {
+  openStudentForm();
+}
+function openStudentForm(id) {
+  const student = id ? window.schoolData.students.find(item => item.id === id) : null;
+  const form = document.getElementById('studentForm');
+  form.reset();
+  document.getElementById('studentFormTitle').textContent = student ? 'Edit Student Record' : 'Add Student';
+  document.getElementById('studentId').readOnly = !!student;
+  document.getElementById('studentId').value = student?.id || '';
+  document.getElementById('studentName').value = student?.name || '';
+  document.getElementById('studentGender').value = student?.gender || '';
+  document.getElementById('studentClass').value = student?.class || '';
+  document.getElementById('studentLevel').value = student?.level || 'O-Level';
+  document.getElementById('studentStatus').value = student?.status || 'Active';
+  document.getElementById('guardianName').value = student?.guardianName || '';
+  document.getElementById('guardianPhone').value = student?.guardianPhone || '';
+  document.getElementById('guardianEmail').value = student?.guardianEmail || '';
+  document.getElementById('studentAcademic').value = student?.academicScore ?? '';
+  document.getElementById('studentDisciplineReadOnly').textContent = student && numberOrNull(student.disciplinePoints) !== null
+    ? `${Number(student.disciplinePoints)}/40 — updated only through a reviewed official import.`
+    : 'No official total recorded. Only updated through a reviewed official import.';
+  document.getElementById('studentAttendance').value = student?.attendanceRate ?? '';
+  document.getElementById('studentM').dataset.editingId = student?.id || '';
+  document.getElementById('studentM').classList.add('on');
+}
+function closeStudentForm() {
+  document.getElementById('studentM').classList.remove('on');
+}
+function saveStudentForm(event) {
+  event.preventDefault();
+  const modal = document.getElementById('studentM');
+  const editingId = modal.dataset.editingId;
+  const id = document.getElementById('studentId').value.trim();
+  const name = document.getElementById('studentName').value.trim();
+  const cls = document.getElementById('studentClass').value.trim();
+  if (!id || !name || !cls) return toast('ID, name, and class are required.');
+  let student = editingId ? window.schoolData.students.find(item => item.id === editingId) : null;
+  if (!student && window.schoolData.students.some(item => item.id.toLowerCase() === id.toLowerCase())) {
+    return toast('That student ID already exists.');
+  }
+  const isNew = !student;
+  if (!student) {
+    student = { id, absences: 0, photo: null, academicScore: null, disciplinePoints: null, attendanceRate: null };
+    window.schoolData.students.push(student);
+  }
+  Object.assign(student, {
+    name,
+    gender: document.getElementById('studentGender').value,
+    class: cls,
+    level: document.getElementById('studentLevel').value,
+    status: document.getElementById('studentStatus').value,
+    guardianName: document.getElementById('guardianName').value.trim(),
+    guardianPhone: document.getElementById('guardianPhone').value.trim(),
+    guardianEmail: document.getElementById('guardianEmail').value.trim(),
+    academicScore: document.getElementById('studentAcademic').value === '' ? null : Number(document.getElementById('studentAcademic').value),
+    attendanceRate: document.getElementById('studentAttendance').value === '' ? null : Number(document.getElementById('studentAttendance').value)
   });
   computeClassStats();
   saveStudents();
+  populateAttendanceClassSelect();
+  renderUserTable();
+  populateDMStudentDropdown();
+  updateDashboardStats();
+  logActivity('student', isNew ? 'Student created' : 'Student record updated', 'Admin', student.id + ' — ' + student.name);
+  recordAuditEvent('Admin', isNew ? 'Student record created' : 'Student record updated', student.id, student.name);
+  closeStudentForm();
+  toast(isNew ? 'Student created.' : 'Student record updated.');
+}
+function editStudent(id) {
+  openStudentForm(id);
+}
+function toggleStudentArchive(id) {
+  const student = window.schoolData.students.find(item => item.id === id);
+  if (!student) return;
+  student.status = student.status === 'Archived' ? 'Active' : 'Archived';
+  computeClassStats();
+  saveStudents();
+  populateAttendanceClassSelect();
   renderUserTable();
   updateDashboardStats();
-  toast('User added: ' + name);
+  logActivity('student', student.status === 'Archived' ? 'Student archived' : 'Student restored', 'Admin', student.id);
+  recordAuditEvent('Admin', student.status === 'Archived' ? 'Student archived' : 'Student restored', student.id, student.name);
+  toast(student.status === 'Archived' ? 'Student archived; record retained.' : 'Student restored.');
+}
+function viewStudent(id) {
+  const student = window.schoolData.students.find(item => item.id === id);
+  if (!student) return;
+  const discipline = window.schoolData.disciplineEvents.filter(item => item.studentId === id).slice(-8).reverse();
+  const academics = window.schoolData.academicRecords.filter(item => item.studentId === id).slice(-8).reverse();
+  const attendance = window.schoolData.attendanceRecords.filter(item => item.studentId === id).slice(-8).reverse();
+  const lines = [
+    student.name + ' (' + student.id + ')',
+    'Class: ' + student.class + ' | ' + student.level + ' | ' + student.status,
+    'Guardian: ' + (student.guardianName || 'Not recorded') + ' | ' + (student.guardianPhone || 'No phone'),
+    'Official discipline total: ' + (student.disciplinePoints ?? 'Not recorded') + '/40',
+    'Academic score: ' + (student.academicScore ?? 'Not recorded') + '% | Attendance: ' + (student.attendanceRate ?? 'Not recorded') + '%',
+    '', 'Recent discipline events:', ...discipline.map(item => `${item.date}: ${item.reason || 'Score imported'} (${item.change ?? 'total ' + item.total}) by ${item.recordedBy || 'Not recorded'}`),
+    '', 'Recent academic records:', ...academics.map(item => `${item.term || ''} ${item.subject || ''}: ${item.score}/${item.maxScore}`),
+    '', 'Recent attendance:', ...attendance.map(item => `${item.date}: ${item.status} (${item.period || 'Full Day'})`)
+  ];
+  alert(lines.join('\n'));
 }
 
 // ===== EDIT MODE SYSTEM =====
@@ -718,17 +1103,6 @@ function editStaff(index) {
   toast('Edit mode enabled. Click the text you want to change.');
 }
 
-function editStudent(id) {
-  const student = window.schoolData.students.find(s => s.id === id);
-  if (!student) return;
-  const newName = prompt('Edit student name:', student.name);
-  if (newName && newName !== student.name) {
-    student.name = newName;
-    renderUserTable();
-    toast('Student updated');
-  }
-}
-
 function saveSettings() {
   window.schoolData.settings.schoolName = document.getElementById('setSchoolName').value;
   window.schoolData.settings.motto = document.getElementById('setMotto').value;
@@ -764,6 +1138,15 @@ function exportData() {
 function resetAllData() {
   if (!confirm('WARNING: This will reset ALL student data to demo state. Are you sure?')) return;
   generateDemoData();
+  window.schoolData.attendanceRecords = [];
+  window.schoolData.disciplineEvents = [];
+  window.schoolData.academicRecords = [];
+  window.schoolData.importBatches = [];
+  window.schoolData.activityLog = [];
+  saveStudents();
+  saveSchoolRecords();
+  populateAttendanceClassSelect();
+  loadAtt();
   renderUserTable();
   updateDashboardStats();
   renderAllClassRankings();
@@ -834,12 +1217,12 @@ function drawStars() {
     const alpha = s.opacity * twinkle * (isDark ? 1 : 0.35);
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '30,41,59') + ',' + (isDark ? alpha : alpha * 2.2) + ')';
+    ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '20,83,45') + ',' + (isDark ? alpha : alpha * 2.2) + ')';
     ctx.fill();
     if (s.r > 1) {
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '59,130,246') + ',' + (alpha * 0.15) + ')';
+      ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '20,83,45') + ',' + (alpha * 0.15) + ')';
       ctx.fill();
     }
   });
@@ -890,7 +1273,9 @@ function closeL() { document.getElementById('loginM').classList.remove('on'); }
 function setR(r) {
   curRole = r;
   document.querySelectorAll('#loginM .tab').forEach(t => t.classList.remove('on'));
-  document.getElementById('t-' + r.substring(0, 3)).classList.add('on');
+  const tabId = r === 'parent' ? 't-par' : 't-' + r.substring(0, 3);
+  const tab = document.getElementById(tabId);
+  if (tab) tab.classList.add('on');
   document.getElementById('arole').classList.toggle('hidden', r !== 'admin');
 }
 function doL() {
@@ -899,8 +1284,14 @@ function doL() {
   if (!id || !pw) { toast('Please enter ID and password'); return; }
   closeL();
   document.getElementById('land').classList.add('hidden');
-  if (curRole === 'student') { document.getElementById('stuP').classList.add('on'); }
+  if (curRole === 'student') { document.getElementById('stuP').classList.add('on'); renderStudentPortal(); }
   else if (curRole === 'staff') { document.getElementById('staP').classList.add('on'); loadAtt(); updateStaffDashboardStats(); populateDMStudentDropdown(); }
+  else if (curRole === 'parent') {
+    document.getElementById('parP').classList.add('on');
+    renderParentOverview();
+    renderParentStudentInfo();
+    renderParentNotifications();
+  }
   else {
     const ar = document.getElementById('asel').value;
     document.getElementById('admP').classList.add('on');
@@ -924,6 +1315,69 @@ function logout() {
   toast('Logged out successfully'); checkAIVisibility();
 }
 
+// ===== PARENT PORTAL =====
+function renderParentOverview() {
+  const child = {
+    name: 'Jean-Paul Manirafasha',
+    id: 'LDK-2023-001',
+    class: 'S5 Stream 1',
+    attendance: '96.5%',
+    academic: '88%',
+    discipline: '35/40',
+    rank: '#12 of 145',
+    nextExam: 'Mathematics',
+    status: 'On track'
+  };
+
+  document.getElementById('parentStudentName').textContent = child.name;
+  document.getElementById('parentStudentClass').textContent = child.class;
+  document.getElementById('parentAttendanceValue').textContent = child.attendance;
+  document.getElementById('parentAcademicValue').textContent = child.academic;
+  document.getElementById('parentDisciplineValue').textContent = child.discipline;
+  document.getElementById('parentRankValue').textContent = child.rank;
+  document.getElementById('parentExamValue').textContent = child.nextExam;
+  document.getElementById('parentStatusValue').textContent = child.status;
+}
+
+function renderParentStudentInfo() {
+  const rows = [
+    ['Student ID', 'LDK-2023-001'],
+    ['Class', 'S5 Stream 1'],
+    ['Form', 'Senior 5'],
+    ['Academic Trend', 'Improving'],
+    ['Discipline', 'Positive'],
+    ['Teacher Remarks', 'Consistent, motivated, hardworking']
+  ];
+
+  const tbody = document.getElementById('parentStudentTable');
+  tbody.innerHTML = rows.map(([label, value]) => `
+    <tr>
+      <td style="color:var(--t3)">${label}</td>
+      <td style="font-weight:600">${value}</td>
+    </tr>
+  `).join('');
+}
+
+function renderParentNotifications() {
+  const items = [
+    { title: 'Term 2 exam timetable published', body: 'Your child has been scheduled for Mathematics and Physics examinations this week.', priority: 'high' },
+    { title: 'Attendance summary', body: 'Attendance remains strong at 96.5% with only 3 recorded absences this term.', priority: 'normal' },
+    { title: 'School announcement', body: 'School fee reminder has been sent to the parent office for guidance.', priority: 'low' }
+  ];
+
+  const container = document.getElementById('parentNotifList');
+  container.innerHTML = items.map(item => `
+    <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
+      <div class="notif-top">
+        <div><span class="notif-title">${item.title}</span><span class="notif-priority ${item.priority}">${item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}</span></div>
+        <span class="notif-time">Today</span>
+      </div>
+      <div class="notif-body">${item.body}</div>
+      <div class="notif-sender">From: LDK School Administration</div>
+    </div>
+  `).join('');
+}
+
 // ===== STUDENT TABS =====
 function sTab(t) {
   document.querySelectorAll('#stuP .side-nav a').forEach(a => a.classList.remove('on'));
@@ -932,6 +1386,7 @@ function sTab(t) {
   document.getElementById('v-' + t).classList.remove('hidden');
   const titles = { sd: 'Dashboard', sdi: 'Discipline Record', sab: 'Absence Justification', san: 'Announcements', snot: 'Notifications' };
   document.getElementById('st').textContent = titles[t];
+  renderStudentPortal();
   if (t === 'sab') renderAbsenceHistory();
   checkAIVisibility();
 }
@@ -940,15 +1395,55 @@ function sTab(t) {
 // "Pending Justifications" queue — approving/rejecting on the staff side
 // now actually updates what the student sees, instead of the two views
 // being disconnected static lists.
+// Demo identity only. After authentication exists, pass the linked student
+// record's stable student_id to this adapter; never derive it from form input.
 let CURRENT_STUDENT = { name: 'Jean-Paul Manirafasha', id: 'LDK-2023-001', class: 'S5 Stream 1' };
+function setStudentPortalRecord(studentId) {
+  const student = window.schoolData.students.find(item => item.id.toLowerCase() === String(studentId).toLowerCase());
+  if (!student) return false;
+  CURRENT_STUDENT = { name: student.name, id: student.id, class: student.class };
+  renderStudentPortal();
+  return true;
+}
+function renderStudentPortal() {
+  const student = window.schoolData.students.find(item => item.id === CURRENT_STUDENT.id);
+  if (!student) return;
+  CURRENT_STUDENT = { name: student.name, id: student.id, class: student.class };
+  const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  setText('studentPortalName', student.name);
+  setText('studentPortalClass', student.class || student.level || 'Student');
+  setText('studentDisciplineTotal', `${student.disciplinePoints ?? '--'}/40`);
+  setText('studentDisciplineBadge', `Official total: ${student.disciplinePoints ?? '--'}/40`);
+  setText('studentDisciplineUpdated', student.disciplineSnapshotDate ? `Imported ${student.disciplineSnapshotDate}` : 'Demo/current roster value');
+  setText('studentAttendanceRate', `${student.attendanceRate ?? '--'}%`);
+  setText('studentAbsenceCount', String(student.absences ?? 0));
+  const classStudents = window.schoolData.students.filter(item => item.class === student.class && item.status !== 'Archived');
+  const schoolStudents = window.schoolData.students.filter(item => item.status !== 'Archived');
+  const rank = roster => {
+    const ranked = roster.filter(item => combinedPerformanceIndex(item) !== null)
+      .sort((a, b) => combinedPerformanceIndex(b) - combinedPerformanceIndex(a));
+    const position = ranked.findIndex(item => item.id === student.id);
+    return position < 0 ? 'Not ranked' : `#${position + 1} of ${ranked.length}`;
+  };
+  setText('studentClassRank', rank(classStudents));
+  setText('studentSchoolRank', `School rank ${rank(schoolStudents)}`);
+  const events = window.schoolData.disciplineEvents.filter(item => item.studentId === student.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const history = document.getElementById('studentDisciplineHistory');
+  if (history) history.innerHTML = events.length ? events.map(item => {
+    const value = item.change === null || item.change === undefined ? (item.total === null || item.total === undefined ? 'Snapshot' : `Total ${item.total}/40`) : `${item.change > 0 ? '+' : ''}${item.change}`;
+    return `<tr><td>${escapeHTML(item.date || '')}</td><td>${escapeHTML(item.reason || 'Official discipline data import')}</td><td>${escapeHTML(value)}</td><td>${escapeHTML(item.recordedBy || item.source || 'Not recorded')}</td><td><span class="tag tag-ap">${escapeHTML(item.status || (item.total === null ? 'Reported' : 'Imported'))}</span></td></tr>`;
+  }).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--t3)">No discipline history imported for this student yet.</td></tr>';
+  const recent = document.getElementById('studentRecentDiscipline');
+  if (recent) recent.innerHTML = events.slice(0, 4).map(item => `<div style="padding:12px;background:var(--s2);border-radius:8px"><div style="font-size:14px;font-weight:600">${escapeHTML(item.reason || (item.total === null ? 'Action reported' : `Official total updated to ${item.total}/40`))}</div><div style="font-size:12px;color:var(--t3)">${escapeHTML(item.date || '')} · ${escapeHTML(item.recordedBy || item.source || 'Not recorded')} · ${item.total === null ? 'Awaiting/recorded reference' : `Official total ${item.total}/40`}</div></div>`).join('') || '<div style="padding:12px;color:var(--t3)">Official discipline details will appear here after the school imports them.</div>';
+}
 
 function seedJustifications() {
   return [
-    { id: 1, student: 'Jean-Paul Manirafasha', studentId: 'LDK-2023-001', class: 'S5 Stream 1', initials: 'JM', color: 'linear-gradient(135deg,var(--a),#8b5cf6)', date: 'Aug 6, 2025', reason: 'Transportation', detail: 'Bus breakdown on KG 11 route. Arrived 45 minutes late.', proofName: null, status: 'Pending' },
+    { id: 1, student: 'Jean-Paul Manirafasha', studentId: 'LDK-2023-001', class: 'S5 Stream 1', initials: 'JM', color: 'linear-gradient(135deg,var(--a),var(--r))', date: 'Aug 6, 2025', reason: 'Transportation', detail: 'Bus breakdown on KG 11 route. Arrived 45 minutes late.', proofName: null, status: 'Pending' },
     { id: 2, student: 'Claire Umutoni', studentId: 'LDK-2023-045', class: 'S4 Stream 2', initials: 'CU', color: 'linear-gradient(135deg,var(--g),#059669)', date: 'Aug 5, 2025', reason: 'Medical', detail: 'Malaria symptoms. Medical certificate from CHUK attached.', proofName: null, status: 'Pending' },
     { id: 3, student: 'Patrick Habyarimana', studentId: 'LDK-2022-089', class: 'S6 Stream 1', initials: 'PH', color: 'linear-gradient(135deg,var(--w),#d97706)', date: 'Aug 4, 2025', reason: 'Family Emergency', detail: 'Father hospitalized at King Faisal Hospital.', proofName: null, status: 'Pending' },
-    { id: 4, student: 'Jean-Paul Manirafasha', studentId: 'LDK-2023-001', class: 'S5 Stream 1', initials: 'JM', color: 'linear-gradient(135deg,var(--a),#8b5cf6)', date: 'August 1, 2025', reason: 'Medical', detail: "Fever and headache. Doctor's note from CHUK attached.", proofName: 'medical_note.pdf', status: 'Approved' },
-    { id: 5, student: 'Jean-Paul Manirafasha', studentId: 'LDK-2023-001', class: 'S5 Stream 1', initials: 'JM', color: 'linear-gradient(135deg,var(--a),#8b5cf6)', date: 'July 25, 2025', reason: 'Family Emergency', detail: 'Funeral attendance in Bugesera district.', proofName: null, status: 'Approved' }
+    { id: 4, student: 'Jean-Paul Manirafasha', studentId: 'LDK-2023-001', class: 'S5 Stream 1', initials: 'JM', color: 'linear-gradient(135deg,var(--a),var(--r))', date: 'August 1, 2025', reason: 'Medical', detail: "Fever and headache. Doctor's note from CHUK attached.", proofName: 'medical_note.pdf', status: 'Approved' },
+    { id: 5, student: 'Jean-Paul Manirafasha', studentId: 'LDK-2023-001', class: 'S5 Stream 1', initials: 'JM', color: 'linear-gradient(135deg,var(--a),var(--r))', date: 'July 25, 2025', reason: 'Family Emergency', detail: 'Funeral attendance in Bugesera district.', proofName: null, status: 'Approved' }
   ];
 }
 function loadJustifications() {
@@ -974,8 +1469,8 @@ function renderAbsenceHistory() {
     .sort((a, b) => b.id - a.id);
   container.innerHTML = mine.length ? mine.map(j => `
     <div style="padding:14px;border:1px solid var(--b);border-radius:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:14px;font-weight:600">${j.date}</span><span class="tag ${tagClassFor(j.status)}">${j.status}</span></div>
-      <div style="font-size:13px;color:var(--t2)">${j.reason} — ${j.detail}${j.proofName ? ' <span style="color:var(--t3)">📎 ' + j.proofName + '</span>' : ''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:14px;font-weight:600">${escapeHTML(j.date)}</span><span class="tag ${tagClassFor(j.status)}">${escapeHTML(j.status)}</span></div>
+      <div style="font-size:13px;color:var(--t2)">${escapeHTML(j.reason)} — ${escapeHTML(j.detail)}${j.proofName ? ' <span style="color:var(--t3)">📎 ' + escapeHTML(j.proofName) + '</span>' : ''}</div>
     </div>
   `).join('') : '<div style="font-size:13px;color:var(--t3)">No absence justifications submitted yet.</div>';
 }
@@ -986,10 +1481,10 @@ function renderPendingJustifications() {
   container.innerHTML = pending.length ? pending.map(j => `
     <div style="padding:14px;border:1px solid var(--b);border-radius:10px">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:10px"><div class="avatar-sm" style="background:${j.color}">${j.initials}</div><div><div style="font-size:14px;font-weight:600">${j.student}</div><div style="font-size:12px;color:var(--t3)">${j.studentId} — ${j.class}</div></div></div>
+        <div style="display:flex;align-items:center;gap:10px"><div class="avatar-sm" style="background:${j.color}">${escapeHTML(j.initials)}</div><div><div style="font-size:14px;font-weight:600">${escapeHTML(j.student)}</div><div style="font-size:12px;color:var(--t3)">${escapeHTML(j.studentId)} — ${escapeHTML(j.class)}</div></div></div>
         <span class="tag tag-pe">Pending</span>
       </div>
-      <div style="font-size:13px;color:var(--t2);margin-bottom:8px"><strong>${j.date}</strong> — ${j.reason}: ${j.detail}${j.proofName ? ' <span style="color:var(--t3)">📎 ' + j.proofName + '</span>' : ''}</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:8px"><strong>${escapeHTML(j.date)}</strong> — ${escapeHTML(j.reason)}: ${escapeHTML(j.detail)}${j.proofName ? ' <span style="color:var(--t3)">📎 ' + escapeHTML(j.proofName) + '</span>' : ''}</div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="btn btn-d" style="font-size:12px" onclick="resolveJustification(${j.id},'Rejected')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject</button>
         <button class="btn btn-s" style="font-size:12px" onclick="resolveJustification(${j.id},'Approved')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
@@ -1002,6 +1497,7 @@ function resolveJustification(id, status) {
   if (!j) return;
   j.status = status;
   saveJustifications();
+  recordAuditEvent('Staff', 'Absence justification ' + status.toLowerCase(), j.studentId, `${j.student} · ${j.class}`);
   renderPendingJustifications();
   renderAbsenceHistory();
   logActivity('justification', 'Absence justification ' + status.toLowerCase(), j.student || 'Staff', j.class || '');
@@ -1028,11 +1524,12 @@ function subAbs() {
   window.schoolData.justifications.push({
     id: Date.now(),
     student: CURRENT_STUDENT.name, studentId: CURRENT_STUDENT.id, class: CURRENT_STUDENT.class,
-    initials: getInitials(CURRENT_STUDENT.name), color: 'linear-gradient(135deg,var(--a),#8b5cf6)',
+    initials: getInitials(CURRENT_STUDENT.name), color: 'linear-gradient(135deg,var(--a),var(--r))',
     date: formatted, reason: reasonSel, detail: de,
     proofName: window._pendingProofName || null, status: 'Pending'
   });
   saveJustifications();
+  recordAuditEvent(CURRENT_STUDENT.id, 'Absence justification submitted', CURRENT_STUDENT.id, reasonSel + ' · ' + d);
   renderAbsenceHistory();
   renderPendingJustifications();
   toast('Justification submitted successfully!');
@@ -1069,22 +1566,24 @@ function staTab(t) {
   checkAIVisibility();
 }
 const demoStudents = [
-  { n: 'Jean-Paul Manirafasha', id: 'LDK-2023-001', s: true, color: 'linear-gradient(135deg,#3b82f6,#8b5cf6)' },
+  { n: 'Jean-Paul Manirafasha', id: 'LDK-2023-001', s: true, color: 'linear-gradient(135deg,#15803d,#14532d)' },
   { n: 'Claire Umutoni', id: 'LDK-2023-045', s: true, color: 'linear-gradient(135deg,#10b981,#059669)' },
   { n: 'Patrick Habyarimana', id: 'LDK-2022-089', s: true, color: 'linear-gradient(135deg,#f59e0b,#d97706)' },
   { n: 'Marie Mukamana', id: 'LDK-2023-112', s: false, color: 'linear-gradient(135deg,#ec4899,#be185d)' },
   { n: 'Jean Bosco Ndayisaba', id: 'LDK-2024-034', s: true, color: 'linear-gradient(135deg,#06b6d4,#0891b2)' },
-  { n: 'Diane Uwimana', id: 'LDK-2023-067', s: true, color: 'linear-gradient(135deg,#8b5cf6,#7c3aed)' },
+  { n: 'Diane Uwimana', id: 'LDK-2023-067', s: true, color: 'linear-gradient(135deg,#b91c1c,#7f1d1d)' },
   { n: 'Eric Nshimiyimana', id: 'LDK-2023-078', s: true, color: 'linear-gradient(135deg,#14b8a6,#0d9488)' },
   { n: 'Grace Murekatete', id: 'LDK-2024-012', s: false, color: 'linear-gradient(135deg,#f97316,#ea580c)' }
 ];
 function loadAtt() {
   const list = document.getElementById('atlist');
+  const classSelect = document.getElementById('atclass');
+  if (!classSelect.value && window.schoolData.classes.length) classSelect.value = window.schoolData.classes[0].name;
   const cls = document.getElementById('atclass').value;
   document.getElementById('atcname').textContent = cls;
   list.innerHTML = '';
 
-  const classStudents = window.schoolData.students.filter(s => s.class === cls).slice(0, 60);
+  const classStudents = window.schoolData.students.filter(s => s.class === cls && s.status !== 'Archived').sort((a, b) => a.name.localeCompare(b.name));
   window._currentAttStudents = classStudents; // so subAtt() can map rows back to real students
   if (classStudents.length === 0) {
     list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3)">No students found in this class. Import students or check demo data.</div>';
@@ -1096,24 +1595,35 @@ function loadAtt() {
     row.className = 'at-r';
     const initials = getInitials(stu.name);
     const color = getAvatarColor(stu.name);
-    row.innerHTML = '<div class="at-i"><div class="at-a" style="background:' + color + '">' + initials + '</div><div><div style="font-size:14px;font-weight:600">' + stu.name + '</div><div style="font-size:12px;color:var(--t3)">' + stu.id + '</div></div></div><div class="tog"><button class="tog-btn on-p" onclick="toggleAtt(this,true)">Present</button><button class="tog-btn" onclick="toggleAtt(this,false)">Absent</button></div>';
+    const date = document.getElementById('atdate').value;
+    const period = document.getElementById('atperiod').value;
+    const existing = window.schoolData.attendanceRecords.find(record => record.studentId === stu.id && record.date === date && record.className === cls && record.period === period);
+    const status = existing?.status || 'present';
+    row.dataset.studentId = stu.id;
+    row.dataset.status = status;
+    row.innerHTML = '<div class="at-i"><div class="at-a" style="background:' + color + '">' + escapeHTML(initials) + '</div><div><div style="font-size:14px;font-weight:600">' + escapeHTML(stu.name) + '</div><div style="font-size:12px;color:var(--t3)">' + escapeHTML(stu.id) + '</div></div></div><div class="tog"><button class="tog-btn ' + (status === 'present' ? 'on-p' : '') + '" data-status="present" onclick="toggleAtt(this,\'present\')">Present</button><button class="tog-btn ' + (status === 'absent' ? 'on-a' : '') + '" data-status="absent" onclick="toggleAtt(this,\'absent\')">Absent</button><button class="tog-btn ' + (status === 'late' ? 'on-w' : '') + '" data-status="late" onclick="toggleAtt(this,\'late\')">Late</button><button class="tog-btn ' + (status === 'excused' ? 'on-x' : '') + '" data-status="excused" onclick="toggleAtt(this,\'excused\')">Excused</button></div>';
     list.appendChild(row);
   });
   applyAttDraft();
 }
-function toggleAtt(btn, present) {
+function populateAttendanceClassSelect() {
+  const select = document.getElementById('atclass');
+  if (!select) return;
+  const previous = select.value;
+  const classNames = window.schoolData.classes.map(item => item.name).sort((a, b) => a.localeCompare(b));
+  select.innerHTML = classNames.map(name => `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`).join('');
+  if (classNames.includes(previous)) select.value = previous;
+}
+function toggleAtt(btn, status) {
   const row = btn.closest('.at-r');
-  const btns = row.querySelectorAll('.tog-btn');
-  btns[0].classList.toggle('on-p', present);
-  btns[1].classList.toggle('on-a', !present);
+  row.dataset.status = status;
+  row.querySelectorAll('.tog-btn').forEach(button => {
+    button.classList.remove('on-p', 'on-a', 'on-w', 'on-x');
+    if (button.dataset.status === status) button.classList.add(({ present: 'on-p', absent: 'on-a', late: 'on-w', excused: 'on-x' })[status]);
+  });
 }
 function markAll(present) {
-  document.querySelectorAll('.tog-btn').forEach((btn, i) => {
-    if (present && i % 2 === 0) btn.classList.add('on-p');
-    if (present && i % 2 === 1) btn.classList.remove('on-a');
-    if (!present && i % 2 === 0) btn.classList.remove('on-p');
-    if (!present && i % 2 === 1) btn.classList.add('on-a');
-  });
+  document.querySelectorAll('#atlist .at-r').forEach(row => toggleAtt(row.querySelector(`[data-status="${present ? 'present' : 'absent'}"]`), present ? 'present' : 'absent'));
 }
 // ===== ATTENDANCE DRAFT + SUBMIT =====
 // Save Draft used to just toast; now it actually keeps the checked
@@ -1121,13 +1631,11 @@ function markAll(present) {
 function attDraftKey() {
   const cls = document.getElementById('atclass').value;
   const date = document.getElementById('atdate').value || 'undated';
-  return 'ldk-att-draft-' + cls + '-' + date;
+  const period = document.getElementById('atperiod').value;
+  return 'ldk-att-draft-' + cls + '-' + date + '-' + period;
 }
 function saveAttDraft() {
-  const rows = [...document.querySelectorAll('#atlist .at-r')].map(row => {
-    const btns = row.querySelectorAll('.tog-btn');
-    return btns[0].classList.contains('on-p');
-  });
+  const rows = [...document.querySelectorAll('#atlist .at-r')].map(row => ({ studentId: row.dataset.studentId, status: row.dataset.status }));
   localStorage.setItem(attDraftKey(), JSON.stringify(rows));
   toast('Draft saved for ' + document.getElementById('atclass').value);
 }
@@ -1135,43 +1643,60 @@ function applyAttDraft() {
   const saved = localStorage.getItem(attDraftKey());
   if (!saved) return;
   try {
-    const present = JSON.parse(saved);
+    const states = JSON.parse(saved);
     document.querySelectorAll('#atlist .at-r').forEach((row, i) => {
-      if (i >= present.length) return;
-      const btns = row.querySelectorAll('.tog-btn');
-      btns[0].classList.toggle('on-p', present[i]);
-      btns[1].classList.toggle('on-a', !present[i]);
+      const entry = states[i];
+      if (!entry) return;
+      const status = typeof entry === 'boolean' ? (entry ? 'present' : 'absent') : entry.status;
+      if (entry.studentId && entry.studentId !== row.dataset.studentId) return;
+      if (['present', 'absent', 'late', 'excused'].includes(status)) toggleAtt(row.querySelector(`[data-status="${status}"]`), status);
     });
   } catch (e) { /* ignore corrupt draft */ }
 }
 function subAtt() {
   const cls = document.getElementById('atclass').value;
+  const date = document.getElementById('atdate').value;
+  const period = document.getElementById('atperiod').value;
   const rows = [...document.querySelectorAll('#atlist .at-r')];
-  const rosterAtSubmit = window._currentAttStudents || [];
+  if (!date) { toast('Choose an attendance date first.'); return; }
   if (!rows.length) { toast('No students loaded for this class'); return; }
-  let markedAbsent = 0;
-  rows.forEach((row, i) => {
-    const student = rosterAtSubmit[i];
+  const timestamp = new Date().toISOString();
+  const markedAbsent = rows.filter(row => row.dataset.status === 'absent').length;
+  rows.forEach(row => {
+    const student = window.schoolData.students.find(item => item.id === row.dataset.studentId);
     if (!student) return;
-    const present = row.querySelectorAll('.tog-btn')[0].classList.contains('on-p');
-    if (!present) {
-      markedAbsent++;
-      student.absences = (student.absences || 0) + 1;
-      student.attendanceRate = Math.max(0, Math.round((student.attendanceRate || 100) - 0.5));
-    }
+    const key = item => item.studentId === student.id && item.date === date && item.className === cls && item.period === period;
+    const record = window.schoolData.attendanceRecords.find(key);
+    const values = { studentId: student.id, date, className: cls, period, status: row.dataset.status, updatedAt: timestamp, submittedBy: 'Staff' };
+    if (record) Object.assign(record, values);
+    else window.schoolData.attendanceRecords.push({ id: 'attendance-' + student.id + '-' + date + '-' + period, ...values, createdAt: timestamp });
+    recalculateAttendanceStats(student);
   });
   computeClassStats();
   saveStudents();
+  saveSchoolRecords();
+  populateAttendanceClassSelect();
   localStorage.removeItem(attDraftKey());
   // Real-time: the moment attendance is submitted, refresh the Staff
   // dashboard (in case this teacher switches back to it) and the Admin
   // dashboard, plus the shared activity feed both portals read from --
   // this is the actual "teacher marks a class -> stats update everywhere"
   // behavior.
-  logActivity('attendance', 'Attendance marked — ' + cls, 'Staff (Mark Attendance)', markedAbsent + ' marked absent, ' + (rosterAtSubmit.length - markedAbsent) + ' present');
+  logActivity('attendance', 'Attendance submitted — ' + cls, 'Staff (Mark Attendance)', date + ', ' + period + ': ' + markedAbsent + ' absent of ' + rows.length);
+  recordAuditEvent('Staff', 'Attendance submitted', cls, `${date} · ${period} · ${markedAbsent} absent of ${rows.length}`);
   updateStaffDashboardStats();
   updateDashboardStats();
   toast(`Attendance submitted to Discipline Office — ${markedAbsent} marked absent in ${cls}.`);
+}
+
+function recalculateAttendanceStats(student) {
+  if (student.attendanceBaseAbsences === undefined) student.attendanceBaseAbsences = Number(student.absences || 0);
+  const records = window.schoolData.attendanceRecords.filter(record => record.studentId === student.id);
+  student.absences = Number(student.attendanceBaseAbsences) + records.filter(record => record.status === 'absent').length;
+  const counted = records.filter(record => record.status !== 'excused');
+  if (counted.length) {
+    student.attendanceRate = Math.round(counted.filter(record => record.status === 'present' || record.status === 'late').length / counted.length * 1000) / 10;
+  }
 }
 let dmVal = 0;
 function setDM(v) { dmVal = v; toast('Points set: ' + (v > 0 ? '+' : '') + v); }
@@ -1191,13 +1716,18 @@ function addDM() {
     toast('Could not find that student in the system');
     return;
   }
-  student.disciplinePoints = Math.max(0, Math.min(40, (student.disciplinePoints || 0) + dmVal));
-  computeClassStats();
-  saveStudents();
-  logActivity('discipline', 'Discipline mark added (' + (dmVal > 0 ? '+' : '') + dmVal + ')', studentName, reason);
+  const date = getLocalDateString();
+  window.schoolData.disciplineEvents.push({
+    id: 'discipline-log-' + Date.now(), studentId: student.id, date, total: null, change: dmVal,
+    reason, recordedBy: document.getElementById('adn')?.textContent || 'Staff',
+    source: 'Manual reference to national system', status: 'reported'
+  });
+  saveSchoolRecords();
+  logActivity('discipline', 'Official discipline action documented (' + (dmVal > 0 ? '+' : '') + dmVal + ')', studentName, reason);
+  recordAuditEvent(document.getElementById('adn')?.textContent || 'Staff', 'Discipline action reported (official total unchanged)', student.id, reason);
   updateDashboardStats();
   updateStaffDashboardStats();
-  toast('Discipline mark added: ' + (dmVal > 0 ? '+' : '') + dmVal + ' to ' + studentName + ' (now ' + student.disciplinePoints + '/40)');
+  toast('Action documented. The official total remains unchanged until an official import updates it.');
   dmVal = 0; document.getElementById('dmreason').value = '';
 }
 
@@ -1209,6 +1739,8 @@ function admTab(t) {
   document.getElementById('v-' + t).classList.remove('hidden');
   const titles = { admd: 'Dashboard', admu: 'User Management', admbi: 'Bulk Import', admr: 'Reports', admran: 'Rankings', admnot: 'Notifications', adms: 'Settings' };
   document.getElementById('adt').textContent = titles[t]; checkAIVisibility();
+  if (t === 'admr') updateReportSummary();
+  if (t === 'admbi') renderImportReviewQueue();
 
   if (t === 'admran') {
     setTimeout(() => {
@@ -1509,11 +2041,11 @@ updateBadgeCounts();
     const cx = width / 2;
     const cy = height / 2;
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const dotColor = isDark ? '56, 189, 248' : '30, 58, 138';
-    const lineColor = isDark ? '38, 189, 248' : '30, 58, 138';
+    const dotColor = isDark ? '255, 255, 255' : '20, 83, 45';
+    const lineColor = isDark ? '255, 255, 255' : '20, 83, 45';
     ctx.beginPath();
     ctx.arc(cx, cy, GLOBE_RADIUS, 0, Math.PI * 2);
-    ctx.strokeStyle = isDark ? 'rgba(56, 189, 248, 0.06)' : 'rgba(30, 58, 138, 0.15)';
+    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(20, 83, 45, 0.18)';
     ctx.lineWidth = 1;
     ctx.stroke();
     const cosR = Math.cos(rotation);
@@ -1596,7 +2128,7 @@ updateBadgeCounts();
         if (first) { ctx.moveTo(px, py); first = false; }
         else { ctx.lineTo(px, py); }
       }
-      ctx.strokeStyle = isDark ? 'rgba(56, 189, 248, 0.03)' : 'rgba(30, 58, 138, 0.08)';
+      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 83, 45, 0.1)';
       ctx.stroke();
     }
     for (let i = 0; i < gridLines; i++) {
@@ -1611,7 +2143,7 @@ updateBadgeCounts();
         if (first) { ctx.moveTo(px, py); first = false; }
         else { ctx.lineTo(px, py); }
       }
-      ctx.strokeStyle = isDark ? 'rgba(56, 189, 248, 0.03)' : 'rgba(30, 58, 138, 0.08)';
+      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 83, 45, 0.1)';
       ctx.stroke();
     }
     rotation += 0.0025;
@@ -1680,7 +2212,7 @@ updateBadgeCounts();
   const ctx = canvas.getContext('2d');
   let width, height;
   const sparks = [];
-  const sparkColor = '#3b82f6';
+  const sparkColor = '#15803d';
   const sparkSize = 10;
   const sparkRadius = 15;
   const sparkCount = 8;
@@ -1791,7 +2323,25 @@ function addAIMessage(text, sender) {
   } else {
     div.style.cssText = 'align-self:flex-start;max-width:85%;padding:10px 14px;background:var(--s2);border-radius:12px;border-bottom-left-radius:4px;color:var(--t2);font-size:13px;line-height:1.5';
   }
-  div.innerHTML = text;
+  if (sender === 'user') {
+    div.textContent = text;
+  } else {
+    const template = document.createElement('template');
+    template.innerHTML = text;
+    const allowedTags = new Set(['STRONG', 'B', 'EM', 'I', 'BR', 'P', 'UL', 'OL', 'LI', 'CODE', 'PRE']);
+    const appendSafe = (source, target) => {
+      [...source.childNodes].forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) target.appendChild(document.createTextNode(node.textContent));
+        else if (node.nodeType === Node.ELEMENT_NODE) {
+          if (!allowedTags.has(node.tagName)) return appendSafe(node, target);
+          const safeNode = document.createElement(node.tagName.toLowerCase());
+          appendSafe(node, safeNode);
+          target.appendChild(safeNode);
+        }
+      });
+    };
+    appendSafe(template.content, div);
+  }
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
@@ -1893,7 +2443,9 @@ function processLocalAIResponse(msg) {
   }
   else if (lower.includes('rank') || lower.includes('top')) {
     const top = getTop30Overall()[0];
-    response = 'The top performing student is <strong>' + top.name + '</strong> from ' + top.class + ' with a combined index of <strong>' + top.index + '</strong>.';
+    response = top
+      ? 'The top performing student is <strong>' + escapeHTML(top.name) + '</strong> from ' + escapeHTML(top.class) + ' with a combined index of <strong>' + top.index + '</strong>.'
+      : 'There are no students with both discipline and academic scores to rank yet.';
   }
   else if (lower.includes('attention') || lower.includes('trouble') || lower.includes('bad')) {
     const count = getNeedsAttention().length;
@@ -1907,25 +2459,29 @@ function processLocalAIResponse(msg) {
     a.href = url;
     a.download = 'ldk-students-' + new Date().toISOString().split('T')[0] + '.csv';
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     response = 'I\'ve generated and downloaded a CSV file with all student data including discipline points, academic scores, and attendance rates.';
   }
   else if (lower.includes('class') && (lower.includes('best') || lower.includes('good'))) {
     const best = getClassRankings()[0];
-    response = 'The best performing class by discipline is <strong>' + best.name + '</strong> with an average of <strong>' + best.avgDiscipline + '/40</strong> discipline points and <strong>' + best.avgAcademic + '%</strong> academic score.';
+    response = best
+      ? 'The best performing class by discipline is <strong>' + escapeHTML(best.name) + '</strong> with an average of <strong>' + (best.avgDiscipline ?? 'N/A') + '/40</strong> discipline points and <strong>' + (best.avgAcademic ?? 'N/A') + '%</strong> academic score.'
+      : 'No class data is available yet.';
   }
   else if (lower.includes('attendance')) {
-    const avg = Math.round(window.schoolData.students.reduce((a,s) => a + s.attendanceRate, 0) / window.schoolData.students.length * 10) / 10;
-    response = 'The average attendance rate across all students is <strong>' + avg + '%</strong>. You can view detailed breakdowns in the Reports section.';
+    const attendanceRates = window.schoolData.students.map(student => numberOrNull(student.attendanceRate)).filter(value => value !== null);
+    const avg = attendanceRates.length ? Math.round(attendanceRates.reduce((sum, value) => sum + value, 0) / attendanceRates.length * 10) / 10 : null;
+    response = 'The average attendance rate across all students is <strong>' + (avg === null ? 'not available' : avg + '%') + '</strong>. You can view detailed breakdowns in the Reports section.';
   }
   else if (lower.includes('discipline') && (lower.includes('mark') || lower.includes('point'))) {
-    response = 'Discipline marks are out of <strong>40 points per term</strong> (120 annually). Students below <strong>20/40</strong> are flagged for intervention. The highest current score is <strong>' + Math.max(...window.schoolData.students.map(s => s.disciplinePoints)) + '/40</strong>.';
+    const totals = window.schoolData.students.map(student => numberOrNull(student.disciplinePoints)).filter(value => value !== null);
+    response = 'Discipline marks are out of <strong>40 points per term</strong> (120 annually). Students below <strong>20/40</strong> are flagged for intervention. The highest current score is <strong>' + (totals.length ? Math.max(...totals) + '/40' : 'not available') + '</strong>.';
   }
   else if (lower.includes('hello') || lower.includes('hi') || lower.includes('help')) {
     response = 'Hello! I can help you with:<br>• <strong>Student data</strong> — ask "how many students" or "who is top"<br>• <strong>Export data</strong> — say "generate spreadsheet"<br>• <strong>Rankings</strong> — ask "which class is best"<br>• <strong>Insights</strong> — ask about attendance or discipline<br>What do you need?';
   }
   else {
-    response = 'I understand you\'re asking about "<em>' + msg + '</em>". I can help with student data, rankings, exports, and school metrics. Try asking something like:<br>• "How many students do we have?"<br>• "Generate a CSV"<br>• "Who needs attention?"<br>• "What is the best class?"';
+    response = 'I understand you\'re asking about "<em>' + escapeHTML(msg) + '</em>". I can help with student data, rankings, exports, and school metrics. Try asking something like:<br>• "How many students do we have?"<br>• "Generate a CSV"<br>• "Who needs attention?"<br>• "What is the best class?"';
   }
 
   addAIMessage(response, 'bot');
@@ -1936,6 +2492,8 @@ function processLocalAIResponse(msg) {
 function downloadReport(btn) {
   const card = btn.closest('.card');
   const title = card.querySelector('h3').textContent.trim();
+  if (title === 'Attendance Report') return downloadAttendanceReport();
+  if (title === 'Discipline Report') return downloadDisciplineReport();
   const rows = [...card.querySelectorAll(':scope > div > div')].map(row => {
     const spans = row.querySelectorAll(':scope > div > span');
     return spans.length >= 2 ? [spans[0].textContent.trim(), spans[1].textContent.trim()] : null;
@@ -1958,12 +2516,71 @@ function downloadReport(btn) {
   toast(title + ' downloaded');
 }
 function generateStudentCSV() {
-  const headers = ['ID', 'Name', 'Gender', 'Class', 'Level', 'Discipline Points', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'];
+  const headers = ['ID', 'Name', 'Gender', 'Class', 'Level', 'Guardian Name', 'Guardian Phone', 'Guardian Email', 'Discipline Points', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'];
   const rows = window.schoolData.students.map(s => [
-    s.id, s.name, s.gender, s.class, s.level,
+    s.id, s.name, s.gender, s.class, s.level, s.guardianName, s.guardianPhone, s.guardianEmail,
     s.disciplinePoints, s.academicScore + '%', s.attendanceRate + '%', s.absences, s.status
   ]);
-  return [headers, ...rows].map(r => r.map(x => '"' + String(x).replace(/"/g, '""') + '"').join(',')).join('\n');
+  return [headers, ...rows].map(r => r.map(csvCell).join(',')).join('\n');
+}
+function getReportPeriod() {
+  const from = document.getElementById('reportFrom')?.value || '';
+  const to = document.getElementById('reportTo')?.value || '';
+  if (from && to && from > to) { toast('Report start date must be before the end date.'); return null; }
+  return { from, to };
+}
+function inReportPeriod(date, period) {
+  return (!period.from || date >= period.from) && (!period.to || date <= period.to);
+}
+function updateReportSummary() {
+  const period = getReportPeriod();
+  const summary = document.getElementById('reportSummary');
+  if (!summary || !period) return;
+  const countFor = records => records.filter(record => inReportPeriod(record.date || '', period)).length;
+  summary.textContent = `${countFor(window.schoolData.attendanceRecords)} attendance records · ${countFor(window.schoolData.disciplineEvents)} discipline events · ${countFor(window.schoolData.academicRecords)} academic results`;
+}
+function downloadCSVFile(filename, headers, rows) {
+  const csv = [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function csvCell(value) {
+  const text = String(value ?? '');
+  const safeText = typeof value === 'string' && /^[\s]*[=+\-@]/.test(text) ? "'" + text : text;
+  return '"' + safeText.replace(/"/g, '""') + '"';
+}
+function downloadAttendanceReport() {
+  const period = getReportPeriod(); if (!period) return;
+  const rows = window.schoolData.attendanceRecords.filter(record => inReportPeriod(record.date || '', period)).map(record => {
+    const student = window.schoolData.students.find(item => item.id === record.studentId);
+    return [record.date, record.className, record.period, record.studentId, student?.name, record.status, record.submittedBy, record.updatedAt];
+  });
+  downloadCSVFile('ldk-attendance-report', ['Date', 'Class', 'Period', 'Student ID', 'Student Name', 'Status', 'Recorded By', 'Updated At'], rows);
+}
+function downloadDisciplineReport() {
+  const period = getReportPeriod(); if (!period) return;
+  const rows = window.schoolData.disciplineEvents.filter(record => inReportPeriod(record.date || '', period)).map(record => {
+    const student = window.schoolData.students.find(item => item.id === record.studentId);
+    return [record.date, record.studentId, student?.name, record.total, record.change, record.reason, record.recordedBy, record.source, record.batchId];
+  });
+  downloadCSVFile('ldk-discipline-report', ['Date', 'Student ID', 'Student Name', 'Official Total', 'Reported Change', 'Reason', 'Recorded By', 'Source', 'Import Batch'], rows);
+}
+function downloadAcademicReport() {
+  const period = getReportPeriod(); if (!period) return;
+  const rows = window.schoolData.academicRecords.filter(record => inReportPeriod(record.date || '', period)).map(record => {
+    const student = window.schoolData.students.find(item => item.id === record.studentId);
+    return [record.date, record.studentId, student?.name, student?.class, record.term, record.subject, record.score, record.maxScore];
+  });
+  downloadCSVFile('ldk-academic-report', ['Date', 'Student ID', 'Student Name', 'Class', 'Term', 'Subject', 'Score', 'Maximum Score'], rows);
+}
+function downloadStudentReport() {
+  const rows = window.schoolData.students.map(student => [student.id, student.name, student.gender, student.class, student.level, student.guardianName, student.guardianPhone, student.guardianEmail, student.disciplinePoints, student.academicScore, student.attendanceRate, student.absences, student.status]);
+  downloadCSVFile('ldk-student-roster', ['Student ID', 'Name', 'Gender', 'Class', 'Level', 'Guardian Name', 'Guardian Phone', 'Guardian Email', 'Discipline Total', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'], rows);
 }
 
 // ===== INIT =====
@@ -1971,8 +2588,15 @@ if (!loadStudents()) {
   generateDemoData();
   saveStudents();
 }
+loadSchoolRecords();
+const attendanceDate = document.getElementById('atdate');
+if (attendanceDate) attendanceDate.value = getLocalDateString();
+populateAttendanceClassSelect();
+loadAtt();
 loadContentEdits();
 loadSettings();
 loadJustifications();
 loadSavedNotifications();
+updateDashboardStats();
+updateStaffDashboardStats();
 checkAIVisibility();
