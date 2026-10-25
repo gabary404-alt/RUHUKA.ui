@@ -80,7 +80,7 @@ function generateDemoData() {
   let idCounter = 1;
 
   classNames.forEach(cls => {
-    const count = 45 + Math.floor(Math.random() * 15); // 45-60 students per class
+    const count = 8; // light demo roster; full imports still work
     for (let i = 0; i < count; i++) {
       const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
       const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
@@ -1194,7 +1194,7 @@ let stars = [], width, height, mouseX = 0, mouseY = 0;
 function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; initStars(); }
 function initStars() {
   stars = [];
-  const count = Math.floor((width * height) / 3000);
+  const count = Math.min(70, Math.floor((width * height) / 18000));
   for (let i = 0; i < count; i++) {
     stars.push({
       x: Math.random() * width, y: Math.random() * height,
@@ -1207,10 +1207,12 @@ function initStars() {
   }
 }
 function drawStars() {
+  if (document.hidden) return;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   ctx.clearRect(0, 0, width, height);
   const time = Date.now() * 0.001;
-  stars.forEach(s => {
+  for (let i = 0; i < stars.length; i++) {
+    const s = stars[i];
     s.y -= s.speed;
     if (s.y < 0) { s.y = height; s.x = Math.random() * width; }
     const twinkle = Math.sin(time * s.twinkleSpeed * 100 + s.twinklePhase) * 0.4 + 0.6;
@@ -1219,15 +1221,10 @@ function drawStars() {
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '20,83,45') + ',' + (isDark ? alpha : alpha * 2.2) + ')';
     ctx.fill();
-    if (s.r > 1) {
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '20,83,45') + ',' + (alpha * 0.15) + ')';
-      ctx.fill();
-    }
-  });
+  }
   requestAnimationFrame(drawStars);
 }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) drawStars(); });
 window.addEventListener('resize', resize);
 resize(); drawStars();
 
@@ -2172,7 +2169,7 @@ updateBadgeCounts();
   }
   function initStars() {
     stars = [];
-    const count = Math.floor((width * height) / 8000);
+    const count = Math.min(40, Math.floor((width * height) / 22000));
     for (let i = 0; i < count; i++) {
       stars.push({
         x: Math.random() * width, y: Math.random() * height,
@@ -2233,12 +2230,14 @@ updateBadgeCounts();
     }
   }
   document.addEventListener('click', (e) => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     const target = e.target;
     if (target.closest('a') || target.closest('button') || target.closest('input') || target.closest('textarea') || target.closest('select')) return;
     createSparks(e.clientX, e.clientY);
   });
   function easeOut(t) { return t * (2 - t); }
   function drawSparks() {
+    if (!sparks.length) { requestAnimationFrame(drawSparks); return; }
     ctx.clearRect(0, 0, width, height);
     for (let i = sparks.length - 1; i >= 0; i--) {
       const spark = sparks[i];
@@ -2267,6 +2266,7 @@ updateBadgeCounts();
 // ===== CARD 3D TILT =====
 (function(){
   function applyTilt(el) {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     el.addEventListener('mousemove', (e) => {
       const rect = el.getBoundingClientRect();
       const x = e.clientX - rect.left;
