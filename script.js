@@ -1194,7 +1194,7 @@ let stars = [], width, height, mouseX = 0, mouseY = 0;
 function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; initStars(); }
 function initStars() {
   stars = [];
-  const count = Math.min(70, Math.floor((width * height) / 18000));
+  const count = Math.min(180, Math.floor((width * height) / 9000));
   for (let i = 0; i < count; i++) {
     stars.push({
       x: Math.random() * width, y: Math.random() * height,
@@ -1215,11 +1215,11 @@ function drawStars() {
     const s = stars[i];
     s.y -= s.speed;
     if (s.y < 0) { s.y = height; s.x = Math.random() * width; }
-    const twinkle = Math.sin(time * s.twinkleSpeed * 100 + s.twinklePhase) * 0.4 + 0.6;
-    const alpha = s.opacity * twinkle * (isDark ? 1 : 0.35);
+    const twinkle = Math.sin(time * s.twinkleSpeed * 100 + s.twinklePhase) * 0.25 + 0.75;
+    const alpha = isDark ? s.opacity * twinkle : Math.min(1, s.opacity * twinkle * 0.95);
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '20,83,45') + ',' + (isDark ? alpha : alpha * 2.2) + ')';
+    ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '6,36,20') + ',' + alpha + ')';
     ctx.fill();
   }
   requestAnimationFrame(drawStars);
@@ -2176,7 +2176,7 @@ updateBadgeCounts();
   }
   function initStars() {
     stars = [];
-    const count = Math.min(40, Math.floor((width * height) / 22000));
+    const count = Math.min(110, Math.floor((width * height) / 10000));
     for (let i = 0; i < count; i++) {
       stars.push({
         x: Math.random() * width, y: Math.random() * height,
@@ -2196,10 +2196,10 @@ updateBadgeCounts();
       s.y -= s.speed;
       if (s.y < 0) { s.y = height; s.x = Math.random() * width; }
       const twinkle = Math.sin(time * s.twinkleSpeed * 100 + s.twinklePhase) * 0.4 + 0.6;
-      const alpha = s.opacity * twinkle * (isDark ? 0.9 : 0.3);
+      const alpha = isDark ? s.opacity * twinkle * 0.9 : Math.min(1, (s.opacity + 0.35) * twinkle);
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '30,41,59') + ',' + (isDark ? alpha : alpha * 2.2) + ')';
+      ctx.arc(s.x, s.y, s.r + (isDark ? 0 : 0.35), 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '8,32,18') + ',' + alpha + ')';
       ctx.fill();
     });
     requestAnimationFrame(draw);
