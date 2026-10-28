@@ -1252,11 +1252,21 @@ if (heroIn) {
 // ===== SCROLL REVEAL =====
 const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('on'); }
-    else { e.target.classList.remove('on'); }
+    if (!e.isIntersecting) return;
+    e.target.classList.add('on');
+    obs.unobserve(e.target);
   });
-}, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
-document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('.rv').forEach(el => {
+  const siblings = el.parentElement
+    ? [...el.parentElement.children].filter(c => c.classList && c.classList.contains('rv'))
+    : [el];
+  const idx = Math.max(0, siblings.indexOf(el));
+  if (!el.classList.contains('d1') && !el.classList.contains('d2') && !el.classList.contains('d3') && !el.classList.contains('d4')) {
+    el.style.transitionDelay = Math.min(idx, 7) * 0.12 + 's';
+  }
+  obs.observe(el);
+});
 
 function sc(id) {
   const el = document.getElementById(id);
@@ -1920,19 +1930,16 @@ document.querySelectorAll('[data-bento]').forEach(card => {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
     const cx = rect.width / 2, cy = rect.height / 2;
-    const rx = ((y - cy) / cy) * -8, ry = ((x - cx) / cx) * 8;
-    card.style.transform = 'perspective(1000px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-2px)';
+    const rx = ((y - cy) / cy) * -2.2, ry = ((x - cx) / cx) * 2.2;
+    card.style.transform = 'perspective(1200px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
     const gx = (x / rect.width) * 100, gy = (y / rect.height) * 100;
     card.style.setProperty('--glow-x', gx + '%');
     card.style.setProperty('--glow-y', gy + '%');
     card.style.setProperty('--glow-intensity', '1');
-    const mx = (x - cx) * 0.03, my = (y - cy) * 0.03;
-    card.style.marginLeft = mx + 'px'; card.style.marginTop = my + 'px';
   });
   card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+    card.style.transform = 'perspective(1200px) rotateX(0) rotateY(0)';
     card.style.setProperty('--glow-intensity', '0');
-    card.style.marginLeft = '0'; card.style.marginTop = '0';
     particles.forEach(p => p.remove());
     particles = [];
     cancelAnimationFrame(animId);
@@ -2274,7 +2281,7 @@ updateBadgeCounts();
       const cx = rect.width / 2;
       const cy = rect.height / 2;
       const isRank = el.classList.contains('rank-card-tilt');
-      const mult = isRank ? 0.6 : 3;
+      const mult = isRank ? 0.35 : 1.1;
       const rx = ((y - cy) / cy) * -mult;
       const ry = ((x - cx) / cx) * mult;
       const z = isRank ? 2 : 6;

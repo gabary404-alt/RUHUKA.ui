@@ -156,9 +156,9 @@ input,select,textarea{font:inherit}
 .prog-f{height:100%;border-radius:100px;transition:width 1s ease}
 .toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--p);color:#fff;border-radius:10px;font-size:14px;font-weight:500;box-shadow:var(--sh2);z-index:300;transform:translateY(100px);opacity:0;transition:all .4s ease}
 .toast.on{transform:translateY(0);opacity:1}
-.rv{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.rv{opacity:0;transform:translateY(22px);transition:opacity 1.05s cubic-bezier(.22,.7,.25,1),transform 1.05s cubic-bezier(.22,.7,.25,1)}
 .rv.on{opacity:1;transform:translateY(0)}
-.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+.d1{transition-delay:.14s}.d2{transition-delay:.28s}.d3{transition-delay:.42s}.d4{transition-delay:.56s}
 #cursor-spotlight{position:fixed;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:5;transform:translate(-50%,-50%);opacity:0;transition:opacity .3s;mix-blend-mode:screen;background:radial-gradient(circle,rgba(var(--glow-rgb),0.12) 0%,rgba(var(--glow-rgb),0.05) 30%,transparent 70%)}
 .rank-card{background:var(--card-bg);border:1px solid var(--b);border-radius:16px;padding:24px;transition:all var(--tr)}
 .rank-card:hover{border-color:rgba(var(--glow-rgb),0.3)}
@@ -209,7 +209,7 @@ input,select,textarea{font:inherit}
 .hero-globe-wrap canvas{width:100%;height:100%;display:block}
 #starfield-fg{position:absolute;inset:0;z-index:2;pointer-events:none}
 #clickspark-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999}
-.card-tilt,.magic-card-tilt,.str-tilt,.ach-card-tilt,.rank-card-tilt,.stf-tilt,.notif-item-tilt,.at-r-tilt,.compose-card-tilt{transform-style:preserve-3d;transition:transform 0.15s ease-out}
+.card-tilt,.magic-card-tilt,.str-tilt,.ach-card-tilt,.rank-card-tilt,.stf-tilt,.notif-item-tilt,.at-r-tilt,.compose-card-tilt{transform-style:preserve-3d;transition:transform 0.45s ease-out}
 .edit-badge{position:absolute;top:8px;right:8px;padding:4px 10px;background:var(--a);color:#fff;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;z-index:10;opacity:0;transition:opacity .2s}
 .card:hover .edit-badge,.magic-card:hover .edit-badge,.str:hover .edit-badge,.stf:hover .edit-badge{opacity:1}
 .edit-mode .edit-badge{opacity:1}
