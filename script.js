@@ -1281,7 +1281,7 @@ document.querySelectorAll('.rv').forEach(el => {
     bar.style.width = (max ? (window.scrollY / max) * 100 : 0) + '%';
   }
   function tick() {
-    current += (target - current) * 0.08;
+    current += (target - current) * 0.14;
     if (Math.abs(target - current) < 0.4) {
       current = target;
       window.scrollTo(0, current);
@@ -1299,7 +1299,7 @@ document.querySelectorAll('.rv').forEach(el => {
     if (document.querySelector('.mod.on')) return;
     if (e.target.closest('textarea, input, select, .port')) return;
     e.preventDefault();
-    target = Math.max(0, Math.min(maxY(), target + e.deltaY * 0.42));
+    target = Math.max(0, Math.min(maxY(), target + e.deltaY * 0.68));
     if (!gliding) { gliding = true; requestAnimationFrame(tick); }
   }, { passive: false });
   window.addEventListener('scroll', () => { if (!gliding) { current = target = window.scrollY; paint(); } }, { passive: true });
