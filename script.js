@@ -1252,21 +1252,59 @@ if (heroIn) {
 // ===== SCROLL REVEAL =====
 const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    e.target.classList.add('on');
-    obs.unobserve(e.target);
+    if (e.isIntersecting) e.target.classList.add('on');
+    else if (e.intersectionRatio === 0) e.target.classList.remove('on');
   });
-}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+}, { threshold: [0, 0.22], rootMargin: '0px 0px -14% 0px' });
 document.querySelectorAll('.rv').forEach(el => {
   const siblings = el.parentElement
     ? [...el.parentElement.children].filter(c => c.classList && c.classList.contains('rv'))
     : [el];
   const idx = Math.max(0, siblings.indexOf(el));
   if (!el.classList.contains('d1') && !el.classList.contains('d2') && !el.classList.contains('d3') && !el.classList.contains('d4')) {
-    el.style.transitionDelay = Math.min(idx, 7) * 0.12 + 's';
+    el.style.transitionDelay = Math.min(idx, 7) * 0.16 + 's';
   }
   obs.observe(el);
 });
+
+(function calmScroll() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  const bar = document.getElementById('scroll-glow');
+  let target = window.scrollY;
+  let current = window.scrollY;
+  let gliding = false;
+  function maxY() { return Math.max(0, document.documentElement.scrollHeight - window.innerHeight); }
+  function paint() {
+    if (!bar) return;
+    const max = maxY();
+    bar.style.width = (max ? (window.scrollY / max) * 100 : 0) + '%';
+  }
+  function tick() {
+    current += (target - current) * 0.08;
+    if (Math.abs(target - current) < 0.4) {
+      current = target;
+      window.scrollTo(0, current);
+      gliding = false;
+      paint();
+      return;
+    }
+    window.scrollTo(0, current);
+    paint();
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('wheel', (e) => {
+    const land = document.getElementById('land');
+    if (!land || getComputedStyle(land).display === 'none') return;
+    if (document.querySelector('.mod.on')) return;
+    if (e.target.closest('textarea, input, select, .port')) return;
+    e.preventDefault();
+    target = Math.max(0, Math.min(maxY(), target + e.deltaY * 0.42));
+    if (!gliding) { gliding = true; requestAnimationFrame(tick); }
+  }, { passive: false });
+  window.addEventListener('scroll', () => { if (!gliding) { current = target = window.scrollY; paint(); } }, { passive: true });
+  paint();
+})();
 
 function sc(id) {
   const el = document.getElementById(id);
