@@ -1536,7 +1536,7 @@ function sTab(t) {
   document.getElementById('n' + t).classList.add('on');
   document.querySelectorAll('#stuP .main > div').forEach(d => d.classList.add('hidden'));
   document.getElementById('v-' + t).classList.remove('hidden');
-  const titles = { sd: 'Dashboard', sdi: 'Discipline Record', sab: 'Absence Justification', san: 'Announcements', snot: 'Notifications' };
+  const titles = { sd: 'Dashboard', sdi: 'Discipline Record', sres: 'Results', satt: 'Attendance', sab: 'Absence Justification', san: 'Announcements', snot: 'Notifications' };
   document.getElementById('st').textContent = titles[t];
   renderStudentPortal();
   if (t === 'sab') renderAbsenceHistory();
@@ -1851,37 +1851,8 @@ function recalculateAttendanceStats(student) {
   }
 }
 let dmVal = 0;
-function setDM(v) { dmVal = v; toast('Points set: ' + (v > 0 ? '+' : '') + v); }
-function addDM() {
-  const stuSel = document.getElementById('dmstu').value;
-  const reason = document.getElementById('dmreason').value;
-  if (!dmVal) { toast('Please select points'); return; }
-  if (!reason) { toast('Please enter a reason'); return; }
-
-  const idMatch = stuSel.match(/\(([^)]+)\)/);
-  const studentName = stuSel.split('(')[0].trim();
-  const student = idMatch
-    ? window.schoolData.students.find(s => s.id === idMatch[1])
-    : window.schoolData.students.find(s => s.name === studentName);
-
-  if (!student) {
-    toast('Could not find that student in the system');
-    return;
-  }
-  const date = getLocalDateString();
-  window.schoolData.disciplineEvents.push({
-    id: 'discipline-log-' + Date.now(), studentId: student.id, date, total: null, change: dmVal,
-    reason, recordedBy: document.getElementById('adn')?.textContent || 'Staff',
-    source: 'Manual reference to national system', status: 'reported'
-  });
-  saveSchoolRecords();
-  logActivity('discipline', 'Official discipline action documented (' + (dmVal > 0 ? '+' : '') + dmVal + ')', studentName, reason);
-  recordAuditEvent(document.getElementById('adn')?.textContent || 'Staff', 'Discipline action reported (official total unchanged)', student.id, reason);
-  updateDashboardStats();
-  updateStaffDashboardStats();
-  toast('Action documented. The official total remains unchanged until an official import updates it.');
-  dmVal = 0; document.getElementById('dmreason').value = '';
-}
+function setDM() { toast('Official discipline points cannot be changed on this website.'); }
+function addDM() { toast('Official discipline points are imported. This screen cannot add or deduct them.'); }
 
 // ===== ADMIN TABS =====
 function admTab(t) {
@@ -1889,7 +1860,7 @@ function admTab(t) {
   document.getElementById('n' + t).classList.add('on');
   document.querySelectorAll('#admP .main > div').forEach(d => d.classList.add('hidden'));
   document.getElementById('v-' + t).classList.remove('hidden');
-  const titles = { admd: 'Dashboard', admu: 'User Management', admbi: 'Bulk Import', admr: 'Reports', admran: 'Rankings', admnot: 'Notifications', adms: 'Settings' };
+  const titles = { admd: 'Dashboard', admu: 'User Management', admbi: 'Bulk Import', admr: 'Reports', admran: 'Rankings', admnot: 'Notifications', adms: 'Settings', admatt: 'Main attendance', admfu: 'Follow-up lessons', admret: 'Midday returns', admmail: 'Parent inbox' };
   document.getElementById('adt').textContent = titles[t]; checkAIVisibility();
   if (t === 'admr') updateReportSummary();
   if (t === 'admbi') renderImportReviewQueue();

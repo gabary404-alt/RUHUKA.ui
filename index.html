@@ -314,6 +314,8 @@
     <ul class="side-nav">
       <li><a href="#" class="on" onclick="sTab('sd')" id="nsd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
       <li><a href="#" onclick="sTab('sdi')" id="nsdi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Discipline</a></li>
+      <li><a href="#" onclick="sTab('sres')" id="nsres"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> Results</a></li>
+      <li><a href="#" onclick="sTab('satt')" id="nsatt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Attendance</a></li>
       <li><a href="#" onclick="sTab('sab')" id="nsab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Absence</a></li>
       <li><a href="#" onclick="sTab('san')" id="nsan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Announcements</a></li>
       <li><a href="#" onclick="sTab('snot')" id="nsnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications <span style="margin-left:auto;background:var(--r);color:#fff;font-size:10px;padding:2px 6px;border-radius:100px" id="sNotifBadge">3</span></a></li>
@@ -330,11 +332,11 @@
         <div class="stc"><h4>Official Discipline</h4><div class="v" style="color:var(--g)" id="studentDisciplineTotal">--/40</div><div class="ch" id="studentDisciplineUpdated">Waiting for official import</div></div>
         <div class="stc"><h4>Attendance Rate</h4><div class="v" style="color:var(--a)" id="studentAttendanceRate">--%</div><div class="ch">Recorded sessions</div></div>
         <div class="stc"><h4>Absences</h4><div class="v" style="color:var(--w)" id="studentAbsenceCount">--</div><div class="ch">From saved attendance</div></div>
-        <div class="stc"><h4>Class Rank</h4><div class="v" style="color:var(--p)" id="studentClassRank">--</div><div class="ch" id="studentSchoolRank">School rank --</div></div>
+        <div class="stc"><h4>Academic rank</h4><div class="v" style="color:var(--p)" id="studentClassRank">--</div><div class="ch" id="studentSchoolRank">Discipline rank is separate</div></div>
       </div>
       <div class="g2">
         <div class="card"><h3 style="margin-bottom:16px">Recent Discipline Activity</h3><div id="studentRecentDiscipline" style="display:flex;flex-direction:column;gap:12px"></div></div>
-        <div class="card"><h3 style="margin-bottom:16px">Upcoming Schedule</h3><p style="color:var(--t2)">School timetable details will appear here when connected to the academic calendar.</p></div>
+        <div class="card"><h3 style="margin-bottom:16px">Timetable</h3><div id="studentTimetable"></div></div>
       </div>
     </div>
     <div id="v-sdi" class="hidden">
@@ -343,6 +345,8 @@
         <div class="data-table-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Reason</th><th>Points / Total</th><th>Recorded by / source</th><th>Status</th></tr></thead><tbody id="studentDisciplineHistory"></tbody></table></div>
       </div>
     </div>
+    <div id="v-sres" class="hidden"><div class="card" id="studentResultsCard"></div></div>
+    <div id="v-satt" class="hidden"><div class="card" id="studentAttendanceCard"></div></div>
     <div id="v-sab" class="hidden">
       <div class="g2">
         <div class="card">
@@ -427,7 +431,7 @@
 <!-- STAFF PORTAL -->
 <div class="port" id="staP">
   <aside class="side">
-    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Staff Portal</span></div>
+    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Teacher Portal</span></div>
     <ul class="side-nav">
       <li><a href="#" class="on" onclick="staTab('stad')" id="ntad"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
       <li><a href="#" onclick="staTab('staat')" id="ntaat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Mark Attendance</a></li>
@@ -439,7 +443,7 @@
   </aside>
   <main class="main">
     <div class="ph">
-      <div><h1 id="stat">Dashboard</h1><p>Welcome, Mrs. Uwimana — Discipline Department</p></div>
+      <div><h1 id="stat">Dashboard</h1><p id="teacherWelcome">Teacher view — your assigned classes only. Demo data stays on this browser.</p></div>
       <div class="pu">
         <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -448,7 +452,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           <span class="notif-badge" id="stBellBadge">2</span>
         </div>
-        <div style="text-align:right"><div style="font-size:14px;font-weight:600">Mrs. Uwimana</div><div style="font-size:12px;color:var(--t3)">Discipline Officer</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600">Mr. Ndayisaba</div><div style="font-size:12px;color:var(--t3)">Teacher · S5 Stream 1</div></div>
         <div class="pu-a" style="background:var(--a)">UW</div>
         <button class="btn btn-g" style="padding:6px 12px;font-size:12px" onclick="logout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
       </div>
@@ -475,10 +479,11 @@
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
           <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Class</label><select class="sel" id="atclass" onchange="loadAtt()"></select></div>
           <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Date</label><input type="date" class="inp" id="atdate" onchange="loadAtt()"></div>
-          <div class="fg" style="margin:0;flex:1;min-width:200px"><label class="lab">Period</label><select class="sel" id="atperiod" onchange="loadAtt()"><option>Morning (1-2)</option><option>Afternoon (3-4)</option><option>Full Day</option></select></div>
+          <div class="fg" style="margin:0;flex:1;min-width:220px"><label class="lab" for="atperiod">Attendance type</label><select class="sel" id="atperiod" onchange="loadAtt()"><option>Main daily attendance</option><option>Follow-up lesson (not in official rate)</option></select></div>
         </div>
+        <p id="attKindNote" style="font-size:13px;color:var(--t3);margin:-8px 0 16px">Main daily attendance is the only type that changes official attendance statistics. Follow-up lessons stay separate.</p>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
-          <h3 style="font-size:15px">Student List — <span id="atcname">S5 Stream 1</span></h3>
+          <h3 style="font-size:15px">Assigned class — <span id="atcname">S5 Stream 1</span></h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-s" style="font-size:12px" onclick="markAll(true)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> All Present</button>
             <button class="btn btn-d" style="font-size:12px" onclick="markAll(false)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> All Absent</button>
@@ -500,14 +505,8 @@
     <div id="v-stadm" class="hidden">
       <div class="g2">
         <div class="card">
-          <h3 style="margin-bottom:20px">Add Discipline Mark <span style="font-size:13px;color:var(--t3);font-weight:400">(Max 40 per term)</span></h3>
-          <div class="fg"><label class="lab">Student</label><select class="sel" id="dmstu"><option>Jean-Paul Manirafasha (LDK-2023-001)</option><option>Claire Umutoni (LDK-2023-045)</option><option>Patrick Habyarimana (LDK-2022-089)</option><option>Marie Mukamana (LDK-2023-112)</option><option>Jean Bosco Ndayisaba (LDK-2024-034)</option></select></div>
-          <div class="fg"><label class="lab">Points</label><div style="display:flex;gap:8px"><button class="btn btn-s" style="flex:1" onclick="setDM(1)">+1</button><button class="btn btn-s" style="flex:1" onclick="setDM(2)">+2</button><button class="btn btn-s" style="flex:1" onclick="setDM(3)">+3</button><button class="btn btn-s" style="flex:1" onclick="setDM(5)">+5</button><button class="btn btn-s" style="flex:1" onclick="setDM(10)">+10</button></div></div>
-          <div class="fg"><label class="lab">Or Deduct</label><div style="display:flex;gap:8px"><button class="btn btn-d" style="flex:1" onclick="setDM(-1)">-1</button><button class="btn btn-d" style="flex:1" onclick="setDM(-2)">-2</button><button class="btn btn-d" style="flex:1" onclick="setDM(-3)">-3</button><button class="btn btn-d" style="flex:1" onclick="setDM(-5)">-5</button><button class="btn btn-d" style="flex:1" onclick="setDM(-10)">-10</button></div></div>
-          <div class="fg"><label class="lab">Reason</label><input type="text" class="inp" id="dmreason" placeholder="e.g. Late to class, Helping others, etc."></div>
-          <div class="fg"><label class="lab">Category</label><select class="sel" id="dmcategory"><option>Academic Conduct</option><option>Punctuality</option><option>Participation</option><option>Uniform & Appearance</option><option>Behavior</option></select></div>
-          <button class="btn btn-a" style="width:100%;justify-content:center;padding:12px" onclick="addDM()">Log Official-System Action</button>
-          <p style="font-size:12px;color:var(--t3);margin-top:10px">This records who reported the official action and why. It does not alter the official total; only a verified discipline import updates that score.</p>
+          <h3 style="margin-bottom:12px">Official discipline is read-only</h3>
+          <p style="font-size:14px;color:var(--t2)">Teachers cannot add or deduct points on this website. The official total comes from the school’s external system and is shown after import.</p>
         </div>
         <div class="card">
           <h3 style="margin-bottom:20px">Recent Discipline Actions</h3>
@@ -583,7 +582,7 @@
   </aside>
   <main class="main">
     <div class="ph">
-      <div><h1 id="parentTitle">Dashboard</h1><p>Welcome, Parent Portal — school updates at a glance</p></div>
+      <div><h1 id="parentTitle">Dashboard</h1><p>Demo parent view. Messages stay on this browser until a backend exists.</p><label class="lab" for="parentChildSelect" style="margin-top:8px">Child</label><select id="parentChildSelect" class="sel" onchange="selectParentChild(this.value)"></select></div>
       <div class="pu">
         <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:40px;height:40px;border-radius:50%;background:var(--s3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all var(--trf)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -643,6 +642,7 @@
         <div class="fg"><label class="lab">Subject</label><input type="text" class="inp" id="parentMsgSubject" placeholder="e.g. Request for academic support"></div>
         <div class="fg"><label class="lab">Message</label><textarea class="txa" id="parentMsgBody" placeholder="Write your message here..."></textarea></div>
         <button class="btn btn-a" style="justify-content:center;width:100%" onclick="sendParentMessage()">Send Message</button>
+        <div id="parentThread" style="margin-top:18px"></div>
         <div id="parentSentMessages" style="margin-top:18px"></div>
       </div>
     </div>
@@ -710,7 +710,11 @@
       <li><a href="#" onclick="admTab('admr')" id="nadmr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Reports</a></li>
       <li><a href="#" onclick="admTab('admran')" id="nadmran"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Rankings</a></li>
       <li><a href="#" onclick="admTab('admnot')" id="nadmnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications</a></li>
-      <li><a href="#" onclick="admTab('adms')" id="nadms"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Settings</a></li>
+      <li><a href="#" onclick="admTab('admatt')" id="nadmatt" data-roles="headmaster discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg> Main attendance</a></li>
+      <li><a href="#" onclick="admTab('admfu')" id="nadmfu" data-roles="headmaster discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg> Follow-up lessons</a></li>
+      <li><a href="#" onclick="admTab('admret')" id="nadmret" data-roles="headmaster discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3l9 9-9 9"/></svg> Midday returns</a></li>
+      <li><a href="#" onclick="admTab('admmail')" id="nadmmail" data-roles="discipline headmaster"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 7l8 6 8-6"/></svg> Parent inbox</a></li>
+      <li><a href="#" onclick="admTab('adms')" id="nadms" data-roles="headmaster"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Settings</a></li>
     </ul>
     <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
   </aside>
@@ -846,6 +850,15 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
 
     <!-- ADMIN REPORTS -->
     <div id="v-admr" class="hidden">
+      <div class="card" style="margin-bottom:16px">
+        <p style="font-size:13px;color:var(--t3);margin-bottom:10px">Demo report. Missing figures stay blank. Follow-up lessons are not included in the main attendance rate.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <label class="lab">Range <select id="reportRange" class="sel" onchange="renderDemoReports()"><option value="week">This week</option><option value="month">This month</option><option value="term">This term</option></select></label>
+          <label class="lab">Class <select id="reportClass" class="sel" onchange="renderDemoReports()"><option value="">All classes</option></select></label>
+          <label class="lab">Domain <select id="reportDomain" class="sel" onchange="renderDemoReports()"><option value="attendance">Main attendance</option><option value="followup">Follow-up lessons</option><option value="academic">Academics</option><option value="discipline">Discipline</option></select></label>
+        </div>
+        <div id="demoReportBody" style="margin-top:14px"></div>
+      </div>
       <div class="card" style="margin-bottom:20px">
         <h3 style="margin-bottom:14px">Report period</h3>
         <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
@@ -876,11 +889,11 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
     <!-- ADMIN RANKINGS -->
     <div id="v-admran" class="hidden">
       <div class="tabs" style="margin-bottom:24px">
-        <button class="tab on" onclick="setRankTab('discipline')" id="rt-discipline">Class Rankings</button>
-        <button class="tab" onclick="setRankTab('academic')" id="rt-academic">Academic Rankings</button>
-        <button class="tab" onclick="setRankTab('students')" id="rt-students">Top 30 Students</button>
+        <button class="tab on" onclick="setRankTab('discipline')" id="rt-discipline">Discipline classes</button>
+        <button class="tab" onclick="setRankTab('academic')" id="rt-academic">Academic classes</button>
+        <button class="tab" onclick="setRankTab('students')" id="rt-students">Student ranks</button>
         <button class="tab" onclick="setRankTab('attention')" id="rt-attention">Needs Attention</button>
-        <button class="tab" onclick="setRankTab('leaders')" id="rt-leaders">Class Leaders</button>
+        <button class="tab" onclick="setRankTab('leaders')" id="rt-leaders">Class leaders</button>
       </div>
 
       <div id="rank-discipline">
@@ -906,13 +919,13 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
       <div id="rank-students" class="hidden">
         <div class="g2">
           <div class="rank-card rank-card-tilt">
-            <h3 style="margin-bottom:20px;font-size:16px">Top 30 Overall Performers</h3>
-            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Average of discipline normalized from 40 and academic score from 100; students need both scores to rank.</p>
+            <h3 style="margin-bottom:12px;font-size:16px">Academic student ranks</h3>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Equal scores share a place. The next place is skipped. This list is not mixed with discipline.</p>
             <div class="rank-full-list" id="top30Overall"></div>
           </div>
           <div class="rank-card rank-card-tilt">
-            <h3 style="margin-bottom:20px;font-size:16px">Top 30 Most Disciplined</h3>
-            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Highest discipline points across all classes</p>
+            <h3 style="margin-bottom:12px;font-size:16px">Discipline student ranks</h3>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Official imported totals only. Equal totals share a place.</p>
             <div class="rank-full-list" id="top30Discipline"></div>
           </div>
         </div>
@@ -922,7 +935,7 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
         <div class="g2">
           <div class="rank-card rank-card-tilt" style="border:1px solid var(--r)">
             <h3 style="margin-bottom:20px;font-size:16px;color:var(--r)">Students Needing Attention</h3>
-            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Students with discipline below 20/40 or academic below 60%</p>
+            <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Academic under 50%, official discipline under 20/40, or more than five main-attendance absences. Each flag is separate.</p>
             <div class="rank-full-list" id="needsAttentionList"></div>
           </div>
           <div class="rank-card rank-card-tilt" style="border:1px solid var(--w)">
@@ -936,11 +949,16 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
       <div id="rank-leaders" class="hidden">
         <div class="rank-card rank-card-tilt">
           <h3 style="margin-bottom:20px;font-size:16px">Student Leaders by Class</h3>
-          <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Top performer in each class — the student with the highest combined index</p>
+          <p style="font-size:13px;color:var(--t3);margin-bottom:16px">Academic leader and discipline leader are listed separately. There is no combined performer.</p>
           <div class="rank-full-list" id="classLeadersList"></div>
         </div>
       </div>
     </div>
+
+    <div id="v-admatt" class="hidden"><div class="card" id="adminMainAtt"></div></div>
+    <div id="v-admfu" class="hidden"><div class="card" id="adminFollowAtt"></div></div>
+    <div id="v-admret" class="hidden"><div class="card" id="adminReturns"></div></div>
+    <div id="v-admmail" class="hidden"><div class="card" id="adminParentInbox"></div></div>
 
     <!-- ADMIN NOTIFICATIONS -->
     <div id="v-admnot" class="hidden">
@@ -1048,5 +1066,6 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
 </div>
 
 <script src="script.js"></script>
+<script src="portal-flows.js"></script>
 </body>
 </html>
