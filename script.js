@@ -1361,66 +1361,173 @@ function logout() {
 }
 
 // ===== PARENT PORTAL =====
+const PARENT_CHILD_ID = 'LDK-2023-001';
+let parentNotices = [
+  { title: 'Term 2 exam timetable published', body: 'Mathematics and Physics are on the Senior 5 timetable this week.', priority: 'high', time: 'Today', from: 'Dean of Studies', read: false },
+  { title: 'Attendance summary', body: 'Review the latest attendance and absences for your child.', priority: 'normal', time: 'Yesterday', from: 'Discipline Office', read: false },
+  { title: 'School announcement', body: 'Fee reminders are handled at the school office. This portal does not take payments.', priority: 'low', time: 'This week', from: 'School Administration', read: true }
+];
+
+function parentChild() {
+  const list = (window.schoolData && window.schoolData.students) || [];
+  return list.find(s => s.id === PARENT_CHILD_ID) || list[0] || null;
+}
+function parentRankText(student) {
+  if (!student || typeof combinedPerformanceIndex !== 'function') return 'Not ranked';
+  const mates = window.schoolData.students.filter(s => s.class === student.class && s.status !== 'Archived' && combinedPerformanceIndex(s) !== null);
+  const ordered = mates.slice().sort((a, b) => combinedPerformanceIndex(b) - combinedPerformanceIndex(a));
+  const place = ordered.findIndex(s => s.id === student.id);
+  return place < 0 ? 'Not ranked' : '#' + (place + 1) + ' of ' + ordered.length;
+}
+function pTab(t) {
+  document.querySelectorAll('#parP .side-nav a').forEach(a => a.classList.remove('on'));
+  const nav = document.getElementById('n' + t);
+  if (nav) nav.classList.add('on');
+  document.querySelectorAll('#parP .main > div[id^="v-"]').forEach(d => d.classList.add('hidden'));
+  const view = document.getElementById('v-' + t);
+  if (view) view.classList.remove('hidden');
+  const titles = { pdash: 'Dashboard', pstudent: 'Student Info', patt: 'Attendance', presults: 'Results', pnotes: 'Messages', pnotif: 'Notifications', pset: 'Settings' };
+  const title = document.getElementById('parentTitle');
+  if (title) title.textContent = titles[t] || 'Parent Portal';
+  if (t === 'pnotes') renderParentMessages();
+  if (t === 'pnotif' || t === 'pdash') renderParentNotifications();
+  if (t === 'patt') renderParentAttendance();
+  if (t === 'presults') renderParentResults();
+  if (t === 'pset') loadParentSettingsForm();
+}
 function renderParentOverview() {
-  const child = {
-    name: 'Jean-Paul Manirafasha',
-    id: 'LDK-2023-001',
-    class: 'S5 Stream 1',
-    attendance: '96.5%',
-    academic: '88%',
-    discipline: '35/40',
-    rank: '#12 of 145',
-    nextExam: 'Mathematics',
-    status: 'On track'
-  };
-
-  document.getElementById('parentStudentName').textContent = child.name;
-  document.getElementById('parentStudentClass').textContent = child.class;
-  document.getElementById('parentAttendanceValue').textContent = child.attendance;
-  document.getElementById('parentAcademicValue').textContent = child.academic;
-  document.getElementById('parentDisciplineValue').textContent = child.discipline;
-  document.getElementById('parentRankValue').textContent = child.rank;
-  document.getElementById('parentExamValue').textContent = child.nextExam;
-  document.getElementById('parentStatusValue').textContent = child.status;
+  const child = parentChild();
+  if (!child) return;
+  const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  set('parentStudentName', child.name);
+  set('parentStudentClass', child.class || '');
+  set('parentAttendanceValue', (child.attendanceRate ?? '--') + '%');
+  set('parentAcademicValue', (child.academicScore ?? '--') + '%');
+  set('parentDisciplineValue', (child.disciplinePoints ?? '--') + '/40');
+  set('parentRankValue', parentRankText(child));
+  set('parentExamValue', 'Mathematics');
+  const reasons = [];
+  if (child.disciplinePoints != null && child.disciplinePoints < 20) reasons.push('Discipline needs attention');
+  if (child.academicScore != null && child.academicScore < 50) reasons.push('Academics need attention');
+  set('parentStatusValue', reasons.length ? reasons.join(' · ') : 'On track');
+  set('parentDisplayRole', 'Parent of ' + child.name.split(' ')[0]);
+  const saved = localStorage.getItem('ldk-parent-name');
+  if (saved) set('parentDisplayName', saved);
+  renderParentNotifications();
 }
-
 function renderParentStudentInfo() {
-  const rows = [
-    ['Student ID', 'LDK-2023-001'],
-    ['Class', 'S5 Stream 1'],
-    ['Form', 'Senior 5'],
-    ['Academic Trend', 'Improving'],
-    ['Discipline', 'Positive'],
-    ['Teacher Remarks', 'Consistent, motivated, hardworking']
-  ];
-
+  const child = parentChild();
   const tbody = document.getElementById('parentStudentTable');
-  tbody.innerHTML = rows.map(([label, value]) => `
-    <tr>
-      <td style="color:var(--t3)">${label}</td>
-      <td style="font-weight:600">${value}</td>
-    </tr>
-  `).join('');
-}
-
-function renderParentNotifications() {
-  const items = [
-    { title: 'Term 2 exam timetable published', body: 'Your child has been scheduled for Mathematics and Physics examinations this week.', priority: 'high' },
-    { title: 'Attendance summary', body: 'Attendance remains strong at 96.5% with only 3 recorded absences this term.', priority: 'normal' },
-    { title: 'School announcement', body: 'School fee reminder has been sent to the parent office for guidance.', priority: 'low' }
+  if (!child || !tbody) return;
+  const rows = [
+    ['Student ID', child.id],
+    ['Name', child.name],
+    ['Class', child.class || ''],
+    ['Level', child.level || ''],
+    ['Status', child.status || 'Active'],
+    ['Guardian', child.guardianName || 'On file'],
+    ['Guardian phone', child.guardianPhone || 'Not recorded'],
+    ['Academic score', (child.academicScore ?? '--') + '%'],
+    ['Discipline', (child.disciplinePoints ?? '--') + '/40'],
+    ['Attendance', (child.attendanceRate ?? '--') + '%'],
+    ['Absences', String(child.absences ?? 0)],
+    ['Class rank', parentRankText(child)]
   ];
-
-  const container = document.getElementById('parentNotifList');
-  container.innerHTML = items.map(item => `
-    <div class="notif-item notif-item-tilt unread" onclick="markRead(this)">
-      <div class="notif-top">
-        <div><span class="notif-title">${item.title}</span><span class="notif-priority ${item.priority}">${item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}</span></div>
-        <span class="notif-time">Today</span>
-      </div>
-      <div class="notif-body">${item.body}</div>
-      <div class="notif-sender">From: LDK School Administration</div>
-    </div>
-  `).join('');
+  tbody.innerHTML = rows.map(([label, value]) => '<tr><td style="color:var(--t3)">' + escapeHTML(String(label)) + '</td><td style="font-weight:600">' + escapeHTML(String(value)) + '</td></tr>').join('');
+}
+function renderParentNotifications() {
+  const html = parentNotices.map((item, index) => `
+    <div class="notif-item ${item.read ? 'read' : 'unread'}" onclick="readParentNotice(${index})">
+      <div class="notif-top"><div><span class="notif-title">${escapeHTML(item.title)}</span><span class="notif-priority ${item.priority}">${item.priority}</span></div><span class="notif-time">${escapeHTML(item.time)}</span></div>
+      <div class="notif-body">${escapeHTML(item.body)}</div>
+      <div class="notif-sender">From: ${escapeHTML(item.from)}</div>
+    </div>`).join('');
+  const dash = document.getElementById('parentNotifList');
+  const full = document.getElementById('parentNotifListDetailed');
+  if (dash) dash.innerHTML = html;
+  if (full) full.innerHTML = html;
+  const unread = parentNotices.filter(n => !n.read).length;
+  const badge = document.getElementById('parentNotifBadge');
+  if (badge) { badge.textContent = String(unread); badge.style.display = unread ? 'flex' : 'none'; }
+}
+function readParentNotice(index) {
+  if (!parentNotices[index]) return;
+  parentNotices[index].read = true;
+  renderParentNotifications();
+}
+function renderParentAttendance() {
+  const child = parentChild();
+  const box = document.getElementById('parentAttendanceDetail');
+  if (!child || !box) return;
+  box.innerHTML = '<div class="stc" style="margin-bottom:12px"><h4>Rate</h4><div class="v">' + (child.attendanceRate ?? '--') + '%</div><div class="ch">' + (child.absences ?? 0) + ' absences recorded</div></div><p style="font-size:13px;color:var(--t3)">Late still counts as present. A parent explanation does not change the official mark until staff approve it.</p>';
+  const history = document.getElementById('parentAbsHistory');
+  if (!history || !window.schoolData) return;
+  const mine = (window.schoolData.justifications || []).filter(j => j.studentId === child.id);
+  history.innerHTML = mine.length ? mine.slice().reverse().map(j => '<div style="padding:8px 0;border-top:1px solid var(--b);font-size:13px"><strong>' + escapeHTML(j.date || '') + '</strong> · ' + escapeHTML(j.reason || '') + ' · ' + escapeHTML(j.status || 'Pending') + '</div>').join('') : '<div style="font-size:13px;color:var(--t3)">No absence notes sent yet.</div>';
+}
+function submitParentAbsence() {
+  const d = document.getElementById('parentAbsDate').value;
+  const reason = document.getElementById('parentAbsReason').value;
+  const detail = document.getElementById('parentAbsDetail').value.trim();
+  if (!d || !detail) { toast('Add the date and a short explanation'); return; }
+  const child = parentChild();
+  if (!child) return;
+  const dateObj = new Date(d + 'T00:00:00');
+  const formatted = isNaN(dateObj) ? d : dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  window.schoolData.justifications.push({
+    id: Date.now(), student: child.name, studentId: child.id, class: child.class,
+    initials: getInitials(child.name), color: 'linear-gradient(135deg,var(--a),var(--r))',
+    date: formatted, reason: reason, detail: detail, proofName: null, status: 'Pending', source: 'Parent'
+  });
+  saveJustifications();
+  renderPendingJustifications();
+  document.getElementById('parentAbsDate').value = '';
+  document.getElementById('parentAbsDetail').value = '';
+  renderParentAttendance();
+  toast('Absence note sent to staff');
+}
+function renderParentResults() {
+  const child = parentChild();
+  const card = document.getElementById('parentResultsCard');
+  if (!child || !card) return;
+  card.innerHTML = '<h3 style="margin-bottom:12px">Results for ' + escapeHTML(child.name) + '</h3><div class="g3"><div class="stc"><h4>Academic</h4><div class="v">' + (child.academicScore ?? '--') + '%</div></div><div class="stc"><h4>Discipline</h4><div class="v">' + (child.disciplinePoints ?? '--') + '/40</div></div><div class="stc"><h4>Class rank</h4><div class="v" style="font-size:22px">' + escapeHTML(parentRankText(child)) + '</div></div></div><p style="margin-top:14px;font-size:13px;color:var(--t3)">Parents can read these figures. Only staff and admin can change them.</p>';
+}
+function loadParentMessages() {
+  try { return JSON.parse(localStorage.getItem('ldk-parent-messages') || '[]'); } catch (e) { return []; }
+}
+function renderParentMessages() {
+  const box = document.getElementById('parentSentMessages');
+  if (!box) return;
+  const list = loadParentMessages();
+  box.innerHTML = list.length ? '<h4 style="margin-bottom:8px">Sent</h4>' + list.map(m => '<div style="padding:10px 0;border-top:1px solid var(--b)"><strong>' + escapeHTML(m.subject) + '</strong><div style="font-size:13px;color:var(--t2);margin-top:4px">' + escapeHTML(m.body) + '</div><div style="font-size:12px;color:var(--t3);margin-top:4px">' + escapeHTML(m.at) + ' · ' + escapeHTML(m.status) + '</div></div>').join('') : '<div style="font-size:13px;color:var(--t3);margin-top:8px">No messages sent yet.</div>';
+}
+function sendParentMessage() {
+  const subject = document.getElementById('parentMsgSubject').value.trim();
+  const body = document.getElementById('parentMsgBody').value.trim();
+  if (!subject || !body) { toast('Write a subject and a message'); return; }
+  const list = loadParentMessages();
+  list.unshift({ subject, body, at: new Date().toLocaleString(), status: 'Sent to the school office' });
+  localStorage.setItem('ldk-parent-messages', JSON.stringify(list.slice(0, 30)));
+  document.getElementById('parentMsgSubject').value = '';
+  document.getElementById('parentMsgBody').value = '';
+  renderParentMessages();
+  toast('Message sent to the school office');
+}
+function loadParentSettingsForm() {
+  const name = document.getElementById('parentNameInput');
+  const phone = document.getElementById('parentPhoneInput');
+  if (name) name.value = localStorage.getItem('ldk-parent-name') || 'Mrs. Mukamana';
+  if (phone) phone.value = localStorage.getItem('ldk-parent-phone') || '';
+}
+function saveParentSettings() {
+  const name = document.getElementById('parentNameInput').value.trim();
+  const phone = document.getElementById('parentPhoneInput').value.trim();
+  if (!name) { toast('Add the name the school should see'); return; }
+  localStorage.setItem('ldk-parent-name', name);
+  localStorage.setItem('ldk-parent-phone', phone);
+  const label = document.getElementById('parentDisplayName');
+  if (label) label.textContent = name;
+  toast('Parent settings saved');
 }
 
 // ===== STUDENT TABS =====
