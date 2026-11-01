@@ -5,6 +5,16 @@
   window.staffAssignedClasses = function () {
     return window.staffKind === 'academic' ? ['S5 Stream 1'] : (window.schoolData.classes || []).map(c => c.name);
   };
+  window.sendStaffReport = function () {
+    const title = document.getElementById('staffRepTitle').value.trim();
+    const body = document.getElementById('staffRepBody').value.trim();
+    if (!title || !body) { toast('Add a title and a short description.'); return; }
+    const to = window.staffKind === 'academic' ? 'dean' : document.getElementById('staffRepTo').value;
+    const list = reportStore();
+    list.unshift({ id: String(Date.now()), category: document.getElementById('staffRepCat').value, to, title, body, fileName: '', sender: window.staffKind === 'academic' ? 'Academic Staff' : 'Discipline Staff', read: false, date: new Date().toLocaleString() });
+    saveReports(list);
+    toast('Saved in this browser demo. Nobody else has been notified.');
+  };
   window.applyStaffKind = function () {
     const pick = document.getElementById('sstaff');
     window.staffKind = pick ? pick.value : 'academic';
@@ -16,6 +26,13 @@
     }
     const ann = document.getElementById('annTitle');
     if (ann && ann.closest('.card')) ann.closest('.card').style.display = window.staffKind === 'academic' ? '' : 'none';
+    const select = document.getElementById('staffRepTo');
+    if (select) {
+      select.innerHTML = window.staffKind === 'academic'
+        ? '<option value="dean">Dean of Studies</option>'
+        : '<option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option>';
+      select.disabled = window.staffKind === 'academic';
+    }
     if (typeof populateAttendanceClassSelect === 'function') populateAttendanceClassSelect();
   };
 
@@ -337,9 +354,25 @@
       card.innerHTML = '<h3>Announcement</h3><p style="font-size:13px;color:var(--t3)">Teachers may post only to an assigned class. ' + NOTE + '</p><label class="lab" for="annTitle">Title</label><input class="inp" id="annTitle"><label class="lab" for="annBody">Message</label><textarea class="txa" id="annBody"></textarea><label class="lab" for="annAudience">Audience</label><select class="sel" id="annAudience"><option value="S5 Stream 1">S5 Stream 1</option><option value="school">Whole school (admin only)</option></select><button class="btn btn-a" style="margin-top:8px" onclick="publishAnnouncement()">Publish in this demo</button>';
       dash.appendChild(card);
     }
+    if (dash && !document.getElementById('staffRepTitle')) {
+      const send = document.createElement('div');
+      send.className = 'card';
+      send.style.marginTop = '16px';
+      send.innerHTML = '<h3>Send a class report</h3><p style="font-size:13px;color:var(--t3)">Academic Staff can save a report for the Dean. Discipline Staff can save one for the Headmaster or Discipline Officer. ' + NOTE + '</p><label class="lab" for="staffRepCat">Category</label><select id="staffRepCat" class="sel"><option>Discipline</option><option>Academics</option><option>Attendance</option><option>Other</option></select><label class="lab" for="staffRepTo">Recipient</label><select id="staffRepTo" class="sel"></select><label class="lab" for="staffRepTitle">Title</label><input class="inp" id="staffRepTitle"><label class="lab" for="staffRepBody">Short description</label><textarea class="txa" id="staffRepBody"></textarea><button class="btn btn-a" style="margin-top:8px" onclick="sendStaffReport()">Save in this browser demo</button>';
+      dash.appendChild(send);
+    }
     const ann = document.getElementById('v-san');
     if (ann) ann.innerHTML = '<div class="card"><h3>Announcements</h3><p style="font-size:13px;color:var(--t3)">One feed. ' + NOTE + '</p><div id="studentAnnouncements"></div></div>';
     renderAnnouncements();
+    const reports = document.getElementById('v-admr');
+    if (reports && !document.getElementById('hmInbox')) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.marginTop = '16px';
+      card.innerHTML = '<div id="hmInbox"></div><h3 style="margin-top:16px">Send a demo report</h3><p style="font-size:13px;color:var(--t3)">Saving a report does not notify anyone. The file name stays on this browser; the file is not uploaded.</p><label class="lab" for="repCat">Category</label><select class="sel" id="repCat"><option>Discipline</option><option>Academics</option><option>Attendance</option><option>Other</option></select><label class="lab" for="repTo">Recipient</label><select class="sel" id="repTo"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option></select><label class="lab" for="repTitle">Title</label><input class="inp" id="repTitle"><label class="lab" for="repBody">Short description</label><textarea class="txa" id="repBody"></textarea><label class="lab" for="repFile">Attachment</label><input id="repFile" type="file"><div id="repPreview" hidden></div><button class="btn btn-a" style="margin-top:8px" onclick="queueDemoReport()">Review before saving</button>';
+      reports.appendChild(card);
+      renderReportInbox();
+    }
   }
   window.renderAnnouncements = function () {
     const box = document.getElementById('studentAnnouncements');

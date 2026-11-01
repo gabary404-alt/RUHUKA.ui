@@ -17,7 +17,13 @@ Portals for this handover:
 - Staff, with Academic Staff (teachers) and Discipline Staff (patrons and matrons)
 - Admin: Headmaster, Dean of Studies, Discipline Officer
 
-There is **no Parent portal** in this handover. Students have one Announcements feed, not a separate Notifications section. Needs Attention attendance means **five consecutive recorded main-attendance school days**, not five absences spread over time. Official discipline points cannot be edited on the website. The Headmaster reads attendance through Reports, not through the operational attendance screens.
+There is **no Parent portal** in this handover. Students have one Announcements feed. Needs Attention attendance means **five consecutive recorded main-attendance school days**. Official discipline points cannot be edited here. The Headmaster reads attendance through Reports.
+
+Students also see separate academic and discipline places for their class, their level, and the school. Ties share a place. Missing scores stay missing.
+
+Notebooks hold several personal notes and checklists on this browser only.
+
+Demo reports can be reviewed and then saved into a Headmaster inbox on this browser. That does not notify a real person, and attachments are not uploaded. Discipline Staff cannot publish announcements. Academic Staff can announce only to an assigned class.
 
 ## Purpose of this document
 
