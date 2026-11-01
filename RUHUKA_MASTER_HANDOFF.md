@@ -5,6 +5,20 @@ Repository: https://github.com/gabary404-alt/RUHUKA.ui
 Live-site target: https://ruhukaui.vercel.app/
 Current reviewed main commit: ec2c5695f5d7c56d51dde1f248d08a4645d64703 — “Separate rankings, lock discipline edits, and finish demo portal flows”
 
+## First handover scope — updated 2026-11-01
+
+This section overrides older statements in this file when they conflict.
+
+The first school handover is a **frontend demo** on branch `phase-1-first-handover-prep`. It is not connected to Supabase. Role buttons and `localStorage` are prototypes. They are not security, not delivery, and not sync across devices or accounts.
+
+Portals for this handover:
+
+- Student
+- Staff, with Academic Staff (teachers) and Discipline Staff (patrons and matrons)
+- Admin: Headmaster, Dean of Studies, Discipline Officer
+
+There is **no Parent portal** in this handover. Students have one Announcements feed, not a separate Notifications section. Needs Attention attendance means **five consecutive recorded main-attendance school days**, not five absences spread over time. Official discipline points cannot be edited on the website. The Headmaster reads attendance through Reports, not through the operational attendance screens.
+
 ## Purpose of this document
 
 This is the main orientation and product handoff for anyone continuing RUHUKA: a developer, designer, school representative, or another AI assistant. It describes the intended school system, current progress, decisions confirmed by the project owner, boundaries that must not be broken, known gaps, unresolved questions, and a practical picture of the finished product.

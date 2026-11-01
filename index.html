@@ -297,13 +297,13 @@
       <button class="tab on" onclick="setR('student')" id="t-stu">Student</button>
       <button class="tab" onclick="setR('staff')" id="t-sta">Staff</button>
       <button class="tab" onclick="setR('admin')" id="t-adm">Admin</button>
-      <button class="tab" onclick="setR('parent')" id="t-par">Parent</button>
     </div>
+    <div class="fg hidden" id="srole"><label class="lab" for="sstaff">Staff role</label><select class="sel" id="sstaff"><option value="academic">Academic Staff — teacher</option><option value="discipline">Discipline Staff — patron or matron</option></select></div>
     <div class="fg"><label class="lab">ID / Email</label><input type="text" class="inp" id="lid" placeholder="e.g. LDK-2023-001" value="LDK-2023-001"></div>
     <div class="fg"><label class="lab">Password</label><input type="password" class="inp" id="lpw" placeholder="Enter password" value="password"></div>
     <div class="fg hidden" id="arole"><label class="lab">Admin Role</label><select class="sel" id="asel"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option><option value="dean">Dean of Studies</option></select></div>
     <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="doL()">Sign In <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg></button>
-    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Demo: Use any ID and "password" to login</p></div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--b);text-align:center"><p style="font-size:12px;color:var(--t3)">Demo preview only. Any ID and the word password open a role view on this browser. This is not real security, and nothing is synced to other devices.</p></div>
   </div>
 </div>
 
@@ -318,7 +318,6 @@
       <li><a href="#" onclick="sTab('satt')" id="nsatt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Attendance</a></li>
       <li><a href="#" onclick="sTab('sab')" id="nsab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Absence</a></li>
       <li><a href="#" onclick="sTab('san')" id="nsan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Announcements</a></li>
-      <li><a href="#" onclick="sTab('snot')" id="nsnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications <span style="margin-left:auto;background:var(--r);color:#fff;font-size:10px;padding:2px 6px;border-radius:100px" id="sNotifBadge">3</span></a></li>
     </ul>
     <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
   </aside>
@@ -431,13 +430,14 @@
 <!-- STAFF PORTAL -->
 <div class="port" id="staP">
   <aside class="side">
-    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Teacher Portal</span></div>
+    <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Staff Portal</span></div>
     <ul class="side-nav">
       <li><a href="#" class="on" onclick="staTab('stad')" id="ntad"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a></li>
       <li><a href="#" onclick="staTab('staat')" id="ntaat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Mark Attendance</a></li>
       <li><a href="#" onclick="staTab('stajs')" id="ntjs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Justifications</a></li>
       <li><a href="#" onclick="staTab('stadm')" id="ntadm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Discipline Marks</a></li>
-      <li><a href="#" onclick="staTab('stnot')" id="ntnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications <span style="margin-left:auto;background:var(--r);color:#fff;font-size:10px;padding:2px 6px;border-radius:100px" id="stNotifBadge">2</span></a></li>
+      <li><a href="#" onclick="staTab('stnote')" id="ntnote"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Notebook</a></li>
+      <li><a href="#" onclick="staTab('stlook')" id="ntlook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg> Student lookup</a></li>
     </ul>
     <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
   </aside>
@@ -531,6 +531,8 @@
         </div>
       </div>
     </div>
+    <div id="v-stlook" class="hidden"><div class="card" id="staffLookup"></div></div>
+    <div id="v-stnote" class="hidden"><div class="card" id="staffNotebook"></div></div>
     <div id="v-stnot" class="hidden">
       <div class="card">
         <h3 style="margin-bottom:20px">Staff Notifications</h3>
@@ -566,7 +568,7 @@
 </div>
 
 <!-- PARENT PORTAL -->
-<div class="port" id="parP">
+<div class="port hidden" id="parP" hidden aria-hidden="true">
   <aside class="side">
     <div class="side-logo"><div style="width:32px;height:32px;background:var(--p);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">LDK</div><span>Parent Portal</span></div>
     <ul class="side-nav">
@@ -709,11 +711,11 @@
       <li><a href="#" onclick="admTab('admbi')" id="nadmbi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Bulk Import</a></li>
       <li><a href="#" onclick="admTab('admr')" id="nadmr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Reports</a></li>
       <li><a href="#" onclick="admTab('admran')" id="nadmran"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Rankings</a></li>
-      <li><a href="#" onclick="admTab('admnot')" id="nadmnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Notifications</a></li>
-      <li><a href="#" onclick="admTab('admatt')" id="nadmatt" data-roles="headmaster discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg> Main attendance</a></li>
-      <li><a href="#" onclick="admTab('admfu')" id="nadmfu" data-roles="headmaster discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg> Follow-up lessons</a></li>
-      <li><a href="#" onclick="admTab('admret')" id="nadmret" data-roles="headmaster discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3l9 9-9 9"/></svg> Midday returns</a></li>
-      <li><a href="#" onclick="admTab('admmail')" id="nadmmail" data-roles="discipline headmaster"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 7l8 6 8-6"/></svg> Parent inbox</a></li>
+      <li><a href="#" onclick="admTab('admnot')" id="nadmnot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Announcements</a></li>
+      <li><a href="#" onclick="admTab('admatt')" id="nadmatt" data-roles="discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg> Main attendance</a></li>
+      <li><a href="#" onclick="admTab('admfu')" id="nadmfu" data-roles="discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg> Follow-up lessons</a></li>
+      <li><a href="#" onclick="admTab('admret')" id="nadmret" data-roles="discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3l9 9-9 9"/></svg> Midday returns</a></li>
+      <li><a href="#" onclick="admTab('admnote')" id="nadmnote" data-roles="headmaster dean discipline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Notebook</a></li>
       <li><a href="#" onclick="admTab('adms')" id="nadms" data-roles="headmaster"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Settings</a></li>
     </ul>
     <div style="padding:16px;margin-top:auto;border-top:1px solid var(--b)"><button class="btn btn-g" style="width:100%;justify-content:center" onclick="logout()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button></div>
@@ -958,7 +960,8 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
     <div id="v-admatt" class="hidden"><div class="card" id="adminMainAtt"></div></div>
     <div id="v-admfu" class="hidden"><div class="card" id="adminFollowAtt"></div></div>
     <div id="v-admret" class="hidden"><div class="card" id="adminReturns"></div></div>
-    <div id="v-admmail" class="hidden"><div class="card" id="adminParentInbox"></div></div>
+    <div id="v-admnote" class="hidden"><div class="card" id="adminNotebook"></div></div>
+    <div id="v-admmail" class="hidden"><div class="card"><p>Parent messaging is not part of this first handover.</p></div></div>
 
     <!-- ADMIN NOTIFICATIONS -->
     <div id="v-admnot" class="hidden">
@@ -1067,5 +1070,6 @@ Patrick Habyarimana, LDK-2022-089, M, S6, Stream 1, A-Level"></textarea>
 
 <script src="script.js"></script>
 <script src="portal-flows.js"></script>
+<script src="phase1.js"></script>
 </body>
 </html>
