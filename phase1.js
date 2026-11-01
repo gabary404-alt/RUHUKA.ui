@@ -200,6 +200,14 @@
       users.appendChild(card);
     }
     renderRosterQueue();
+    const dash = document.getElementById('v-stad');
+    if (dash && !document.getElementById('annTitle')) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.marginTop = '16px';
+      card.innerHTML = '<h3>Announcement</h3><p style="font-size:13px;color:var(--t3)">Teachers may post only to an assigned class. ' + NOTE + '</p><label class="lab" for="annTitle">Title</label><input class="inp" id="annTitle"><label class="lab" for="annBody">Message</label><textarea class="txa" id="annBody"></textarea><label class="lab" for="annAudience">Audience</label><select class="sel" id="annAudience"><option value="S5 Stream 1">S5 Stream 1</option><option value="school">Whole school (admin only)</option></select><button class="btn btn-a" style="margin-top:8px" onclick="publishAnnouncement()">Publish in this demo</button>';
+      dash.appendChild(card);
+    }
     const ann = document.getElementById('v-san');
     if (ann) ann.innerHTML = '<div class="card"><h3>Announcements</h3><p style="font-size:13px;color:var(--t3)">One feed. ' + NOTE + '</p><div id="studentAnnouncements"></div></div>';
     renderAnnouncements();
