@@ -12,8 +12,10 @@
     if (welcome) {
       welcome.textContent = window.staffKind === 'academic'
         ? 'Academic Staff. Attendance and announcements are limited to S5 Stream 1 in this demo. ' + NOTE
-        : 'Discipline Staff (patron or matron). Day-to-day lookup and attendance only. You cannot import discipline or clear Needs Attention. ' + NOTE;
+        : 'Discipline Staff (patron or matron). Day-to-day lookup and attendance only. You cannot send announcements or change official discipline totals. ' + NOTE;
     }
+    const ann = document.getElementById('annTitle');
+    if (ann && ann.closest('.card')) ann.closest('.card').style.display = window.staffKind === 'academic' ? '' : 'none';
     if (typeof populateAttendanceClassSelect === 'function') populateAttendanceClassSelect();
   };
 
@@ -124,34 +126,93 @@
     out.innerHTML = rows.map(s => '<div style="padding:8px 0;border-top:1px solid var(--b)"><strong>' + escapeHTML(s.name) + '</strong> · ' + escapeHTML(s.id) + ' · ' + escapeHTML(s.class || '') + '<div style="font-size:13px;color:var(--t2)">Academic: ' + (numberOrNull(s.academicScore) === null ? 'Missing' : s.academicScore + '%') + ' · Official discipline: ' + (numberOrNull(s.disciplinePoints) === null ? 'Missing' : s.disciplinePoints + '/40') + '</div></div>').join('') || '<p>No match.</p>';
   };
 
-  function notebookKey(slot) { return 'ldk-notebook-' + (slot || 'staff') + '-' + (window.staffKind || window.previewRole || 'demo'); }
+  function notebookKey(slot) {
+    const who = slot === 'admin' ? (window.previewRole || 'admin') : (window.staffKind || 'academic');
+    return 'ldk-notes-v2-' + slot + '-' + who;
+  }
+  function readNotes(slot) {
+    try { return JSON.parse(localStorage.getItem(notebookKey(slot)) || '[]'); } catch (e) { return []; }
+  }
+  function writeNotes(slot, notes) {
+    localStorage.setItem(notebookKey(slot), JSON.stringify(notes));
+  }
   window.renderNotebook = function (elementId, slot) {
     const box = document.getElementById(elementId);
     if (!box) return;
-    let data = { notes: '', items: [] };
-    try { data = JSON.parse(localStorage.getItem(notebookKey(slot)) || '') || data; } catch (e) { data = { notes: '', items: [] }; }
-    box.innerHTML = '<h3>Personal notebook</h3><p style="font-size:13px;color:var(--t3);margin:8px 0">' + NOTE + '</p><label class="lab" for="nb-' + slot + '">Notes</label><textarea class="txa" id="nb-' + slot + '">' + escapeHTML(data.notes || '') + '</textarea><div id="nb-items-' + slot + '"></div><button class="btn btn-g" onclick="addCheck(\'' + slot + '\',\'' + elementId + '\')">Add checklist item</button> <button class="btn btn-a" onclick="saveNotebook(\'' + slot + '\')">Save on this device</button>';
-    const list = document.getElementById('nb-items-' + slot);
-    list.innerHTML = (data.items || []).map((item, i) => '<label style="display:flex;gap:8px;margin:8px 0"><input type="checkbox" data-i="' + i + '" ' + (item.done ? 'checked' : '') + '> ' + escapeHTML(item.text) + '</label>').join('');
     box.dataset.slot = slot;
+    const notes = readNotes(slot);
+    const openId = box.dataset.open || '';
+    const open = notes.find(n => n.id === openId);
+    const list = notes.length ? notes.map(n => '<button class="btn btn-g" style="width:100%;justify-content:space-between;margin-bottom:8px" onclick="openNote(\'' + slot + '\',\'' + elementId + '\',\'' + n.id + '\')"><span>' + escapeHTML(n.title || (n.kind === 'check' ? 'Checklist' : 'Note')) + '</span><span style="font-size:12px;color:var(--t3)">' + (n.kind === 'check' ? 'Checklist' : 'Note') + '</span></button>').join('') : '<p style="color:var(--t3)">No notes yet. Use the plus button to add a simple note or a checklist.</p>';
+    const editor = open ? (open.kind === 'check'
+      ? '<label class="lab" for="noteTitle">Title</label><input class="inp" id="noteTitle" value="' + escapeHTML(open.title || '') + '"><div id="checkLines">' + (open.items || []).map((item, i) => '<div style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" data-i="' + i + '" ' + (item.done ? 'checked' : '') + '><input class="inp" data-text="' + i + '" value="' + escapeHTML(item.text) + '"><button class="btn btn-d btn-sm" onclick="deleteCheckLine(\'' + slot + '\',\'' + elementId + '\',' + i + ')">Delete</button></div>').join('') + '</div><button class="btn btn-g" onclick="addCheckLine(\'' + slot + '\',\'' + elementId + '\')">Add item</button>'
+      : '<label class="lab" for="noteTitle">Title</label><input class="inp" id="noteTitle" value="' + escapeHTML(open.title || '') + '"><label class="lab" for="noteBody">Note</label><textarea class="txa" id="noteBody">' + escapeHTML(open.body || '') + '</textarea>') + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-a" onclick="saveOpenNote(\'' + slot + '\',\'' + elementId + '\')">Save on this device</button><button class="btn btn-d" onclick="deleteOpenNote(\'' + slot + '\',\'' + elementId + '\')">Delete</button><button class="btn btn-g" onclick="closeNote(\'' + elementId + '\',\'' + slot + '\')">Back</button></div>' : '';
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px"><div><h3>Notebook</h3><p style="font-size:13px;color:var(--t3)">' + NOTE + '</p></div><button class="btn btn-a" aria-label="Add note or checklist" onclick="startNote(\'' + slot + '\',\'' + elementId + '\')">+</button></div><div id="noteChooser" class="hidden" style="display:flex;gap:8px;margin-bottom:12px"><button class="btn btn-g" onclick="createNote(\'' + slot + '\',\'' + elementId + '\',\'note\')">Simple note</button><button class="btn btn-g" onclick="createNote(\'' + slot + '\',\'' + elementId + '\',\'check\')">Checklist</button></div>' + (open ? editor : list);
+    if (box.dataset.choosing === '1' && !open) { const c = document.getElementById('noteChooser'); if (c) c.classList.remove('hidden'); }
   };
-  window.addCheck = function (slot, elementId) {
-    const text = window.prompt('Checklist item');
-    if (!text) return;
-    let data = { notes: '', items: [] };
-    try { data = JSON.parse(localStorage.getItem(notebookKey(slot)) || '') || data; } catch (e) {}
-    data.items = data.items || [];
-    data.items.push({ text, done: false });
-    localStorage.setItem(notebookKey(slot), JSON.stringify(data));
+  window.startNote = function (slot, elementId) {
+    const box = document.getElementById(elementId);
+    if (box) box.dataset.choosing = '1';
     renderNotebook(elementId, slot);
   };
-  window.saveNotebook = function (slot) {
-    const notes = document.getElementById('nb-' + slot);
-    let data = { notes: notes ? notes.value : '', items: [] };
-    try { const old = JSON.parse(localStorage.getItem(notebookKey(slot)) || '{}'); data.items = old.items || []; } catch (e) {}
-    document.querySelectorAll('#nb-items-' + slot + ' input').forEach(input => { if (data.items[input.dataset.i]) data.items[input.dataset.i].done = input.checked; });
-    try { localStorage.setItem(notebookKey(slot), JSON.stringify(data)); toast('Notebook saved on this device.'); }
+  window.createNote = function (slot, elementId, kind) {
+    const notes = readNotes(slot);
+    const id = String(Date.now());
+    notes.unshift({ id, kind, title: kind === 'check' ? 'Checklist' : 'Note', body: '', items: kind === 'check' ? [{ text: '', done: false }] : [] });
+    writeNotes(slot, notes);
+    const box = document.getElementById(elementId);
+    if (box) { box.dataset.open = id; box.dataset.choosing = ''; }
+    renderNotebook(elementId, slot);
+    toast('Saved in this browser demo.');
+  };
+  window.openNote = function (slot, elementId, id) {
+    const box = document.getElementById(elementId);
+    if (box) box.dataset.open = id;
+    renderNotebook(elementId, slot);
+  };
+  window.closeNote = function (elementId, slot) {
+    const box = document.getElementById(elementId);
+    if (box) box.dataset.open = '';
+    renderNotebook(elementId, slot);
+  };
+  window.saveOpenNote = function (slot, elementId) {
+    const box = document.getElementById(elementId);
+    const notes = readNotes(slot);
+    const note = notes.find(n => n.id === (box && box.dataset.open));
+    if (!note) return;
+    note.title = document.getElementById('noteTitle').value.trim() || note.title;
+    if (note.kind === 'check') {
+      note.items = [...document.querySelectorAll('#checkLines [data-text]')].map(input => ({ text: input.value, done: !!document.querySelector('#checkLines [data-i="' + input.dataset.text + '"]').checked }));
+    } else note.body = document.getElementById('noteBody').value;
+    try { writeNotes(slot, notes); toast('Saved in this browser demo. Not synced.'); }
     catch (e) { toast('This browser could not store the notebook.'); }
+  };
+  window.deleteOpenNote = function (slot, elementId) {
+    const box = document.getElementById(elementId);
+    writeNotes(slot, readNotes(slot).filter(n => n.id !== box.dataset.open));
+    box.dataset.open = '';
+    renderNotebook(elementId, slot);
+    toast('Deleted on this device.');
+  };
+  window.addCheckLine = function (slot, elementId) {
+    window.saveOpenNote(slot, elementId);
+    const box = document.getElementById(elementId);
+    const notes = readNotes(slot);
+    const note = notes.find(n => n.id === box.dataset.open);
+    if (!note) return;
+    note.items.push({ text: '', done: false });
+    writeNotes(slot, notes);
+    renderNotebook(elementId, slot);
+  };
+  window.deleteCheckLine = function (slot, elementId, index) {
+    window.saveOpenNote(slot, elementId);
+    const box = document.getElementById(elementId);
+    const notes = readNotes(slot);
+    const note = notes.find(n => n.id === box.dataset.open);
+    if (!note) return;
+    note.items.splice(index, 1);
+    writeNotes(slot, notes);
+    renderNotebook(elementId, slot);
   };
 
   const origAdm = window.admTab;
@@ -187,6 +248,74 @@
     if (!box) return;
     const queue = JSON.parse(localStorage.getItem('ldk-roster-queue') || '[]');
     box.innerHTML = queue.map(item => '<div style="padding:8px 0;border-top:1px solid var(--b)"><strong>' + escapeHTML(item.name) + '</strong> · ' + escapeHTML(item.status) + (window.previewRole === 'headmaster' && item.status === 'Awaiting Headmaster' ? ' <button class="btn btn-a btn-sm" onclick="reviewRoster(\'' + item.id + '\',\'Approved\')">Approve</button> <button class="btn btn-d btn-sm" onclick="reviewRoster(\'' + item.id + '\',\'Declined\')">Decline</button>' : '') + '</div>').join('') || '<p style="color:var(--t3)">No roster requests.</p>';
+  };
+
+  function placeOf(list, student, scoreOf) {
+    const rows = list.map(s => ({ s, score: scoreOf(s) })).filter(r => r.score !== null);
+    rows.sort((a, b) => b.score - a.score);
+    let last = null, place = 0;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].score !== last) { place = i + 1; last = rows[i].score; }
+      if (rows[i].s.id === student.id) return place + ' of ' + rows.length;
+    }
+    return 'Not ranked — score missing';
+  }
+  function rankLine(student, label, pool, key) {
+    return '<div style="padding:8px 0;border-top:1px solid var(--b)"><strong>' + label + '</strong><div>Academic: ' + placeOf(pool, student, s => numberOrNull(s.academicScore)) + '</div><div>Discipline: ' + placeOf(pool, student, s => numberOrNull(s.disciplinePoints)) + '</div></div>';
+  }
+  const priorStudent = window.renderStudentPortal;
+  window.renderStudentPortal = function () {
+    if (priorStudent) priorStudent();
+    const card = document.getElementById('studentResultsCard');
+    const student = window.schoolData && window.schoolData.students.find(s => s.id === CURRENT_STUDENT.id);
+    if (!card || !student) return;
+    const active = window.schoolData.students.filter(s => s.status !== 'Archived');
+    card.insertAdjacentHTML('beforeend', '<h3 style="margin-top:16px">Demo ranks</h3><p style="font-size:12px;color:var(--t3)">Academic and discipline are separate. Ties share a place. Missing scores are not zero. ' + NOTE + '</p>' + rankLine(student, 'Class · ' + (student.class || '')) + rankLine(student, 'Level · ' + (student.level || 'Unknown'), active.filter(s => s.level === student.level)) + rankLine(student, 'School', active));
+  };
+
+  function reportStore() { try { return JSON.parse(localStorage.getItem('ldk-demo-reports') || '[]'); } catch (e) { return []; } }
+  function saveReports(list) { localStorage.setItem('ldk-demo-reports', JSON.stringify(list)); }
+  window.queueDemoReport = function () {
+    const category = document.getElementById('repCat').value;
+    const to = document.getElementById('repTo').value;
+    const title = document.getElementById('repTitle').value.trim();
+    const body = document.getElementById('repBody').value.trim();
+    const file = document.getElementById('repFile').files[0];
+    if (!title || !body) { toast('Add a title and a short description.'); return; }
+    const preview = document.getElementById('repPreview');
+    preview.hidden = false;
+    preview.innerHTML = '<p><strong>Check before saving</strong></p><p>' + escapeHTML(category) + ' report for ' + escapeHTML(to) + '</p><p>' + escapeHTML(title) + '</p><p>' + escapeHTML(body) + '</p><p>File: ' + escapeHTML(file ? file.name : 'none') + '</p><button class="btn btn-a" onclick="confirmDemoReport()">Save in this browser demo</button>';
+    window._pendingReport = { category, to, title, body, fileName: file ? file.name : '' };
+  };
+  window.confirmDemoReport = function () {
+    const pending = window._pendingReport;
+    if (!pending) return;
+    const sender = window.previewRole || (window.staffKind === 'discipline' ? 'discipline-staff' : 'academic-staff');
+    const list = reportStore();
+    list.unshift({ id: String(Date.now()), ...pending, sender, read: false, date: new Date().toLocaleString() });
+    saveReports(list);
+    window._pendingReport = null;
+    document.getElementById('repPreview').hidden = true;
+    toast('Saved in this browser demo. Nobody else has been notified.');
+    renderReportInbox();
+  };
+  window.renderReportInbox = function () {
+    const box = document.getElementById('hmInbox');
+    if (!box) return;
+    const who = window.previewRole || 'headmaster';
+    const mine = reportStore().filter(r => r.to === who || (who === 'headmaster' && r.to === 'headmaster'));
+    const unread = mine.filter(r => !r.read);
+    const byCat = {};
+    unread.forEach(r => { const key = r.category + ' from ' + r.sender; byCat[key] = (byCat[key] || 0) + 1; });
+    box.innerHTML = '<h3>Report inbox</h3><p style="font-size:13px;color:var(--t3)">' + NOTE + '</p><p>Unread: ' + unread.length + (Object.keys(byCat).length ? ' · ' + Object.entries(byCat).map(([k, n]) => n + ' ' + k).join(', ') : '') + '</p>' +
+      (mine.length ? mine.map(r => '<article style="padding:10px 0;border-top:1px solid var(--b)"><strong>' + escapeHTML(r.title) + '</strong> <span class="tag">' + (r.read ? 'Read' : 'Unread') + '</span><div style="font-size:13px;color:var(--t3)">' + escapeHTML(r.sender) + ' · ' + escapeHTML(r.category) + ' · ' + escapeHTML(r.date) + '</div><p>' + escapeHTML(r.body) + '</p>' + (r.fileName ? '<p>Attachment name: ' + escapeHTML(r.fileName) + ' (kept as a name only in this demo)</p>' : '') + '<button class="btn btn-g btn-sm" onclick="markReport(\'' + r.id + '\')">Open</button></article>').join('') : '<p>No reports in this browser yet.</p>');
+  };
+  window.markReport = function (id) {
+    const list = reportStore();
+    const row = list.find(r => r.id === id);
+    if (row) row.read = true;
+    saveReports(list);
+    renderReportInbox();
   };
 
   function boot() {
@@ -225,6 +354,7 @@
     const body = document.getElementById('annBody').value.trim();
     const audience = document.getElementById('annAudience').value;
     if (!title || !body) { toast('Add a title and a message.'); return; }
+    if (window.staffKind === 'discipline') { toast('Discipline Staff cannot send announcements.'); return; }
     if (window.staffKind === 'academic' && audience === 'school') { toast('Teachers can announce only to an assigned class.'); return; }
     const items = JSON.parse(localStorage.getItem('ldk-announcements') || '[]');
     items.unshift({ title, body, audience, author: window.staffKind === 'academic' ? 'Academic Staff demo' : 'Admin demo', date: new Date().toLocaleDateString() });
