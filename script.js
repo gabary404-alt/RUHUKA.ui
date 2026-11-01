@@ -1322,6 +1322,8 @@ function setR(r) {
   const tab = document.getElementById(tabId);
   if (tab) tab.classList.add('on');
   document.getElementById('arole').classList.toggle('hidden', r !== 'admin');
+  const staffRole = document.getElementById('srole');
+  if (staffRole) staffRole.classList.toggle('hidden', r !== 'staff');
 }
 function doL() {
   const id = document.getElementById('lid').value;
@@ -1330,13 +1332,8 @@ function doL() {
   closeL();
   document.getElementById('land').classList.add('hidden');
   if (curRole === 'student') { document.getElementById('stuP').classList.add('on'); renderStudentPortal(); }
-  else if (curRole === 'staff') { document.getElementById('staP').classList.add('on'); loadAtt(); updateStaffDashboardStats(); populateDMStudentDropdown(); }
-  else if (curRole === 'parent') {
-    document.getElementById('parP').classList.add('on');
-    renderParentOverview();
-    renderParentStudentInfo();
-    renderParentNotifications();
-  }
+  else if (curRole === 'staff') { document.getElementById('staP').classList.add('on'); if (window.applyStaffKind) window.applyStaffKind(); loadAtt(); updateStaffDashboardStats(); }
+  else if (curRole === 'parent') { toast('The parent portal is not part of this first handover.'); document.getElementById('land').classList.remove('hidden'); return; }
   else {
     const ar = document.getElementById('asel').value;
     document.getElementById('admP').classList.add('on');
@@ -1704,17 +1701,18 @@ function staTab(t) {
   // was returning null and throwing, which silently aborted this whole
   // function before it ever reached the code that actually switches the
   // visible view. Mapped explicitly instead of guessing the id.
-  const navIds = { stad: 'ntad', staat: 'ntaat', stajs: 'ntjs', stadm: 'ntadm', stnot: 'ntnot' };
+  const navIds = { stad: 'ntad', staat: 'ntaat', stajs: 'ntjs', stadm: 'ntadm', stnot: 'ntnot', stnote: 'ntnote', stlook: 'ntlook' };
   document.querySelectorAll('#staP .side-nav a').forEach(a => a.classList.remove('on'));
   document.getElementById(navIds[t]).classList.add('on');
   document.querySelectorAll('#staP .main > div').forEach(d => d.classList.add('hidden'));
   document.getElementById('v-' + t).classList.remove('hidden');
-  const titles = { stad: 'Dashboard', staat: 'Mark Attendance', stajs: 'Justifications', stadm: 'Discipline Marks', stnot: 'Notifications' };
+  const titles = { stad: 'Dashboard', staat: 'Mark Attendance', stajs: 'Justifications', stadm: 'Discipline Marks', stnot: 'Notifications', stnote: 'Notebook', stlook: 'Student lookup' };
   document.getElementById('stat').textContent = titles[t];
   if (t === 'stajs') renderPendingJustifications();
   if (t === 'stad') updateStaffDashboardStats();
   if (t === 'staat') loadAtt();
-  if (t === 'stadm') populateDMStudentDropdown();
+  if (t === 'stlook' && window.renderStaffLookup) window.renderStaffLookup();
+  if (t === 'stnote' && window.renderNotebook) window.renderNotebook('staffNotebook', 'staff');
   checkAIVisibility();
 }
 const demoStudents = [
@@ -1760,11 +1758,11 @@ function loadAtt() {
 }
 function populateAttendanceClassSelect() {
   const select = document.getElementById('atclass');
-  if (!select) return;
-  const previous = select.value;
-  const classNames = window.schoolData.classes.map(item => item.name).sort((a, b) => a.localeCompare(b));
-  select.innerHTML = classNames.map(name => `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`).join('');
-  if (classNames.includes(previous)) select.value = previous;
+  if (!select || !window.schoolData) return;
+  const allowed = (window.staffAssignedClasses && window.staffAssignedClasses()) || window.schoolData.classes.map(item => item.name);
+  const previous = allowed.includes(select.value) ? select.value : allowed[0];
+  select.innerHTML = allowed.map(name => `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`).join('');
+  if (previous) select.value = previous;
 }
 function toggleAtt(btn, status) {
   const row = btn.closest('.at-r');
@@ -1773,6 +1771,7 @@ function toggleAtt(btn, status) {
     button.classList.remove('on-p', 'on-a', 'on-w', 'on-x');
     if (button.dataset.status === status) button.classList.add(({ present: 'on-p', absent: 'on-a', late: 'on-w', excused: 'on-x' })[status]);
   });
+  if (window.autosaveAttendanceDraft) window.autosaveAttendanceDraft();
 }
 function markAll(present) {
   document.querySelectorAll('#atlist .at-r').forEach(row => toggleAtt(row.querySelector(`[data-status="${present ? 'present' : 'absent'}"]`), present ? 'present' : 'absent'));
@@ -1860,7 +1859,7 @@ function admTab(t) {
   document.getElementById('n' + t).classList.add('on');
   document.querySelectorAll('#admP .main > div').forEach(d => d.classList.add('hidden'));
   document.getElementById('v-' + t).classList.remove('hidden');
-  const titles = { admd: 'Dashboard', admu: 'User Management', admbi: 'Bulk Import', admr: 'Reports', admran: 'Rankings', admnot: 'Notifications', adms: 'Settings', admatt: 'Main attendance', admfu: 'Follow-up lessons', admret: 'Midday returns', admmail: 'Parent inbox' };
+  const titles = { admd: 'Dashboard', admu: 'User Management', admbi: 'Bulk Import', admr: 'Reports', admran: 'Rankings', admnot: 'Announcements', adms: 'Settings', admatt: 'Main attendance', admfu: 'Follow-up lessons', admret: 'Midday returns', admmail: 'Parent inbox', admnote: 'Notebook' };
   document.getElementById('adt').textContent = titles[t]; checkAIVisibility();
   if (t === 'admr') updateReportSummary();
   if (t === 'admbi') renderImportReviewQueue();
