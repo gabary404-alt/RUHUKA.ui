@@ -253,12 +253,65 @@
     if (t === 'admret') paintReturns();
     if (t === 'admr') renderDemoReports();
   };
+  let registerDate = '';
+  let onlyMissing = false;
   function paintAdminAttendance(kind) {
-    const id = kind === 'main' ? 'adminMainAtt' : 'adminFollowAtt';
-    const box = document.getElementById(id);
+    const box = document.getElementById(kind === 'main' ? 'adminMainAtt' : 'adminFollowAtt');
     if (!box || !window.schoolData) return;
-    const rows = (window.schoolData.attendanceRecords || []).filter(r => kind === 'follow' ? (r.period || '').toLowerCase().includes('follow-up') : !(r.period || '').toLowerCase().includes('follow-up'));
-    box.innerHTML = '<h3>' + (kind === 'main' ? 'School-wide main attendance' : 'Follow-up lesson attendance') + '</h3><p style="font-size:13px;color:var(--t3)">' + (kind === 'main' ? 'Only these rows affect official statistics.' : 'Not included in official attendance statistics.') + '</p>' + (rows.length ? '<p>' + rows.length + ' demo rows saved on this browser.</p>' : '<p>No rows of this type yet. A teacher can submit one from the teacher portal.</p>');
+    const all = window.schoolData.attendanceRecords || [];
+    const main = r => !(r.period || '').toLowerCase().includes('follow-up');
+    if (kind !== 'main') { box.textContent = all.filter(r => !main(r)).length + ' follow-up records; excluded from official totals.'; return; }
+    registerDate = registerDate || getLocalDateString();
+    box.innerHTML = '<h3>Daily class attendance</h3><p>Demo: records on this browser only. Missing registers are not student absences.</p><label for="registerDate">Date</label><input id="registerDate" class="inp" type="date"><label><input id="missingOnly" type="checkbox"> Show only classes not submitted</label><div id="registerList"></div><div id="registerDetail"></div>';
+    const date = document.getElementById('registerDate'); date.value = registerDate;
+    date.onchange = () => { if (date.value) registerDate = date.value; paintAdminAttendance('main'); };
+    const filter = document.getElementById('missingOnly'); filter.checked = onlyMissing;
+    filter.onchange = () => { onlyMissing = filter.checked; paintAdminAttendance('main'); };
+    const list = document.getElementById('registerList');
+    const classes = window.schoolData.classes || [];
+    const groups = classes.map(c => ({name:c.name, rows:all.filter(r => main(r) && r.className === c.name && r.date === registerDate)}));
+    const summary = document.createElement('p');
+    summary.textContent = groups.filter(g => g.rows.length).length + ' of ' + classes.length + ' classes submitted'; list.appendChild(summary);
+    groups.forEach(group => {
+      if (onlyMissing && group.rows.length) return;
+      const card = document.createElement('div'); card.style.cssText = 'padding:16px 0;border-bottom:1px solid var(--b)';
+      const label = document.createElement('p'); label.textContent = group.name + ' — ' + (group.rows.length ? 'Submitted' : 'Not submitted'); card.appendChild(label);
+      if (group.rows.length) {
+        const row = group.rows[0]; const meta = document.createElement('p');
+        meta.textContent = 'By ' + (row.submittedBy || 'Unknown (older demo)') + ' · ' + (row.createdAt || 'Submission time unavailable') + ' · ' + group.rows.filter(r => r.status === 'absent').length + ' absent / ' + group.rows.length + ' recorded'; card.appendChild(meta);
+        const open = document.createElement('button'); open.className = 'btn btn-o'; open.textContent = 'View register'; open.onclick = () => showRegister(group); card.appendChild(open);
+      }
+      list.appendChild(card);
+    });
+  }
+  function showRegister(group) {
+    const box = document.getElementById('registerDetail'); box.replaceChildren();
+    const title = document.createElement('h3'); title.textContent = group.name + ' · ' + registerDate; box.appendChild(title);
+    group.rows.forEach(record => {
+      const student = window.schoolData.students.find(s => s.id === record.studentId);
+      const card = document.createElement('div'); card.style.cssText = 'padding:16px 0;border-bottom:1px solid var(--b)';
+      const name = document.createElement('p'); name.textContent = (student ? student.name : record.studentId) + ' · ' + record.status; card.appendChild(name);
+      if (window.previewRole === 'discipline') {
+        const select = document.createElement('select'); select.className = 'inp'; select.setAttribute('aria-label','Attendance for ' + record.studentId);
+        ['present','absent','late','excused'].forEach(status => { const o = document.createElement('option'); o.value = status; o.textContent = status; select.appendChild(o); }); select.value = record.status;
+        const reason = document.createElement('input'); reason.className = 'inp'; reason.maxLength = 500; reason.placeholder = 'Reason for correction (required)'; reason.setAttribute('aria-label',reason.placeholder);
+        const save = document.createElement('button'); save.className = 'btn btn-a'; save.textContent = 'Save correction';
+        save.onclick = () => {
+          if (window.previewRole !== 'discipline') { toast('Only Discipline Officers can correct attendance.'); return; }
+          if (!reason.value.trim()) { toast('Enter a reason for this correction.'); return; }
+          if (select.value === record.status) { toast('Choose a different status.'); return; }
+          const change = {before:record.status,after:select.value,reason:reason.value.trim(),editor:'Discipline Officer (demo)',changedAt:new Date().toISOString()};
+          record.corrections = [...(record.corrections || []),change]; record.status = change.after; record.updatedAt = change.changedAt;
+          if (student) recalculateAttendanceStats(student);
+          computeClassStats(); saveStudents(); saveSchoolRecords();
+          recordAuditEvent(change.editor,'Attendance corrected',record.studentId,record.date + ': ' + change.before + ' → ' + change.after + '. ' + change.reason);
+          paintAdminAttendance('main'); showRegister(group); toast('Correction saved on this browser.');
+        };
+        card.append(select,reason,save);
+      }
+      (record.corrections || []).forEach(change => { const line = document.createElement('p'); line.textContent = change.before + ' → ' + change.after + ' · ' + change.reason + ' · ' + change.editor + ' · ' + change.changedAt; card.appendChild(line); });
+      box.appendChild(card);
+    });
   }
   function paintReturns() {
     const box = document.getElementById('adminReturns');
@@ -267,15 +320,9 @@
     box.innerHTML = '<h3>Midday returns</h3><p style="font-size:13px;color:var(--t3)">A returned student stays present for the main day, with the excuse shown beside the mark.</p>' + (rows.length ? rows.map(r => '<div style="padding:8px 0;border-top:1px solid var(--b)">' + escapeHTML(r.studentId) + ' · ' + escapeHTML(r.date) + ' · ' + escapeHTML(r.middayNote || '') + '</div>').join('') : '<p>No midday returns recorded.</p>') + '<div class="fg"><label class="lab" for="returnStudent">Student ID</label><input class="inp" id="returnStudent" value="LDK-2023-001"></div><div class="fg"><label class="lab" for="returnNote">Excuse</label><input class="inp" id="returnNote" placeholder="Arrived after a clinic visit"></div><button class="btn btn-a" onclick="recordMiddayReturn()">Record return as present</button>';
   }
   window.recordMiddayReturn = function () {
-    if ((window.previewRole || '') === 'dean') { toast('The Dean of Studies does not record midday returns.'); return; }
-    const id = document.getElementById('returnStudent').value.trim();
-    const note = document.getElementById('returnNote').value.trim();
-    const student = window.schoolData.students.find(s => s.id === id);
-    if (!student || !note) { toast('Choose a known student and write the excuse.'); return; }
-    window.schoolData.attendanceRecords.push({ id: 'return-' + Date.now(), studentId: student.id, date: getLocalDateString(), className: student.class, period: 'Main daily attendance', status: 'present', middayReturn: true, middayNote: note, updatedAt: new Date().toISOString() });
-    if (typeof saveSchoolRecords === 'function') saveSchoolRecords();
-    paintReturns();
-    toast('Marked present for the main day, with an excused midday return. Demo only.');
+    if (window.previewRole !== 'discipline') { toast('Only Discipline Officers can correct attendance.'); return; }
+    toast('Open the main register and correct the student to Late or Present with the arrival explanation.');
+    window.admTab('admatt');
   };
 
   document.querySelectorAll('#staP #ntjs, #staP #ntadm').forEach(link => { if (link.parentElement) link.parentElement.style.display = 'none'; });
@@ -294,3 +341,4 @@
   document.addEventListener('DOMContentLoaded', fillChildSelect);
   if (document.readyState !== 'loading') fillChildSelect();
 })();
+

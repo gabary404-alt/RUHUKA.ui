@@ -1811,6 +1811,13 @@ function subAtt() {
   const rows = [...document.querySelectorAll('#atlist .at-r')];
   if (!date) { toast('Choose an attendance date first.'); return; }
   if (!rows.length) { toast('No students loaded for this class'); return; }
+  const isMain = !period.toLowerCase().includes('follow-up');
+  if (isMain && window.schoolData.attendanceRecords.some(record =>
+    record.className === cls && record.date === date &&
+    !(record.period || '').toLowerCase().includes('follow-up'))) {
+    toast('Main attendance for this class and day has already been submitted. Ask a Discipline Officer to correct it.');
+    return;
+  }
   const timestamp = new Date().toISOString();
   const markedAbsent = rows.filter(row => row.dataset.status === 'absent').length;
   rows.forEach(row => {
@@ -1842,7 +1849,7 @@ function subAtt() {
 
 function recalculateAttendanceStats(student) {
   if (student.attendanceBaseAbsences === undefined) student.attendanceBaseAbsences = Number(student.absences || 0);
-  const records = window.schoolData.attendanceRecords.filter(record => record.studentId === student.id);
+  const records = window.schoolData.attendanceRecords.filter(record => record.studentId === student.id && !(record.period || '').toLowerCase().includes('follow-up'));
   student.absences = Number(student.attendanceBaseAbsences) + records.filter(record => record.status === 'absent').length;
   const counted = records.filter(record => record.status !== 'excused');
   if (counted.length) {

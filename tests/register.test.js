@@ -1,0 +1,12 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const path=require('node:path');
+const source=fs.readFileSync(path.join(__dirname,'../portal-flows.js'),'utf8');
+function setup(role){
+ const nodes={};function node(){return {style:{},children:[],value:'',append(...x){this.children.push(...x)},appendChild(x){this.children.push(x)},replaceChildren(){this.children=[]},setAttribute(){}}}
+ const document={createElement:node,getElementById:id=>nodes[id]||(nodes[id]=node())};
+ const record={studentId:'s',className:'S1',date:'2026-11-02',period:'Main',status:'absent'};let saved=0;
+ const c={document,window:{previewRole:role,schoolData:{classes:[{name:'S1'},{name:'S2'}],students:[{id:'s',name:'Test'}],attendanceRecords:[record]}},getLocalDateString:()=>record.date,toast(){},recalculateAttendanceStats(){},computeClassStats(){},saveStudents(){},saveSchoolRecords(){saved++},recordAuditEvent(){}};
+ vm.createContext(c);vm.runInContext(source.slice(source.indexOf("  let registerDate = ''"),source.indexOf('  function paintReturns()')),c);c.paintAdminAttendance('main');return {c,nodes,record,saved:()=>saved};
+}
+test('overview identifies submitted and missing classes',()=>{const {nodes}=setup('discipline');assert.equal(nodes.registerList.children[0].textContent,'1 of 2 classes submitted');assert.match(nodes.registerList.children[2].children[0].textContent,/Not submitted/)});
+test('officer correction requires reason and retains previous value',()=>{const {c,nodes,record,saved}=setup('discipline');c.showRegister({name:'S1',rows:[record]});const card=nodes.registerDetail.children[1];const [,select,reason,button]=card.children;select.value='excused';button.onclick();assert.equal(record.status,'absent');reason.value='Approved clinic absence';button.onclick();assert.equal(record.status,'excused');assert.equal(record.corrections[0].before,'absent');assert.equal(saved(),1)});
+test('headmaster has read-only register and role is rechecked on save',()=>{const a=setup('headmaster');a.c.showRegister({name:'S1',rows:[a.record]});assert.equal(a.nodes.registerDetail.children[1].children.length,1);const b=setup('discipline');b.c.showRegister({name:'S1',rows:[b.record]});const [,select,reason,button]=b.nodes.registerDetail.children[1].children;select.value='present';reason.value='Late arrival';b.c.window.previewRole='dean';button.onclick();assert.equal(b.record.status,'absent')});
