@@ -65,9 +65,8 @@ const AI_CONFIG = {
   API_URL:   '/api/chat', // calls our own serverless proxy — see api/chat.js — which holds the real key server-side
   MODEL:     'MINI LDK',                                  // your model name
   USE_API:   true,                                      // false = offline mode
-  SYSTEM_PROMPT: `You are the LDK (Lycée de Kigali) School AI Assistant. You help staff, students, and administrators with school data, student records, discipline points, attendance, rankings, and general school questions. Be concise, professional, and helpful. School: Lycée de Kigali, Rwanda. Motto: "Strive to excel".`
+  SYSTEM_PROMPT: `You are Ruhuka's helpful school and general-learning assistant. Reply in clear, concise English and plain text. You may answer general knowledge and study questions as well as questions about using Ruhuka. You have no access to private student records, passwords, account codes, school databases or exports. Never claim to read or change them. Do not ask for private records or credentials. You have no live web search or verified current sources in this integration. Never claim you searched, checked today's information, or verified a current fact. Explain uncertainty for news, current events and changing facts; suggest checking an official source without inventing citations. School-specific names, policies, schedules, fees and statistics must not be invented. Ruhuka is currently a browser-local demo, not a connected school system. Public identity: Lycée de Kigali, Rwanda; motto: Strive to excel. Portals: Student, Staff and Admin. Students view their own results, discipline, attendance and announcements and submit absence explanations. Teachers take assigned-class attendance. Discipline Officers handle absence reviews and corrections. Academic and discipline rankings stay separate. The school imports official discipline totals; this site does not add or deduct discipline points. When a feature is not live, distinguish the intended workflow from the demo. Do not claim to replace the school's decisions. Use short paragraphs and simple lists, and do not emit HTML.`
 };
-let chatHistory = [];  // keeps last 20 messages for context
 
 
 // Realistic Rwandan names for demo data generation
@@ -1351,6 +1350,7 @@ function doL() {
   toast('Welcome back!'); checkAIVisibility();
 }
 function logout() {
+  if (window.clearAIConversation) window.clearAIConversation(true);
   document.querySelectorAll('.port').forEach(p => p.classList.remove('on'));
   document.getElementById('land').classList.remove('hidden');
   window.scrollTo(0, 0);
@@ -2410,204 +2410,8 @@ updateBadgeCounts();
 })();
 
 
-// ===== AI ASSISTANT =====
-function toggleAI() {
-  const panel = document.getElementById('ai-chat-panel');
-  const fab = document.getElementById('ai-fab');
-  if (panel.style.display === 'none') {
-    panel.style.display = 'flex';
-    fab.style.transform = 'scale(0)';
-    setTimeout(() => document.getElementById('ai-input').focus(), 100);
-  } else {
-    panel.style.display = 'none';
-    fab.style.transform = 'scale(1)';
-  }
-}
-function checkAIVisibility() {
-  const ai = document.getElementById('ai-assistant');
-  if (!ai) return;
-  // Chatbot is now visible on every page (landing + all portals)
-  ai.style.display = 'block';
-}
-async function sendAIMessage() {
-  const input = document.getElementById('ai-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  addAIMessage(msg, 'user');
-  input.value = '';
-  await processAIResponse(msg);
-}
-function addAIMessage(text, sender) {
-  const container = document.getElementById('ai-messages');
-  const div = document.createElement('div');
-  if (sender === 'user') {
-    div.style.cssText = 'align-self:flex-end;max-width:85%;padding:10px 14px;background:var(--a);color:#fff;border-radius:12px;border-bottom-right-radius:4px;font-size:13px';
-  } else {
-    div.style.cssText = 'align-self:flex-start;max-width:85%;padding:10px 14px;background:var(--s2);border-radius:12px;border-bottom-left-radius:4px;color:var(--t2);font-size:13px;line-height:1.5';
-  }
-  if (sender === 'user') {
-    div.textContent = text;
-  } else {
-    const template = document.createElement('template');
-    template.innerHTML = text;
-    const allowedTags = new Set(['STRONG', 'B', 'EM', 'I', 'BR', 'P', 'UL', 'OL', 'LI', 'CODE', 'PRE']);
-    const appendSafe = (source, target) => {
-      [...source.childNodes].forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE) target.appendChild(document.createTextNode(node.textContent));
-        else if (node.nodeType === Node.ELEMENT_NODE) {
-          if (!allowedTags.has(node.tagName)) return appendSafe(node, target);
-          const safeNode = document.createElement(node.tagName.toLowerCase());
-          appendSafe(node, safeNode);
-          target.appendChild(safeNode);
-        }
-      });
-    };
-    appendSafe(template.content, div);
-  }
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-async function processAIResponse(msg) {
-  // Track conversation history for context
-  chatHistory.push({ role: 'user', content: msg });
-  if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+// Chat UI lives in chat.js.
 
-  // If API is disabled, jump straight to offline fallback
-  if (!AI_CONFIG.USE_API) {
-    processLocalAIResponse(msg);
-    return;
-  }
-
-  showAILoading(true);
-
-  try {
-    const messages = [
-      { role: 'system', content: AI_CONFIG.SYSTEM_PROMPT },
-      ...chatHistory.map(m => ({ role: m.role, content: m.content }))
-    ];
-
-    const response = await fetch(AI_CONFIG.API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: AI_CONFIG.MODEL,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 800,
-        stream: false
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('HTTP ' + response.status + ' ' + response.statusText);
-    }
-
-    const data = await response.json();
-
-    // Extract reply — works for OpenAI, Ollama, LM Studio, OpenRouter
-    let botMsg = '';
-    if (data.choices && data.choices[0] && data.choices[0].message) {
-      botMsg = data.choices[0].message.content;
-    } else if (data.message && data.message.content) {
-      botMsg = data.message.content;           // Ollama native format
-    } else if (data.response) {
-      botMsg = data.response;                  // Some local servers
-    } else {
-      botMsg = '<em>Received unexpected response format.</em><br><pre style="font-size:11px;overflow:auto">' + JSON.stringify(data, null, 2) + '</pre>';
-    }
-
-    chatHistory.push({ role: 'assistant', content: botMsg });
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-
-    addAIMessage(botMsg, 'bot');
-
-  } catch (err) {
-    console.error('AI API Error:', err);
-    addAIMessage(
-      '⚠️ <strong>Could not reach the AI server.</strong><br><br>' +
-      'Error: <code style="background:var(--s3);padding:2px 6px;border-radius:4px">' + err.message + '</code><br><br>' +
-      'Checklist:<br>• Is your API server running?<br>• Is the URL in <code>AI_CONFIG.API_URL</code> correct?<br>• Did you enable CORS on the server?<br>• Is your API key correct?<br><br>' +
-      '<em>Activating offline fallback...</em>',
-      'bot'
-    );
-    processLocalAIResponse(msg);
-  } finally {
-    showAILoading(false);
-  }
-}
-
-function showAILoading(show) {
-  const container = document.getElementById('ai-messages');
-  let loader = document.getElementById('ai-loader');
-  if (show) {
-    if (!loader) {
-      loader = document.createElement('div');
-      loader.id = 'ai-loader';
-      loader.style.cssText = 'align-self:flex-start;max-width:85%;padding:10px 14px;background:var(--s2);border-radius:12px;border-bottom-left-radius:4px;color:var(--t3);font-size:13px;display:flex;align-items:center;gap:8px';
-      loader.innerHTML = '<span></span><span></span><span></span> Thinking...';
-      container.appendChild(loader);
-      container.scrollTop = container.scrollHeight;
-    }
-  } else {
-    if (loader) loader.remove();
-  }
-}
-
-/* Offline fallback — used when API is unreachable or USE_API is false */
-function processLocalAIResponse(msg) {
-  const lower = msg.toLowerCase();
-  let response = '';
-
-  if (lower.includes('student') && lower.includes('count')) {
-    response = 'There are currently <strong>' + window.schoolData.students.length.toLocaleString() + '</strong> students in the system across ' + window.schoolData.classes.length + ' classes.';
-  }
-  else if (lower.includes('rank') || lower.includes('top')) {
-    const top = getTop30Overall()[0];
-    response = top
-      ? 'The top performing student is <strong>' + escapeHTML(top.name) + '</strong> from ' + escapeHTML(top.class) + ' with a combined index of <strong>' + top.index + '</strong>.'
-      : 'There are no students with both discipline and academic scores to rank yet.';
-  }
-  else if (lower.includes('attention') || lower.includes('trouble') || lower.includes('bad')) {
-    const count = getNeedsAttention().length;
-    response = 'There are <strong>' + count + '</strong> students currently flagged as needing attention (discipline under 20 or academic under 60%).';
-  }
-  else if (lower.includes('csv') || lower.includes('spreadsheet') || lower.includes('export') || lower.includes('download')) {
-    const csv = generateStudentCSV();
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ldk-students-' + new Date().toISOString().split('T')[0] + '.csv';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    response = 'I\'ve generated and downloaded a CSV file with all student data including discipline points, academic scores, and attendance rates.';
-  }
-  else if (lower.includes('class') && (lower.includes('best') || lower.includes('good'))) {
-    const best = getClassRankings()[0];
-    response = best
-      ? 'The best performing class by discipline is <strong>' + escapeHTML(best.name) + '</strong> with an average of <strong>' + (best.avgDiscipline ?? 'N/A') + '/40</strong> discipline points and <strong>' + (best.avgAcademic ?? 'N/A') + '%</strong> academic score.'
-      : 'No class data is available yet.';
-  }
-  else if (lower.includes('attendance')) {
-    const attendanceRates = window.schoolData.students.map(student => numberOrNull(student.attendanceRate)).filter(value => value !== null);
-    const avg = attendanceRates.length ? Math.round(attendanceRates.reduce((sum, value) => sum + value, 0) / attendanceRates.length * 10) / 10 : null;
-    response = 'The average attendance rate across all students is <strong>' + (avg === null ? 'not available' : avg + '%') + '</strong>. You can view detailed breakdowns in the Reports section.';
-  }
-  else if (lower.includes('discipline') && (lower.includes('mark') || lower.includes('point'))) {
-    const totals = window.schoolData.students.map(student => numberOrNull(student.disciplinePoints)).filter(value => value !== null);
-    response = 'Discipline marks are out of <strong>40 points per term</strong> (120 annually). Students below <strong>20/40</strong> are flagged for intervention. The highest current score is <strong>' + (totals.length ? Math.max(...totals) + '/40' : 'not available') + '</strong>.';
-  }
-  else if (lower.includes('hello') || lower.includes('hi') || lower.includes('help')) {
-    response = 'Hello! I can help you with:<br>• <strong>Student data</strong> — ask "how many students" or "who is top"<br>• <strong>Export data</strong> — say "generate spreadsheet"<br>• <strong>Rankings</strong> — ask "which class is best"<br>• <strong>Insights</strong> — ask about attendance or discipline<br>What do you need?';
-  }
-  else {
-    response = 'I understand you\'re asking about "<em>' + escapeHTML(msg) + '</em>". I can help with student data, rankings, exports, and school metrics. Try asking something like:<br>• "How many students do we have?"<br>• "Generate a CSV"<br>• "Who needs attention?"<br>• "What is the best class?"';
-  }
-
-  addAIMessage(response, 'bot');
-}
 // ===== REPORT DOWNLOAD =====
 // Was a bare toast('Report downloaded') with no file. Now reads the
 // actual figures shown in that report card and generates a real CSV.
