@@ -10,7 +10,15 @@
     const role = slot === 'admin' ? window.previewRole || 'demo' : window.staffKind || 'demo';
     const key = 'ruhuka-notes-v2-' + slot + '-' + role;
     if (!sessions.has(key)) {
-      try { sessions.set(key, {notes:adapter.load(key),error:'',blocked:false}); }
+      try {
+        let notes=adapter.load(key);
+        if(localStorage.getItem(key) === null) {
+          const legacyKey='ldk-notebook-'+slot+'-'+(window.staffKind || window.previewRole || 'demo');
+          const raw=localStorage.getItem(legacyKey);
+          if(raw) { const old=JSON.parse(raw); notes=[{id:crypto.randomUUID(),title:'Imported notebook',text:old.notes || '',items:old.items || [],updatedAt:new Date().toISOString()}]; adapter.save(key,notes); }
+        }
+        sessions.set(key, {notes,error:'',blocked:false});
+      }
       catch { sessions.set(key, {notes:[],error:'Could not read saved notes. Reload to retry. Existing storage has not been overwritten.',blocked:true}); }
     }
     const state = sessions.get(key); let selected = null; let query = '';
