@@ -10,9 +10,18 @@
     const body = document.getElementById('staffRepBody').value.trim();
     if (!title || !body) { toast('Add a title and a short description.'); return; }
     const to = window.staffKind === 'academic' ? 'dean' : document.getElementById('staffRepTo').value;
+    const preview = document.getElementById('staffRepPreview');
+    preview.hidden = false;
+    preview.innerHTML = '<p><strong>Check before saving</strong></p><p>' + escapeHTML(document.getElementById('staffRepCat').value) + ' for ' + escapeHTML(to) + '</p><p>' + escapeHTML(title) + '</p><p>' + escapeHTML(body) + '</p><button class="btn btn-a" onclick="confirmStaffReport()">Save in this browser demo</button>';
+    window._staffPending = { category: document.getElementById('staffRepCat').value, to, title, body, fileName: '', sender: window.staffKind === 'academic' ? 'Academic Staff' : 'Discipline Staff', read: false, date: new Date().toLocaleString(), id: String(Date.now()) };
+  };
+  window.confirmStaffReport = function () {
+    if (!window._staffPending) return;
     const list = reportStore();
-    list.unshift({ id: String(Date.now()), category: document.getElementById('staffRepCat').value, to, title, body, fileName: '', sender: window.staffKind === 'academic' ? 'Academic Staff' : 'Discipline Staff', read: false, date: new Date().toLocaleString() });
+    list.unshift(window._staffPending);
     saveReports(list);
+    window._staffPending = null;
+    document.getElementById('staffRepPreview').hidden = true;
     toast('Saved in this browser demo. Nobody else has been notified.');
   };
   window.applyStaffKind = function () {
@@ -236,6 +245,7 @@
   window.admTab = function (t) {
     if (origAdm) origAdm(t);
     if (t === 'admnote') renderNotebook('adminNotebook', 'admin');
+    if (t === 'admr' && window.renderReportInbox) renderReportInbox();
   };
 
   window.proposeRosterChange = function () {
@@ -287,7 +297,15 @@
     const student = window.schoolData && window.schoolData.students.find(s => s.id === CURRENT_STUDENT.id);
     if (!card || !student) return;
     const active = window.schoolData.students.filter(s => s.status !== 'Archived');
-    card.insertAdjacentHTML('beforeend', '<h3 style="margin-top:16px">Demo ranks</h3><p style="font-size:12px;color:var(--t3)">Academic and discipline are separate. Ties share a place. Missing scores are not zero. ' + NOTE + '</p>' + rankLine(student, 'Class · ' + (student.class || '')) + rankLine(student, 'Level · ' + (student.level || 'Unknown'), active.filter(s => s.level === student.level)) + rankLine(student, 'School', active));
+    const classmates = active.filter(s => s.class === student.class);
+    const sameLevel = active.filter(s => s.level === student.level);
+    let block = document.getElementById('studentScopeRanks');
+    if (!block) {
+      block = document.createElement('div');
+      block.id = 'studentScopeRanks';
+      card.appendChild(block);
+    }
+    block.innerHTML = '<h3 style="margin-top:16px">Demo ranks</h3><p style="font-size:12px;color:var(--t3)">Academic and discipline are separate. Ties share a place. Missing scores are not zero. ' + NOTE + '</p>' + rankLine(student, 'Class · ' + (student.class || 'Unassigned'), classmates) + rankLine(student, 'Level · ' + (student.level || 'Unknown'), sameLevel) + rankLine(student, 'School', active);
   };
 
   function reportStore() { try { return JSON.parse(localStorage.getItem('ldk-demo-reports') || '[]'); } catch (e) { return []; } }
@@ -320,7 +338,9 @@
     const box = document.getElementById('hmInbox');
     if (!box) return;
     const who = window.previewRole || 'headmaster';
-    const mine = reportStore().filter(r => r.to === who || (who === 'headmaster' && r.to === 'headmaster'));
+    const mine = reportStore().filter(r => r.to === who);
+    const composer = document.getElementById('repComposer');
+    if (composer) composer.style.display = who === 'headmaster' ? 'none' : '';
     const unread = mine.filter(r => !r.read);
     const byCat = {};
     unread.forEach(r => { const key = r.category + ' from ' + r.sender; byCat[key] = (byCat[key] || 0) + 1; });
@@ -358,7 +378,7 @@
       const send = document.createElement('div');
       send.className = 'card';
       send.style.marginTop = '16px';
-      send.innerHTML = '<h3>Send a class report</h3><p style="font-size:13px;color:var(--t3)">Academic Staff can save a report for the Dean. Discipline Staff can save one for the Headmaster or Discipline Officer. ' + NOTE + '</p><label class="lab" for="staffRepCat">Category</label><select id="staffRepCat" class="sel"><option>Discipline</option><option>Academics</option><option>Attendance</option><option>Other</option></select><label class="lab" for="staffRepTo">Recipient</label><select id="staffRepTo" class="sel"></select><label class="lab" for="staffRepTitle">Title</label><input class="inp" id="staffRepTitle"><label class="lab" for="staffRepBody">Short description</label><textarea class="txa" id="staffRepBody"></textarea><button class="btn btn-a" style="margin-top:8px" onclick="sendStaffReport()">Save in this browser demo</button>';
+      send.innerHTML = '<h3>Send a class report</h3><p style="font-size:13px;color:var(--t3)">Academic Staff can save a report for the Dean. Discipline Staff can save one for the Headmaster or Discipline Officer. ' + NOTE + '</p><label class="lab" for="staffRepCat">Category</label><select id="staffRepCat" class="sel"><option>Discipline</option><option>Academics</option><option>Attendance</option><option>Other</option></select><label class="lab" for="staffRepTo">Recipient</label><select id="staffRepTo" class="sel"></select><label class="lab" for="staffRepTitle">Title</label><input class="inp" id="staffRepTitle"><label class="lab" for="staffRepBody">Short description</label><textarea class="txa" id="staffRepBody"></textarea><div id="staffRepPreview" hidden></div><button class="btn btn-a" style="margin-top:8px" onclick="sendStaffReport()">Review before saving</button>';
       dash.appendChild(send);
     }
     const ann = document.getElementById('v-san');
@@ -369,7 +389,7 @@
       const card = document.createElement('div');
       card.className = 'card';
       card.style.marginTop = '16px';
-      card.innerHTML = '<div id="hmInbox"></div><h3 style="margin-top:16px">Send a demo report</h3><p style="font-size:13px;color:var(--t3)">Saving a report does not notify anyone. The file name stays on this browser; the file is not uploaded.</p><label class="lab" for="repCat">Category</label><select class="sel" id="repCat"><option>Discipline</option><option>Academics</option><option>Attendance</option><option>Other</option></select><label class="lab" for="repTo">Recipient</label><select class="sel" id="repTo"><option value="headmaster">Headmaster</option><option value="discipline">Discipline Officer</option></select><label class="lab" for="repTitle">Title</label><input class="inp" id="repTitle"><label class="lab" for="repBody">Short description</label><textarea class="txa" id="repBody"></textarea><label class="lab" for="repFile">Attachment</label><input id="repFile" type="file"><div id="repPreview" hidden></div><button class="btn btn-a" style="margin-top:8px" onclick="queueDemoReport()">Review before saving</button>';
+      card.innerHTML = '<div id="hmInbox"></div><div id="repComposer"><h3 style="margin-top:16px">Send a demo report</h3><p style="font-size:13px;color:var(--t3)">Saving a report does not notify anyone. The file name stays on this browser; the file is not uploaded.</p><label class="lab" for="repCat">Category</label><select class="sel" id="repCat"><option>Discipline</option><option>Academics</option><option>Attendance</option><option>Other</option></select><label class="lab" for="repTo">Recipient</label><select class="sel" id="repTo"><option value="headmaster">Headmaster</option></select><label class="lab" for="repTitle">Title</label><input class="inp" id="repTitle"><label class="lab" for="repBody">Short description</label><textarea class="txa" id="repBody"></textarea><label class="lab" for="repFile">Attachment</label><input id="repFile" type="file"><div id="repPreview" hidden></div><button class="btn btn-a" style="margin-top:8px" onclick="queueDemoReport()">Review before saving</button></div>';
       reports.appendChild(card);
       renderReportInbox();
     }

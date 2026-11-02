@@ -1889,12 +1889,12 @@ function setupAdmin(role) {
   document.getElementById('adtp').textContent = 'Welcome, ' + names[role] + ' — ' + texts[role];
   const nav = document.getElementById('admNav');
   const restricted = role !== 'headmaster';
-  nav.children[1].style.display = role === 'discipline' ? 'none' : '';
-  nav.children[2].style.display = role === 'dean' ? 'none' : '';
-  nav.children[3].style.display = (role === 'discipline' || role === 'dean') ? 'none' : '';
-  nav.children[4].style.display = restricted ? 'none' : '';
-  nav.children[5].style.display = restricted ? 'none' : '';
-  nav.children[6].style.display = restricted ? 'none' : '';
+  nav.children[1].style.display = role === 'headmaster' ? '' : 'none';
+  nav.children[2].style.display = '';
+  nav.children[3].style.display = '';
+  nav.children[4].style.display = '';
+  nav.children[5].style.display = '';
+  nav.children[6].style.display = role === 'discipline' ? '' : 'none';
 }
 
 // ===== RANKINGS TABS =====
