@@ -124,36 +124,6 @@
     out.innerHTML = rows.map(s => '<div style="padding:8px 0;border-top:1px solid var(--b)"><strong>' + escapeHTML(s.name) + '</strong> · ' + escapeHTML(s.id) + ' · ' + escapeHTML(s.class || '') + '<div style="font-size:13px;color:var(--t2)">Academic: ' + (numberOrNull(s.academicScore) === null ? 'Missing' : s.academicScore + '%') + ' · Official discipline: ' + (numberOrNull(s.disciplinePoints) === null ? 'Missing' : s.disciplinePoints + '/40') + '</div></div>').join('') || '<p>No match.</p>';
   };
 
-  function notebookKey(slot) { return 'ldk-notebook-' + (slot || 'staff') + '-' + (window.staffKind || window.previewRole || 'demo'); }
-  window.renderNotebook = function (elementId, slot) {
-    const box = document.getElementById(elementId);
-    if (!box) return;
-    let data = { notes: '', items: [] };
-    try { data = JSON.parse(localStorage.getItem(notebookKey(slot)) || '') || data; } catch (e) { data = { notes: '', items: [] }; }
-    box.innerHTML = '<h3>Personal notebook</h3><p style="font-size:13px;color:var(--t3);margin:8px 0">' + NOTE + '</p><label class="lab" for="nb-' + slot + '">Notes</label><textarea class="txa" id="nb-' + slot + '">' + escapeHTML(data.notes || '') + '</textarea><div id="nb-items-' + slot + '"></div><button class="btn btn-g" onclick="addCheck(\'' + slot + '\',\'' + elementId + '\')">Add checklist item</button> <button class="btn btn-a" onclick="saveNotebook(\'' + slot + '\')">Save on this device</button>';
-    const list = document.getElementById('nb-items-' + slot);
-    list.innerHTML = (data.items || []).map((item, i) => '<label style="display:flex;gap:8px;margin:8px 0"><input type="checkbox" data-i="' + i + '" ' + (item.done ? 'checked' : '') + '> ' + escapeHTML(item.text) + '</label>').join('');
-    box.dataset.slot = slot;
-  };
-  window.addCheck = function (slot, elementId) {
-    const text = window.prompt('Checklist item');
-    if (!text) return;
-    let data = { notes: '', items: [] };
-    try { data = JSON.parse(localStorage.getItem(notebookKey(slot)) || '') || data; } catch (e) {}
-    data.items = data.items || [];
-    data.items.push({ text, done: false });
-    localStorage.setItem(notebookKey(slot), JSON.stringify(data));
-    renderNotebook(elementId, slot);
-  };
-  window.saveNotebook = function (slot) {
-    const notes = document.getElementById('nb-' + slot);
-    let data = { notes: notes ? notes.value : '', items: [] };
-    try { const old = JSON.parse(localStorage.getItem(notebookKey(slot)) || '{}'); data.items = old.items || []; } catch (e) {}
-    document.querySelectorAll('#nb-items-' + slot + ' input').forEach(input => { if (data.items[input.dataset.i]) data.items[input.dataset.i].done = input.checked; });
-    try { localStorage.setItem(notebookKey(slot), JSON.stringify(data)); toast('Notebook saved on this device.'); }
-    catch (e) { toast('This browser could not store the notebook.'); }
-  };
-
   const origAdm = window.admTab;
   window.admTab = function (t) {
     if (origAdm) origAdm(t);
@@ -236,3 +206,4 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
+
