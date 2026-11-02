@@ -1,5 +1,7 @@
 # RUHUKA — Master Project Handoff
 
+> **Current requirements (2026-11-02):** Read [RUHUKA_REQUIREMENTS.md](./RUHUKA_REQUIREMENTS.md) first. The owner has completed a new requirements interview. That document supersedes conflicting role rules, review requirements, parent scope and frontend-only handover statements below. The first school delivery must be fully functional; frontend review comes before backend integration. This older document remains historical context.
+
 Last reviewed: 2026-10-31 (Africa/Kigali)
 Repository: https://github.com/gabary404-alt/RUHUKA.ui
 Live-site target: https://ruhukaui.vercel.app/
@@ -297,3 +299,4 @@ These points are intentionally open. Ask the owner when work reaches the relevan
 ## 10. Short description for a new collaborator
 
 RUHUKA is Lycée de Kigali’s planned public website and secure school portal. It serves students, parents, teachers, the Dean of Studies, the Discipline Office, and the Headmaster through four portals. The school’s existing system remains the source of official discipline scores; RUHUKA imports and explains those records but does not change them. Teachers take attendance only for assigned classes. One daily main attendance drives attendance statistics, while optional follow-up lesson attendance is separate. Students and classes have distinct academic and discipline rankings with competition-style ties. A student can be flagged for academic results below 50%, discipline below 20/40, or more than five main-attendance absences; an Admin or Discipline Officer must review and clear the relevant category. Parents need a working school-message conversation, with the Discipline Officer able to see and answer it. The current website and portal flows are demo frontend, and Supabase is a partially built but not frontend-connected backend. The aim is a secure, low-workload system the school can run itself.
+
