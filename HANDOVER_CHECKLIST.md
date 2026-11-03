@@ -25,7 +25,7 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 
 - [x] B01 Identify active Supabase project and inspect schema/policies/migration history.
 - [x] B02 Bootstrap owner's explicitly approved temporary Headmaster account and record audit.
-- [ ] B03 Complete actual sign-in/sign-out tests on deployed pilot and remove stale-session exposure.
+- [x] B03 Complete actual sign-in/sign-out tests on deployed pilot and remove stale-session exposure.
 - [ ] B04 Finish session expiry/renewal/revocation tests including disabled accounts and role changes.
 - [ ] B05 Implement student ID + password login without exposing emails or account enumeration.
 - [ ] B06 Implement verified-email student invitations and first-password setup.
@@ -177,4 +177,4 @@ School source-file examples; approved public wording/claims; school year/term da
 
 - 3 Nov: A06 completed; requirements and historical handoff aligned to accepted scope. Private notebook storage applied; rollback tests passed for ownership, Headmaster isolation, stale-save rejection and student denial. G06/G07 remain open for interface integration and full cross-device/deletion checks. A05 remains open. Verified: 14/121. No owner action required.
 
-- 3 Nov: G06/G07 interface implementation progressed: connected private notebooks support named collections, notes/checklists, autosave, per-user device recovery, conflict messages, session cleanup and confirmed note deletion. Three focused mocked tests pass for serial save/newer edits, stale revision recovery and signout disposal. G06/G07 remain open pending real authenticated browser/cross-device verification. Search currently covers 200 most recent notes in selected notebook with explicit notice; full pagination/search remains a handover requirement. No migration of demo notes into real accounts is automatic. Keep PR #10 draft.
+- 3 Nov: B03 completed with actual deployed owner-account email/password sign-in and explicit Headmaster role, followed by signout returning to login and clearing visible private notebook content. G06/G07 progressed: account-private notebook created, note/body/checklist autosaved and reloaded from server; checklist remained complete. Only labelled synthetic setup content used, left in owner notebook RUHUKA setup checks. 37 automated tests pass; separate ownership/conflict SQL tests passed earlier. Full cross-device/mobile, real conflict recovery and final portal integration remain open. Tracker 15/121 verified. No merge recommendation yet.
