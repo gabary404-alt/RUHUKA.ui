@@ -2,7 +2,7 @@
 'use strict';
 const $=id=>document.getElementById(id);let token=null,refreshToken=null,refreshing=null,user=null,roles=[],roster=[],epoch=0,busy=false,loaded=null;
 const drafts=window.createAttendanceDrafts(localStorage);
-let draftReadFailed=false;
+let draftReadFailed=false;let cloudNotebook=null;
 const config=window.RUHUKA_CONFIG;
 function notify(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error);}
 async function renewSession(){
@@ -13,23 +13,25 @@ async function renewSession(){
 }
 async function request(path,options={},retried=false){
  const response=await fetch(config.url+path,{signal:AbortSignal.timeout(20000),...options,headers:{apikey:config.key,...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json',...options.headers}});
- const data=await response.json();if(response.status===401&&token&&!path.startsWith('/auth/')&&!retried){await renewSession();return request(path,options,true);}if(!response.ok){const e=new Error(response.status===401?'Your session expired. Sign in again.':data.message||data.msg||data.error_description||'Request failed.');e.code=data.code;throw e;}return data;
+ if(response.status===204)return null;const data=await response.json();if(response.status===401&&token&&!path.startsWith('/auth/')&&!retried){await renewSession();return request(path,options,true);}if(!response.ok){const e=new Error(response.status===401?'Your session expired. Sign in again.':data.message||data.msg||data.error_description||'Request failed.');e.code=data.code;throw e;}return data;
 }
 const rpc=(name,args)=>request('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(args)});
 function row(text){const box=document.createElement('div');box.className='row';const p=document.createElement('p');p.textContent=text;box.append(p);return box;}
 function action(label,fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;return b;}
-function clear(){epoch++;token=null;refreshToken=null;user=null;roles=[];roster=[];loaded=null;$('workspace').hidden=true;$('login').hidden=false;$('signout').hidden=true;$('password').value='';$('students').replaceChildren();$('overview').replaceChildren();$('details').replaceChildren();}
+function clear(){if(cloudNotebook){cloudNotebook.dispose();cloudNotebook=null;}$('cloud-notebook').hidden=true;$('open-notebook').hidden=true;epoch++;token=null;refreshToken=null;user=null;roles=[];roster=[];loaded=null;$('workspace').hidden=true;$('login').hidden=false;$('signout').hidden=true;$('password').value='';$('students').replaceChildren();$('overview').replaceChildren();$('details').replaceChildren();}
 $('login-form').onsubmit=async event=>{event.preventDefault();const version=++epoch;const button=event.submitter;button.disabled=true;
  try{notify('Signing in…');const session=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})});if(version!==epoch)return;token=session.access_token;refreshToken=session.refresh_token;user=session.user;
  const [profile,grants]=await Promise.all([request('/rest/v1/profiles?select=display_name,is_active&id=eq.'+user.id),request('/rest/v1/user_roles?select=role&user_id=eq.'+user.id)]);if(version!==epoch)return;
  roles=grants.map(x=>x.role);if(!profile[0]?.is_active||!roles.some(r=>['teacher','discipline_staff','discipline_officer','headmaster','dean','student'].includes(r)))throw Error('This account has no active school staff access.');
  $('identity').textContent=(profile[0].display_name||user.email)+' · '+roles.join(', ');$('login').hidden=true;$('workspace').hidden=false;$('signout').hidden=false;$('password').value='';$('submit-panel').hidden=!roles.some(r=>['teacher','discipline_staff'].includes(r));
+ $('open-notebook').hidden=!roles.some(r=>['teacher','discipline_staff','discipline_officer','headmaster','dean'].includes(r));
  $('explanations').hidden=!roles.some(r=>['student','discipline_officer'].includes(r));
  $('overview-panel').hidden=roles.includes('student');$('refresh').hidden=roles.includes('student');
  if(roles.includes('student')){await explanations();notify('Signed in. Your absence records are loaded from the school.');return;}
  const classes=await request('/rest/v1/school_classes?select=class_name&order=class_name');if(version!==epoch)return;$('class').replaceChildren();classes.forEach(c=>{const o=document.createElement('option');o.value=c.class_name;o.textContent=c.class_name;$('class').append(o);});await overview();notify('Signed in. Records are loaded from the school database.');
  }catch(error){if(version===epoch){clear();notify(error.message,true);}}finally{button.disabled=false;}};
-$('signout').onclick=async()=>{const old=token;clear();notify('Signed out.');if(old)try{await request('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+old}});}catch{notify('Signed out on this page. Server session revocation could not be confirmed.',true);}};
+$('signout').onclick=async()=>{if(cloudNotebook&&!(await cloudNotebook.flush())){notify('Your note is not saved. Copy your changes or retry saving before signing out.',true);return;}const old=token;clear();notify('Signed out.');if(old)try{await request('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+old}});}catch{notify('Signed out on this page. Server session revocation could not be confirmed.',true);}};
+$('open-notebook').onclick=()=>{if(!user)return;const host=$('cloud-notebook');host.hidden=false;if(!cloudNotebook){const current=epoch;cloudNotebook=window.mountCloudNotebook(host,request,()=>current===epoch,user.id);}host.scrollIntoView?.({behavior:'smooth'});};
 function dateChanged(){loaded=null;$('submit').hidden=true;$('students').replaceChildren();$('details').replaceChildren();overview().catch(e=>notify(e.message,true));}
 $('day').value=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Kigali',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());$('day').onchange=dateChanged;$('class').onchange=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
 async function overview(){if(!token||roles.includes('student'))return;const version=epoch,day=$('day').value;const rows=await rpc('main_attendance_overview',{day});if(version!==epoch||day!==$('day').value)return;$('overview').replaceChildren();rows.forEach(r=>{const box=row(r.class_name+' — '+(r.session_id?'Submitted · '+r.absent+' absent / '+r.recorded+' recorded':'Not submitted'));if(r.session_id){box.append(row('Submitted '+(r.submitted_at?new Date(r.submitted_at).toLocaleString():'(time unavailable)')+' · Account '+r.submitted_by));box.append(action('View register',()=>details(r).catch(e=>notify(e.message,true))));}$('overview').append(box);});}
