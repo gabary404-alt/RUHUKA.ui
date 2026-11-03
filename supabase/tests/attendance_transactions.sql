@@ -10,6 +10,30 @@ insert into public.attendance_sessions(id,class_name,attendance_date,period,stat
 insert into public.attendance_records(id,session_id,student_id,status) values ('30000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','__TEST_STUDENT__','absent');
 select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
 set local role authenticated;
+do $$ declare rejected boolean:=false; begin
+ begin select public.submit_main_attendance('__TEST_ATTENDANCE__','2026-11-05','[]'::jsonb); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL incomplete register accepted'; end if;
+end $$;
+do $$ declare rejected boolean:=false; begin
+ begin select public.submit_main_attendance('__TEST_ATTENDANCE__','2026-11-05','[{"student_id":"WRONG","status":"present"}]'::jsonb); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL wrong class student accepted'; end if;
+end $$;
+do $$ declare rejected boolean:=false; begin
+ begin select public.submit_main_attendance('__TEST_ATTENDANCE__','2026-11-05','[{"student_id":"__TEST_STUDENT__","status":"maybe"}]'::jsonb); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL invalid status accepted'; end if;
+end $$;
+do $$ declare rejected boolean:=false; begin
+ begin select public.submit_main_attendance('__TEST_ATTENDANCE__','2026-11-05','[{"student_id":"__TEST_STUDENT__","status":"present"},{"student_id":"__TEST_STUDENT__","status":"absent"}]'::jsonb); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL duplicate student accepted'; end if;
+end $$;
+do $$ declare rejected boolean:=false; begin
+ begin insert into public.attendance_sessions(class_name,attendance_date,period,status,submitted_by) values('__TEST_ATTENDANCE__','2026-11-05','Main','submitted',auth.uid()); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL direct main session insert accepted'; end if;
+end $$;
+do $$ declare rejected boolean:=false; begin
+ begin insert into public.attendance_records(session_id,student_id,status) values('20000000-0000-4000-8000-000000000001','__TEST_STUDENT__','present'); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL direct main record insert accepted'; end if;
+end $$;
 select public.submit_main_attendance('__TEST_ATTENDANCE__','2026-11-04','[{"student_id":"__TEST_STUDENT__","status":"present"}]'::jsonb);
 do $$ begin
  begin
@@ -35,4 +59,21 @@ do $$ begin
  if not exists(select 1 from public.attendance_records where student_id='__TEST_STUDENT__' and status='excused') then raise exception 'FAIL correction'; end if;
  if not exists(select 1 from public.audit_events where entity_id='30000000-0000-4000-8000-000000000001' and details->'before'->>'status'='absent' and details->'after'->>'status'='excused') then raise exception 'FAIL audit'; end if;
 end $$;
+
+reset role;
+update public.user_roles set role='discipline_staff' where user_id='10000000-0000-4000-8000-000000000001';
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+select public.submit_main_attendance('__TEST_ATTENDANCE__','2026-11-06','[{"student_id":"__TEST_STUDENT__","status":"late"}]'::jsonb);
+do $$ declare rejected boolean:=false; begin
+ begin select public.correct_main_attendance('30000000-0000-4000-8000-000000000001','present','Not allowed'); exception when others then rejected:=true; end;
+ if not rejected then raise exception 'FAIL patron correction accepted'; end if;
+end $$;
+
+reset role;
+set local role authenticated;
+do $$ begin
+ if not exists(select 1 from public.main_attendance_overview('2026-11-06') where class_name='__TEST_ATTENDANCE__' and recorded=1 and absent=0) then raise exception 'FAIL patron overview'; end if;
+end $$;
+reset role;
 rollback;
