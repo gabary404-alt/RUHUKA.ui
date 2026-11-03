@@ -22,6 +22,12 @@
       catch { sessions.set(key, {notes:[],error:'Could not read saved notes. Reload to retry. Existing storage has not been overwritten.',blocked:true}); }
     }
     const state = sessions.get(key); let selected = null; let query = '';
+    const collectionKey = key + '-collections';
+    let collections = [{id:'default',name:'My notebook'}];
+    let activeCollection = 'default';
+    try { const raw = localStorage.getItem(collectionKey); if(raw) { const parsed=JSON.parse(raw); if(!Array.isArray(parsed) || !parsed.length || parsed.some(c=>!c.id || !c.name)) throw Error(); collections=parsed; } }
+    catch { state.error='Could not read notebook names. Reload to retry; saved notes have not been changed.';state.blocked=true; }
+
     host.classList.add('notebook');
     function el(tag, text, cls) { const n = document.createElement(tag); if (text) n.textContent = text; if (cls) n.className = cls; return n; }
     function button(text, action, cls) { const n = el('button',text,cls || 'btn btn-o'); n.type='button'; n.onclick=action; return n; }
@@ -43,10 +49,22 @@
     }
     function list() {
       selected=null; const top=shell();
-      const create=button('New note',()=>{const n={id:crypto.randomUUID(),title:'',text:'',items:[],updatedAt:new Date().toISOString()}; state.notes.unshift(n);save(n);editor(n);},'btn btn-a'); create.disabled=state.blocked;top.append(create);
+      const chooser=el('label','Choose notebook','nb-field');const select=el('select');
+      collections.forEach(c=>{const option=el('option',c.name);option.value=c.id;select.append(option);});select.value=activeCollection;
+      select.onchange=()=>{activeCollection=select.value;query='';list();};chooser.append(select);host.append(chooser);
+      const form=el('form',null,'nb-add');form.hidden=true;
+      const name=el('input');name.placeholder='Notebook name';name.maxLength=80;name.setAttribute('aria-label','Notebook name');
+      const submit=el('button','Create notebook','btn btn-a');submit.type='submit';form.append(name,submit,button('Cancel',()=>{form.hidden=true;}));
+      const plus=button('+ New notebook',()=>{form.hidden=false;name.focus();});plus.disabled=state.blocked;host.append(plus,form);
+      form.onsubmit=e=>{e.preventDefault();if(!name.value.trim())return;const next={id:crypto.randomUUID(),name:name.value.trim()};
+        try {localStorage.setItem(collectionKey,JSON.stringify([...collections,next]));collections.push(next);activeCollection=next.id;query='';list();}
+        catch {status.textContent='Notebook not created. Browser storage is unavailable or full. Your existing notebooks are unchanged.';}
+      };
+
+      const create=button('New note',()=>{const n={id:crypto.randomUUID(),notebookId:activeCollection,title:'',text:'',items:[],updatedAt:new Date().toISOString()}; state.notes.unshift(n);save(n);editor(n);},'btn btn-a'); create.disabled=state.blocked;top.append(create);
       const search=field('input','Search notes',query,value=>{query=value;paint();}); search.input.type='search'; host.append(search.wrap);
       const cards=el('div',null,'nb-list');host.append(cards);
-      function paint(){cards.replaceChildren();const matches=state.notes.filter(n=>(n.title+' '+n.text).toLowerCase().includes(query.toLowerCase()));
+      function paint(){cards.replaceChildren();const matches=state.notes.filter(n=>(n.notebookId || 'default') === activeCollection).filter(n=>(n.title+' '+n.text).toLowerCase().includes(query.toLowerCase()));
         if(!matches.length) cards.append(el('p',state.notes.length?'No matching notes.':'Your notebook is empty. Create a note for a reminder, useful information, or a small checklist.','nb-empty'));
         matches.forEach(n=>{const card=button('',()=>editor(n),'nb-note');card.append(el('strong',n.title || 'Untitled note'),el('p',(n.text || 'Checklist: '+n.items.length+' items').slice(0,140)),el('small','Updated '+new Date(n.updatedAt).toLocaleString()));cards.append(card);});
       } paint();
