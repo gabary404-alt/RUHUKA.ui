@@ -3,7 +3,7 @@ function setup(replies){
  const nodes={};const create=()=>({value:'',hidden:false,disabled:false,textContent:'',children:[],classList:{toggle(){}},append(x){this.children.push(x)},replaceChildren(){this.children=[]},setAttribute(){},querySelectorAll(){return []}});
  const document={hidden:false,getElementById(id){return nodes[id]||(nodes[id]=create())},createElement:create};const calls=[];
  const context={document,window:{RUHUKA_CONFIG:{url:'https://test.invalid',key:'publishable'}},Intl,Date,AbortSignal,setInterval(){},fetch:async(url,options)=>{calls.push({url,options});const r=replies.shift();if(!r)throw Error('Unexpected request');return {ok:r.ok!==false,status:r.status||200,json:async()=>r.data}}};
- vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../connected/attendance.js'),'utf8'),context);nodes.email.value='staff@example.test';nodes.password.value='test-password';return {nodes,calls};
+ vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../connected/attendance.js'),'utf8'),context);document.getElementById('email').value='staff@example.test';document.getElementById('password').value='test-password';return {nodes,calls};
 }
 test('failed login keeps real workspace closed and clears password',async()=>{
  const {nodes,calls}=setup([{ok:false,status:400,data:{msg:'Invalid login credentials'}}]);const button={};await nodes['login-form'].onsubmit({preventDefault(){},submitter:button});assert.equal(nodes.workspace.hidden,true);assert.equal(nodes.password.value,'');assert.match(nodes.notice.textContent,/Invalid login/);assert.equal(calls.length,1);assert.equal(button.disabled,false);
