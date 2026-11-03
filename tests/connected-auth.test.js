@@ -8,8 +8,8 @@ function setup(replies){
 test('failed login keeps real workspace closed and clears password',async()=>{
  const {nodes,calls}=setup([{ok:false,status:400,data:{msg:'Invalid login credentials'}}]);const button={};await nodes['login-form'].onsubmit({preventDefault(){},submitter:button});assert.equal(nodes.workspace.hidden,true);assert.equal(nodes.password.value,'');assert.match(nodes.notice.textContent,/Invalid login/);assert.equal(calls.length,1);assert.equal(button.disabled,false);
 });
-test('account with no active staff role is rejected before school data loads',async()=>{
- const {nodes,calls}=setup([{data:{access_token:'session',user:{id:'u'}}},{data:[{is_active:true,display_name:'Test'}]},{data:[{role:'student'}]}]);await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});assert.equal(nodes.workspace.hidden,true);assert.match(nodes.notice.textContent,/no active school staff access/);assert.equal(calls.length,3);
+test('account with a deferred parent role is rejected before school data loads',async()=>{
+ const {nodes,calls}=setup([{data:{access_token:'session',user:{id:'u'}}},{data:[{is_active:true,display_name:'Test'}]},{data:[{role:'parent'}]}]);await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});assert.equal(nodes.workspace.hidden,true);assert.match(nodes.notice.textContent,/no active school staff access/);assert.equal(calls.length,3);
 });
 test('officer login uses database roles and loads shared overview',async()=>{
  const {nodes,calls}=setup([{data:{access_token:'session',user:{id:'u'}}},{data:[{is_active:true,display_name:'Test Officer'}]},{data:[{role:'discipline_officer'}]},{data:[]},{data:[{class_name:'S1',session_id:null}]}]);await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});assert.equal(nodes.workspace.hidden,false);assert.equal(nodes['submit-panel'].hidden,true);assert.match(nodes.identity.textContent,/Test Officer/);assert.match(nodes.overview.children[0].children[0].textContent,/Not submitted/);assert.ok(calls.at(-1).url.endsWith('/rpc/main_attendance_overview'));
@@ -19,4 +19,7 @@ test('expired access token renews once and retries overview using new token',asy
 });
 test('rejected renewal returns to sign-in and preserves a visible draft reminder',async()=>{
  const {nodes}=setup([{data:{access_token:'old',refresh_token:'refresh-secret',user:{id:'u'}}},{data:[{is_active:true}]},{data:[{role:'discipline_officer'}]},{data:[]},{ok:false,status:401,data:{message:'expired'}},{ok:false,status:400,data:{message:'refresh rejected'}}]);await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});assert.equal(nodes.workspace.hidden,true);assert.match(nodes.notice.textContent,/session expired.*saved draft/s);
+});
+test('student login opens own explanation route without staff overview',async()=>{
+ const {nodes,calls}=setup([{data:{access_token:'session',user:{id:'u'}}},{data:[{is_active:true}]},{data:[{role:'student'}]},{data:[]},{data:[]}]);await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});assert.equal(nodes.workspace.hidden,false);assert.equal(nodes['overview-panel'].hidden,true);assert.equal(nodes.explanations.hidden,false);assert.equal(calls.some(c=>c.url.includes('main_attendance_overview')),false);
 });

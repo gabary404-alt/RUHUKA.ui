@@ -76,4 +76,55 @@ do $$ begin
  if not exists(select 1 from public.main_attendance_overview('2026-11-06') where class_name='__TEST_ATTENDANCE__' and recorded=1 and absent=0) then raise exception 'FAIL patron overview'; end if;
 end $$;
 reset role;
+
+reset role;
+insert into auth.users(id) values('10000000-0000-4000-8000-000000000003');
+insert into public.profiles(id,is_active) values('10000000-0000-4000-8000-000000000003',true) on conflict(id) do update set is_active=true;
+insert into public.user_roles(user_id,role) values('10000000-0000-4000-8000-000000000003','student');
+update public.students set auth_user_id='10000000-0000-4000-8000-000000000003' where student_id='__TEST_STUDENT__';
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+-- The earlier correction test excused this record. Reset fixture as privileged setup.
+update public.attendance_records set status='absent',note='New test absence' where id='30000000-0000-4000-8000-000000000001';
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000003',true);
+set local role authenticated;
+select set_config('test.explanation',public.submit_absence_explanation('30000000-0000-4000-8000-000000000001','Clinic appointment')::text,true);
+do $$ begin
+ if (select count(*) from public.workflow_items where id=current_setting('test.explanation')::uuid)<>1 then raise exception 'FAIL student cannot read own explanation'; end if;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+do $$ begin
+ if exists(select 1 from public.workflow_items where id=current_setting('test.explanation')::uuid) then raise exception 'FAIL patron can read explanation'; end if;
+ begin
+ perform public.review_absence_explanation(current_setting('test.explanation')::uuid,true,'Unauthorized');
+ raise exception 'FAIL patron approved';
+ exception when insufficient_privilege then null; end;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+select public.review_absence_explanation(current_setting('test.explanation')::uuid,true,'Clinic explanation accepted');
+do $$ begin
+ if not exists(select 1 from public.attendance_records where id='30000000-0000-4000-8000-000000000001' and status='excused') then raise exception 'FAIL linked absence not excused'; end if;
+ if not exists(select 1 from public.workflow_items where id=current_setting('test.explanation')::uuid and status='approved' and reviewed_by=auth.uid()) then raise exception 'FAIL review not saved'; end if;
+ if not exists(select 1 from public.audit_events where entity_id='30000000-0000-4000-8000-000000000001' and details->'before'->>'status'='absent' and details->'after'->>'status'='excused') then raise exception 'FAIL officer cannot see correction audit'; end if;
+end $$;
+reset role;
+
+reset role;
+delete from public.user_roles where user_id='10000000-0000-4000-8000-000000000001';
+insert into public.user_roles(user_id,role) values('10000000-0000-4000-8000-000000000001','headmaster');
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+do $$ begin
+ if exists(select 1 from public.workflow_items where id=current_setting('test.explanation')::uuid) then raise exception 'FAIL headmaster can read private explanation'; end if;
+end $$;
+reset role;
+update public.user_roles set role='dean' where user_id='10000000-0000-4000-8000-000000000001';
+set local role authenticated;
+do $$ begin
+ if exists(select 1 from public.workflow_items where id=current_setting('test.explanation')::uuid) then raise exception 'FAIL dean can read private explanation'; end if;
+end $$;
+reset role;
 rollback;
