@@ -17,7 +17,7 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [x] A03 Verify notebook checklist editing, completion, removal, search and confirmed deletion with focused tests.
 - [x] A04 Verify notebook storage failures and old-note migration without overwriting existing content.
 - [ ] A05 Browser-check notebook on phone, tablet and desktop and all required Staff/Admin roles; record screenshots.
-- [ ] A06 Reconcile older requirements/handoff documents with this accepted scope.
+- [x] A06 Reconcile older requirements/handoff documents with this accepted scope.
 - [ ] A07 Reconcile applied database migrations, repository files and old draft PR #4; document reproducible baseline without resetting the live project.
 - [ ] A08 Review PR #9 and #10 changes, resolve conflicts and mark only verified increments ready for review.
 
@@ -174,3 +174,5 @@ School source-file examples; approved public wording/claims; school year/term da
 - 3 Nov A05 browser pass (in progress): actual Admin/Headmaster desktop route revealed missing collection CSS, an unintentionally visible creation form and poor dark-mode secondary-button contrast. Consolidating collection CSS in PR #10, enforcing hidden controls and using existing theme colours. A05 stays open until remaining roles and device sizes are verified. Browser API currently exposes no viewport resizing; component-width QA must be distinguished from actual phone keyboard/device testing.
 
 - 3 Nov A05 follow-up: corrected CSS deployed and rechecked in actual desktop Admin/Headmaster route. Creation form is hidden initially, + reveals it, successful named notebook creation selects it, and dark-mode controls are readable. Screenshot captured. Seven notebook tests still pass. Other roles, narrow/tablet browser viewports and phone keyboard remain unverified; A05 remains open.
+
+- 3 Nov: A06 completed; requirements and historical handoff aligned to accepted scope. Private notebook storage applied; rollback tests passed for ownership, Headmaster isolation, stale-save rejection and student denial. G06/G07 remain open for interface integration and full cross-device/deletion checks. A05 remains open. Verified: 14/121. No owner action required.

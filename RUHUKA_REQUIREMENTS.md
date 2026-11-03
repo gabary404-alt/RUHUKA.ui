@@ -1,13 +1,13 @@
 # Ruhuka — agreed first functional handover
 
-Decisions confirmed by the project owner through 2026-11-02 (Africa/Kigali).
+Decisions confirmed by the project owner through 2026-11-03 (Africa/Kigali).
 This document supersedes conflicting older briefs and the frontend-only handover
 scope in RUHUKA_MASTER_HANDOFF.md. Requirements below are not implementation claims.
 
 ## Delivery and design
 
-- Finish and review frontend workflows with synthetic records first; then connect
-  and verify Supabase. The actual school handover requires a functioning backend.
+- Build and verify frontend and backend together in complete workflows using
+  synthetic test records, as approved 3 November. The actual school handover requires a functioning backend.
 - Preserve the current green/red identity and existing first-release features,
   including notebooks and AI help. Prioritize phones while supporting desktop.
 - English first. Other languages will be directed by the owner later.
@@ -80,13 +80,9 @@ scope in RUHUKA_MASTER_HANDOFF.md. Requirements below are not implementation cla
   Ties share positions (1,2,2,4). Never silently treat a missing total as zero.
 - Dean publishes and corrects results without Headmaster approval. Notify Headmaster
   on uploads and corrections; retain before/after history and update rankings.
-- Promotion threshold defaults to 50%; Dean can set e.g. 55% or 60% per school year.
-  Prepare suggestions and route below-threshold/missing cases for review. Headmaster
-  OR Dean decides promote/repeat after review. Retain prior-year records.
-- OPEN: threshold choice is not the choice of annual results source. The owner has
-  not chosen final-term percentage vs all-term average vs a supplied annual release.
-  Require the Dean to explicitly select the basis before preparing promotion
-  suggestions; never silently choose a formula.
+- Automatic promotion suggestions/decisions are deferred. Retain explicit manual
+  school decisions and historical records. Future suggestions need an explicitly
+  agreed annual results basis and threshold; never silently choose a formula.
 - Three terms/year, with Headmaster-configured dates. Historical classes, marks and
   attendance must not be rewritten by a new year's roster.
 - Excel and CSV imports; Excel, CSV and printable/PDF reports. Filters must affect
@@ -149,3 +145,9 @@ scope in RUHUKA_MASTER_HANDOFF.md. Requirements below are not implementation cla
    AI provider/source behavior and school acceptance before functional handover.
 
 No production-ready or fully functional claim until the final verification passes.
+
+## Approved scope update — 3 November
+
+HANDOVER_CHECKLIST.md is the delivery/acceptance tracker and supersedes the initial sequence above. Backend work proceeds alongside frontend work.
+
+Defer parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards and elaborate interactive 3D. Retain AI chat and general learning support with live-provider verification. Today dashboard is essential and opens real role-appropriate actions. Remove click sparks/cursor effects, duplicated or placeholder controls and manual discipline point-changing routes. Two lightweight original 3D-looking illustrations are approved for review with static/reduced-motion fallbacks. Named personal notebooks include + New notebook without replacing existing notes. The authorised temporary owner Headmaster account is replaced by a separate school-owned account at handover, preserving audit actors.

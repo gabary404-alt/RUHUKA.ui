@@ -1,3 +1,5 @@
+> Current delivery status: read [HANDOVER_CHECKLIST.md](./HANDOVER_CHECKLIST.md) and the requirements scope update of 3 November. This older narrative is historical, not proof of feature completion.
+
 # RUHUKA — Master Project Handoff
 
 > **Current requirements (2026-11-02):** Read [RUHUKA_REQUIREMENTS.md](./RUHUKA_REQUIREMENTS.md) first. The owner has completed a new requirements interview. That document supersedes conflicting role rules, review requirements, parent scope and frontend-only handover statements below. The first school delivery must be fully functional; frontend review comes before backend integration. This older document remains historical context.
