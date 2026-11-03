@@ -1,11 +1,9 @@
-# Attendance backend status
+# Attendance backend status — 3 November 2026
 
-Applied to RUHUKA system (jsqiqxflgokfdooogcst), 3 November 2026.
+Applied to RUHUKA system (jsqiqxflgokfdooogcst): restrictive submitted-attendance guards; invoker-rights correct_main_attendance RPC with required reason; identity guard and before/after audit; transactional submit_main_attendance RPC for assigned active teachers, complete active roster validation and existing database unique class/day index.
 
-Migration 20261103174849 adds restrictive UPDATE guards for submitted main attendance. Existing permissive policies remain, but cannot independently authorize a teacher/headmaster to update submitted main records. Submitted main session headers are immutable to authenticated clients.
+Executed rollback-based SQL integration test using synthetic teacher/officer accounts: assigned teacher submits a complete register; duplicate submission raises unique violation; teacher direct update changes zero submitted rows; teacher correction RPC denied; officer changes absent to excused; before/after audit verified. Fixture transaction rolled back. Security advisor unchanged: leaked-password protection disabled.
 
-Verified migration history and policy catalog; security advisor reports only the pre-existing leaked-password-protection warning. End-to-end role tests remain outstanding. Existing officer correction constraints still only permit the late-return present path; broader corrections require reconciliation. This is an incremental restriction, not a finished attendance API.
+Remaining: patron role and scope; auth/frontend integration; atomic submission as exclusive write path (legacy direct INSERT grants/policies still exist); complete roster edits/concurrency locking; draft lifecycle; correction reason UI and refresh; explanation review restrictions; multi-session concurrency and reconnect tests. Frontend still uses browser demo storage. Do not claim complete backend readiness.
 
-Existing database already has a partial unique index on main class/date. Still required: atomic submission with full roster validation; separate patron role; correction reason and before/after history; explanation access restriction; authentication integration; realtime view refresh and reconnect; multi-session permission/concurrency tests.
-
-Website remains local demo. No student rows altered. Historical migrations are not all in this checkout: do not reset/rebuild from this folder alone. Reconcile older migration baseline first.
+Older migration baseline remains absent from this checkout; do not reset/rebuild a project from this folder alone.
