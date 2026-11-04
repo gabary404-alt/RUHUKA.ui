@@ -29,3 +29,5 @@
 .ai-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 @media(max-width:480px){#ai-assistant{right:8px;bottom:max(8px,env(safe-area-inset-bottom))}#ai-chat-panel{width:calc(100vw - 16px);max-width:none;height:calc(100dvh - 24px);border-radius:16px}.ai-header{padding:12px}.ai-suggestions{gap:6px}}
 @media(prefers-reduced-motion:reduce){.ai-waiting span{animation:none}}
+
+#ai-messages:focus-visible{outline:3px solid var(--a);outline-offset:-4px}#ai-assistant button:focus-visible{outline:3px solid var(--t);outline-offset:2px;box-shadow:0 0 0 5px var(--s1)}

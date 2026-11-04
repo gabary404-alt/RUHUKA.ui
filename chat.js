@@ -31,6 +31,7 @@
   let lastQuestion = '';
   const requestTimeout = 45000;
   function setStatus(text) { byId('ai-status').textContent = text; }
+  function announce(text) { byId('ai-announcement').textContent = text; }
   function busy(value) {
     byId('ai-send').disabled = value;
     byId('ai-stop').hidden = !value;
@@ -39,6 +40,7 @@
   function append(text, role) {
     const node = document.createElement('div');
     node.className = 'ai-message ai-message-' + role;
+    node.setAttribute('role','article');node.setAttribute('aria-label',role==='user'?'Your message':'Ruhuka assistant message');
     // Model output is text, never trusted HTML, scripts, or executable links.
     node.textContent = text;
     byId('ai-messages').appendChild(node);
@@ -107,7 +109,7 @@
     // A partial/stopped reply is not added to future model context.
     release(run);
     if (run.finishReveal) run.finishReveal(false);
-    setStatus('Stopped. You can ask another question.');
+    setStatus('Stopped. You can ask another question.');announce('Response stopped. The partial response remains in the conversation.');
     byId('ai-input').focus();
   };
   root.clearAIConversation = function (quiet) {
@@ -118,7 +120,7 @@
     append('Hello! Ask me about Ruhuka or a general learning topic. I cannot access private student records. For current facts, check an official source; live web lookup is not connected yet.', 'assistant');
     byId('ai-retry').hidden = true;
     byId('ai-input').value = '';
-    setStatus('Ready');
+    setStatus('Ready');announce(quiet?'':'New chat. Previous conversation cleared.');
     if (!quiet) byId('ai-input').focus();
   };
   root.sendAIMessage = async function (suggestion) {
@@ -133,7 +135,7 @@
     byId('ai-retry').hidden = true;
     const run = { controller: new AbortController(), node: waiting(), timeout: null, tick: null, timedOut: false };
     active = run;
-    busy(true);
+    busy(true);announce('');input.focus();
     setStatus('Preparing a response…');
     let reply;
     let online = false;
@@ -145,10 +147,7 @@
         run.timeout = setTimeout(() => { run.timedOut = true; run.controller.abort(); }, requestTimeout);
         const response = await fetch(AI_CONFIG.API_URL, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: run.controller.signal,
-          body: JSON.stringify({ model: AI_CONFIG.MODEL, messages: [
-            { role: 'system', content: AI_CONFIG.SYSTEM_PROMPT },
-            ...history, { role: 'user', content: message }
-          ], temperature: 0.7, max_tokens: 800, stream: false })
+          body: JSON.stringify({messages:(()=>{const messages=[...history,{role:'user',content:message}];while(messages.length>1&&(messages.length>13||messages.reduce((n,m)=>n+m.content.length,0)>24000))messages.splice(0,2);return messages;})()})
         });
         if (!response.ok) throw new Error('AI unavailable');
         reply = extractReply(await response.json());
@@ -168,6 +167,7 @@
       if (complete && active === run) {
         if (online) history = [...history, { role: 'user', content: message }, { role: 'assistant', content: reply }].slice(-12);
         setStatus(online ? 'Response complete · Current facts are not verified' : 'Local help · Live AI unavailable');
+        announce((online?'Ruhuka assistant: ':'Local help: ')+reply);
       }
     } finally { release(run); }
   };
@@ -179,7 +179,7 @@
       }
     });
     byId('ai-chat-panel').addEventListener('keydown', event => {
-      if (event.key === 'Escape') root.toggleAI();
+      if (event.key === 'Escape'&&!byId('ai-chat-panel').hidden) {event.preventDefault();event.stopPropagation();root.toggleAI();}
     });
     root.clearAIConversation(true);
   });
