@@ -38,4 +38,24 @@ do $$ begin
  exception when insufficient_privilege then null; end;
 end $$;
 reset role;
+
+reset role;
+select set_config('request.jwt.claim.sub','11000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+insert into public.personal_notes(notebook_id,title,body)
+select current_setting('test.notebook')::uuid,'Pagination test '||n,'Unique body marker '||n from generate_series(1,205) n;
+do $$ begin
+ if (select count(*) from public.search_personal_notes(current_setting('test.notebook')::uuid,'',0))<>50 then raise exception 'FAIL page size'; end if;
+ if (select count(*) from public.search_personal_notes(current_setting('test.notebook')::uuid,'',200))<>6 then raise exception 'FAIL notes beyond first 200'; end if;
+ if not exists(select 1 from public.search_personal_notes(current_setting('test.notebook')::uuid,'Unique body marker 205',0) where total_count=1) then raise exception 'FAIL full notebook body search'; end if;
+ if exists(select 1 from public.search_personal_notes(current_setting('test.notebook')::uuid,'%',0)) then raise exception 'FAIL wildcard treated as literal'; end if;
+end $$;
+reset role;
+update public.user_roles set role='headmaster' where user_id='11000000-0000-4000-8000-000000000002';
+select set_config('request.jwt.claim.sub','11000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+do $$ begin
+ if exists(select 1 from public.search_personal_notes(current_setting('test.notebook')::uuid,'',0)) then raise exception 'FAIL search privacy'; end if;
+end $$;
+reset role;
 rollback;

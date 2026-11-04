@@ -161,6 +161,17 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] J11 Agree post-handover support/contact, monitoring and update responsibility.
 - [ ] J12 Deliver access inventory, costs, known limitations, deferred backlog and first-week follow-up arrangement.
 
+
+## K. Class letter (added 4 November; after reliable source records/reports)
+
+- [ ] K01 Confirm school weekly/term class-summary practice and define class/date/year/release selection.
+- [ ] K02 Build deterministic attendance summary with unique-student/absence-day distinction, returns and missing-register coverage.
+- [ ] K03 Add separate selected academic release and dated official discipline details; preserve Not recorded and source attribution.
+- [ ] K04 Keep editable narrative separate from generated metrics and enforce author/Headmaster permissions and explanation privacy.
+- [ ] K05 Save reproducible versioned letter snapshots with source IDs, author and timestamp; later corrections create a new version.
+- [ ] K06 Print school-branded letter with Strive to Excel, correct totals and unclipped supporting detail; no automatic external sending.
+- [ ] K07 Run school acceptance examples and confirm the letter reduces retyping in practice; retain Today dashboard.
+
 ## Owner/school inputs (request only when dependent work is ready)
 
 School source-file examples; approved public wording/claims; school year/term dates; school-owned account identity; authorised pilot participants and acceptance decisions; service/email/billing ownership where needed. Never request passwords in chat. No owner action needed to start A02.
@@ -175,6 +186,8 @@ School source-file examples; approved public wording/claims; school year/term da
 
 - 3 Nov A05 follow-up: corrected CSS deployed and rechecked in actual desktop Admin/Headmaster route. Creation form is hidden initially, + reveals it, successful named notebook creation selects it, and dark-mode controls are readable. Screenshot captured. Seven notebook tests still pass. Other roles, narrow/tablet browser viewports and phone keyboard remain unverified; A05 remains open.
 
-- 3 Nov: A06 completed; requirements and historical handoff aligned to accepted scope. Private notebook storage applied; rollback tests passed for ownership, Headmaster isolation, stale-save rejection and student denial. G06/G07 remain open for interface integration and full cross-device/deletion checks. A05 remains open. Verified: 14/121. No owner action required.
+- 3 Nov: A06 completed; requirements and historical handoff aligned to accepted scope. Private notebook storage applied; rollback tests passed for ownership, Headmaster isolation, stale-save rejection and student denial. G06/G07 remain open for interface integration and full cross-device/deletion checks. A05 remains open. Verified: 14/128. No owner action required.
 
 - 3 Nov: B03 completed with actual deployed owner-account email/password sign-in and explicit Headmaster role, followed by signout returning to login and clearing visible private notebook content. G06/G07 progressed: account-private notebook created, note/body/checklist autosaved and reloaded from server; checklist remained complete. Only labelled synthetic setup content used, left in owner notebook RUHUKA setup checks. 37 automated tests pass; separate ownership/conflict SQL tests passed earlier. Full cross-device/mobile, real conflict recovery and final portal integration remain open. Tracker 15/121 verified. No merge recommendation yet.
+
+- 4 Nov: Class letter reviewed (8/10 conditional on school reporting practice), scoped in CLASS_LETTER_BRIEF.md and added as K01–K07. Total now 128; 15 verified, 113 open. Notebook full-search/pagination replaces 200-note limit; SQL rollback suite tested 206 notes, pages beyond 200, body search/literal wildcard and cross-account denial. No extra boxes checked: browser/mobile and full feature acceptance remain open.

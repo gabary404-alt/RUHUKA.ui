@@ -28,9 +28,19 @@ function mountCloudNotebook(host,api,isCurrent,userId){
   }catch(error){say(error.message);}
  }
  async function openNotebook(book){if(!(await save())||!valid())return;notebook=book;note=null;const version=++sequence;shell(book.name);host.append(button('All notebooks',list));const search=field('Search this notebook','input','');search.input.type='search';host.append(search.l);const results=el('div');host.append(results);
-  let searchTimer,queryVersion=0;
-  async function load(){const q=++queryVersion;try{let path='/rest/v1/personal_notes?select=id,title,body,updated_at&notebook_id=eq.'+book.id+'&order=updated_at.desc&limit=200';const rows=await api(path);if(!valid()||version!==sequence||q!==queryVersion)return;results.replaceChildren();const query=search.input.value.toLowerCase();const matches=rows.filter(n=>(n.title+' '+n.body).toLowerCase().includes(query));say(rows.length===200?'Showing/searching the 200 most recently updated notes.':'Saved notes in this notebook');if(!matches.length)results.append(el('p',query?'No matching notes.':'No notes yet.'));matches.forEach(n=>{const box=el('div');box.className='row';box.append(button(n.title||'Untitled note',()=>openNote(n.id)),el('p',n.body.slice(0,120)),el('small','Updated '+new Date(n.updated_at).toLocaleString()));results.append(box);});}catch(error){say(error.message);}}
-  search.input.oninput=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(load,250);};
+  let searchTimer,queryVersion=0,offset=0;
+  const previous=button('Previous notes',()=>{offset=Math.max(0,offset-50);load();});
+  const next=button('Next notes',()=>{offset+=50;load();});host.append(previous,next);
+  async function load(){const q=++queryVersion;const requestedQuery=search.input.value;previous.disabled=next.disabled=true;
+   try{const rows=await api('/rest/v1/rpc/search_personal_notes',{method:'POST',body:JSON.stringify({target_notebook:book.id,query_text:requestedQuery,page_offset:offset})});
+    if(!valid()||version!==sequence||q!==queryVersion)return;results.replaceChildren();const total=Number(rows[0]?.total_count||0);
+    previous.disabled=offset===0;next.disabled=!rows.length||offset+rows.length>=total;
+    say(rows.length?'Showing '+(offset+1)+'–'+(offset+rows.length)+' of '+total+' matching notes.':'No matching notes on this page.');
+    if(!rows.length)results.append(el('p',requestedQuery?'No matching notes.':'No notes yet.'));
+    rows.forEach(n=>{const box=el('div');box.className='row';box.append(button(n.title||'Untitled note',()=>openNote(n.id)),el('p',n.preview),el('small','Updated '+new Date(n.updated_at).toLocaleString()));results.append(box);});
+   }catch(error){if(valid()&&version===sequence&&q===queryVersion){previous.disabled=offset===0;next.disabled=true;say('Could not load notes. '+error.message);}}
+  }
+  search.input.maxLength=200;search.input.oninput=()=>{offset=0;queryVersion++;clearTimeout(searchTimer);searchTimer=setTimeout(load,250);};
   host.append(button('New note',async()=>{try{const rows=await api('/rest/v1/personal_notes',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({notebook_id:book.id})});if(valid()&&version===sequence)await openNote(rows[0].id);}catch(error){say(error.message);}}));await load();
  }
  async function openNote(id){if(!(await save())||!valid())return;const version=++sequence;try{const rows=await api('/rest/v1/personal_notes?select=*&id=eq.'+id);if(!valid()||version!==sequence)return;if(!rows[0])throw Error('Note no longer available.');note=rows[0];revision=note.revision;dirty=false;shell('Edit note');host.append(button('Back to notes',()=>openNotebook(notebook)));say('Saved to your private account');
