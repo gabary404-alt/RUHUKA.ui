@@ -126,5 +126,44 @@ do $$declare target_role text;begin
   execute 'reset role';
  end loop;
 end $$;
-rollback;
 
+-- A stale class assignment must not bypass account or role revocation.
+reset role;
+update public.user_roles set role='teacher' where user_id='12000000-0000-4000-8000-000000000004';
+insert into public.teacher_class_assignments(teacher_user_id,class_name)
+values('12000000-0000-4000-8000-000000000004','__OPS_S1__');
+select set_config('request.jwt.claim.sub','12000000-0000-4000-8000-000000000004',true);
+set local role authenticated;
+do $$ begin
+ if not private.can_access_class('__OPS_S1__') or not private.can_access_student('__OPS_STUDENT__') then raise exception 'FAIL active assigned teacher access';end if;
+ if not exists(select 1 from public.students where student_id='__OPS_STUDENT__') then raise exception 'FAIL active teacher roster read';end if;
+end $$;
+reset role;
+update public.profiles set is_active=false where id='12000000-0000-4000-8000-000000000004';
+set local role authenticated;
+do $$ begin
+ if private.can_access_class('__OPS_S1__') or private.can_access_student('__OPS_STUDENT__') then raise exception 'FAIL disabled teacher helper access';end if;
+ if exists(select 1 from public.students where student_id='__OPS_STUDENT__') or exists(select 1 from public.attendance_records where student_id='__OPS_STUDENT__') then raise exception 'FAIL disabled teacher record access';end if;
+end $$;
+reset role;
+update public.profiles set is_active=true where id='12000000-0000-4000-8000-000000000004';
+update public.user_roles set role='student' where user_id='12000000-0000-4000-8000-000000000004';
+set local role authenticated;
+do $$ begin
+ if private.can_access_class('__OPS_S1__') or private.can_access_student('__OPS_STUDENT__') or exists(select 1 from public.students where student_id='__OPS_STUDENT__') then raise exception 'FAIL revoked teacher stale assignment';end if;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','12000000-0000-4000-8000-000000000005',true);
+set local role authenticated;
+do $$ begin
+ if not private.can_access_student('__OPS_STUDENT__') then raise exception 'FAIL active student own access';end if;
+end $$;
+reset role;
+update public.profiles set is_active=false where id='12000000-0000-4000-8000-000000000005';
+set local role authenticated;
+do $$ begin
+ if private.can_access_student('__OPS_STUDENT__') or exists(select 1 from public.students where student_id='__OPS_STUDENT__') then raise exception 'FAIL disabled student own access';end if;
+end $$;
+reset role;
+
+rollback;
