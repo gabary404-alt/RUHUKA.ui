@@ -228,7 +228,7 @@ function loadStudents() {
 
 function computeClassStats() {
   const classMap = {};
-  window.schoolData.students.filter(s => s.status !== 'Archived').forEach(s => {
+  window.schoolData.students.filter(s => s.status === 'Active').forEach(s => {
     if (!classMap[s.class]) {
       classMap[s.class] = { name: s.class, level: s.level, students: [], teacher: 'TBD' };
     }
@@ -275,21 +275,21 @@ function getAcademicRankings() {
 }
 
 function getTop30Overall() {
-  return window.schoolData.students.filter(s => s.status !== 'Archived' && combinedPerformanceIndex(s) !== null)
+  return window.schoolData.students.filter(s => s.status === 'Active' && combinedPerformanceIndex(s) !== null)
     .map(s => ({ ...s, index: Math.round(combinedPerformanceIndex(s) * 10) / 10 }))
     .sort((a, b) => b.index - a.index)
     .slice(0, 30);
 }
 
 function getTop30Discipline() {
-  return window.schoolData.students.filter(s => s.status !== 'Archived')
+  return window.schoolData.students.filter(s => s.status === 'Active')
     .filter(s => numberOrNull(s.disciplinePoints) !== null)
     .sort((a, b) => b.disciplinePoints - a.disciplinePoints)
     .slice(0, 30);
 }
 
 function getNeedsAttention() {
-  return window.schoolData.students.filter(s => s.status !== 'Archived' &&
+  return window.schoolData.students.filter(s => s.status === 'Active' &&
     ((numberOrNull(s.disciplinePoints) !== null && Number(s.disciplinePoints) < 20) ||
     (numberOrNull(s.academicScore) !== null && Number(s.academicScore) < 60)))
     .sort((a, b) => (combinedPerformanceIndex(a) ?? 0) - (combinedPerformanceIndex(b) ?? 0));
@@ -306,7 +306,7 @@ function getClassesBelowTarget() {
 function getClassLeaders() {
   const leaders = [];
   window.schoolData.classes.forEach(cls => {
-    const clsStudents = window.schoolData.students.filter(s => s.class === cls.name && s.status !== 'Archived');
+    const clsStudents = window.schoolData.students.filter(s => s.class === cls.name && s.status === 'Active');
     const rankedStudents = clsStudents.filter(s => combinedPerformanceIndex(s) !== null);
     if (rankedStudents.length > 0) {
       const leader = rankedStudents
@@ -465,7 +465,7 @@ function renderUserTable() {
   if (!tbody) return;
   const includeArchived = document.getElementById('includeArchivedStudents')?.checked;
   const students = window.schoolData.students
-    .filter(s => includeArchived || s.status !== 'Archived')
+    .filter(s => includeArchived || s.status === 'Active')
     .slice(0, 500);
   tbody.innerHTML = students.map(s => {
     const dColor = s.disciplinePoints >= 32 ? 'var(--g)' : s.disciplinePoints >= 20 ? 'var(--w)' : 'var(--r)';
@@ -497,11 +497,11 @@ function escapeHTML(value) {
 // Admin views during a demo always shows the current state.
 function updateDashboardStats() {
   const totalEl = document.getElementById('dashTotalStudents');
-  if (totalEl) totalEl.textContent = window.schoolData.students.filter(student => student.status !== 'Archived').length.toLocaleString();
+  if (totalEl) totalEl.textContent = window.schoolData.students.filter(student => student.status === 'Active').length.toLocaleString();
 
   const { presentPct } = computeSchoolAttendanceToday();
   const attEl = document.getElementById('dashAttendanceToday');
-  if (attEl) attEl.textContent = presentPct + '%';
+  if (attEl) attEl.textContent = presentPct === null ? 'Not recorded' : presentPct + '%';
 
   const pendingCount = getNeedsAttention().length + window.schoolData.justifications.filter(j => j.status === 'Pending').length;
   const pendingEl = document.getElementById('dashPendingIssues');
@@ -518,9 +518,9 @@ function updateStaffDashboardStats() {
   const absentEl = document.getElementById('staffAbsentCount');
   const absentPctEl = document.getElementById('staffAbsentPct');
   if (presentEl) presentEl.textContent = present.toLocaleString();
-  if (presentPctEl) presentPctEl.textContent = presentPct + '% today';
+  if (presentPctEl) presentPctEl.textContent = presentPct === null ? 'Not recorded' : presentPct + '% today';
   if (absentEl) absentEl.textContent = absent.toLocaleString();
-  if (absentPctEl) absentPctEl.textContent = (Math.round((100 - presentPct) * 10) / 10) + '% today';
+  if (absentPctEl) absentPctEl.textContent = presentPct === null ? 'Not recorded' : (Math.round((100 - presentPct) * 10) / 10) + '% today';
 
   const pendingEl = document.getElementById('staffPendingJust');
   if (pendingEl) pendingEl.textContent = window.schoolData.justifications.filter(j => j.status === 'Pending').length;
@@ -536,18 +536,12 @@ function updateStaffDashboardStats() {
 // submitted -- so this always reflects the latest marks, on both
 // dashboards, without a separate daily log to keep in sync.
 function computeSchoolAttendanceToday() {
-  const students = window.schoolData.students.filter(student => student.status !== 'Archived');
-  if (!students.length) return { presentPct: 0, present: 0, absent: 0 };
+  const active = new Set(window.schoolData.students.filter(student => student.status === 'Active').map(s=>s.id));
   const today = getLocalDateString();
-  const records = window.schoolData.attendanceRecords.filter(record => record.date === today && record.status !== 'excused');
-  if (records.length) {
-    const present = records.filter(record => record.status === 'present' || record.status === 'late').length;
-    return { presentPct: Math.round(present / records.length * 1000) / 10, present, absent: records.length - present };
-  }
-  const avg = students.reduce((a, s) => a + s.attendanceRate, 0) / students.length;
-  const presentPct = Math.round(avg * 10) / 10;
-  const present = Math.round(students.length * avg / 100);
-  return { presentPct, present, absent: students.length - present };
+  const records = window.schoolData.attendanceRecords.filter(record => active.has(record.studentId) && record.date === today && record.status !== 'excused' && !(record.period || '').toLowerCase().includes('follow-up'));
+  if (!records.length) return { presentPct: null, present: 0, absent: 0 };
+  const present = records.filter(record => record.status === 'present' || record.status === 'late').length;
+  return { presentPct: Math.round(present / records.length * 1000) / 10, present, absent: records.length-present };
 }
 
 function updateAttendanceOverviewBars() {
@@ -620,7 +614,7 @@ function populateDMStudentDropdown() {
   const sel = document.getElementById('dmstu');
   if (!sel) return;
   const prev = sel.value;
-  const sorted = window.schoolData.students.filter(s => s.status !== 'Archived').sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = window.schoolData.students.filter(s => s.status === 'Active').sort((a, b) => a.name.localeCompare(b.name));
   sel.innerHTML = sorted.map(s => `<option value="${escapeHTML(s.name)} (${escapeHTML(s.id)})">${escapeHTML(s.name)} (${escapeHTML(s.id)})</option>`).join('');
   if (prev && sorted.some(s => (s.name + ' (' + s.id + ')') === prev)) sel.value = prev;
 }
@@ -1037,7 +1031,6 @@ function viewStudent(id) {
   const lines = [
     student.name + ' (' + student.id + ')',
     'Class: ' + student.class + ' | ' + student.level + ' | ' + student.status,
-    'Guardian: ' + (student.guardianName || 'Not recorded') + ' | ' + (student.guardianPhone || 'No phone'),
     'Official discipline total: ' + (student.disciplinePoints ?? 'Not recorded') + '/40',
     'Academic score: ' + (student.academicScore ?? 'Not recorded') + '% | Attendance: ' + (student.attendanceRate ?? 'Not recorded') + '%',
     '', 'Recent discipline events:', ...discipline.map(item => `${item.date}: ${item.reason || 'Score imported'} (${item.change ?? 'total ' + item.total}) by ${item.recordedBy || 'Not recorded'}`),
@@ -1311,7 +1304,7 @@ function parentChild() {
 }
 function parentRankText(student) {
   if (!student || typeof combinedPerformanceIndex !== 'function') return 'Not ranked';
-  const mates = window.schoolData.students.filter(s => s.class === student.class && s.status !== 'Archived' && combinedPerformanceIndex(s) !== null);
+  const mates = window.schoolData.students.filter(s => s.class === student.class && s.status === 'Active' && combinedPerformanceIndex(s) !== null);
   const ordered = mates.slice().sort((a, b) => combinedPerformanceIndex(b) - combinedPerformanceIndex(a));
   const place = ordered.findIndex(s => s.id === student.id);
   return place < 0 ? 'Not ranked' : '#' + (place + 1) + ' of ' + ordered.length;
@@ -1506,8 +1499,8 @@ function renderStudentPortal() {
   setText('studentDisciplineUpdated', student.disciplineSnapshotDate ? `Imported ${student.disciplineSnapshotDate}` : 'Demo/current roster value');
   setText('studentAttendanceRate', `${student.attendanceRate ?? '--'}%`);
   setText('studentAbsenceCount', String(student.absences ?? 0));
-  const classStudents = window.schoolData.students.filter(item => item.class === student.class && item.status !== 'Archived');
-  const schoolStudents = window.schoolData.students.filter(item => item.status !== 'Archived');
+  const classStudents = window.schoolData.students.filter(item => item.class === student.class && item.status === 'Active');
+  const schoolStudents = window.schoolData.students.filter(item => item.status === 'Active');
   const rank = roster => {
     const ranked = roster.filter(item => combinedPerformanceIndex(item) !== null)
       .sort((a, b) => combinedPerformanceIndex(b) - combinedPerformanceIndex(a));
@@ -1673,7 +1666,7 @@ function loadAtt() {
   document.getElementById('atcname').textContent = cls;
   list.innerHTML = '';
 
-  const classStudents = window.schoolData.students.filter(s => s.class === cls && s.status !== 'Archived').sort((a, b) => a.name.localeCompare(b.name));
+  const classStudents = window.schoolData.students.filter(s => s.class === cls && s.status === 'Active').sort((a, b) => a.name.localeCompare(b.name));
   window._currentAttStudents = classStudents; // so subAtt() can map rows back to real students
   if (classStudents.length === 0) {
     list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3)">No students found in this class. Import students or check demo data.</div>';
@@ -2255,9 +2248,9 @@ function downloadReport(btn) {
   toast(title + ' downloaded');
 }
 function generateStudentCSV() {
-  const headers = ['ID', 'Name', 'Gender', 'Class', 'Level', 'Guardian Name', 'Guardian Phone', 'Guardian Email', 'Discipline Points', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'];
+  const headers = ['ID', 'Name', 'Gender', 'Class', 'Level', 'Discipline Points', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'];
   const rows = window.schoolData.students.map(s => [
-    s.id, s.name, s.gender, s.class, s.level, s.guardianName, s.guardianPhone, s.guardianEmail,
+    s.id, s.name, s.gender, s.class, s.level,
     s.disciplinePoints, s.academicScore + '%', s.attendanceRate + '%', s.absences, s.status
   ]);
   return [headers, ...rows].map(r => r.map(csvCell).join(',')).join('\n');
@@ -2318,8 +2311,8 @@ function downloadAcademicReport() {
   downloadCSVFile('ldk-academic-report', ['Date', 'Student ID', 'Student Name', 'Class', 'Term', 'Subject', 'Score', 'Maximum Score'], rows);
 }
 function downloadStudentReport() {
-  const rows = window.schoolData.students.map(student => [student.id, student.name, student.gender, student.class, student.level, student.guardianName, student.guardianPhone, student.guardianEmail, student.disciplinePoints, student.academicScore, student.attendanceRate, student.absences, student.status]);
-  downloadCSVFile('ldk-student-roster', ['Student ID', 'Name', 'Gender', 'Class', 'Level', 'Guardian Name', 'Guardian Phone', 'Guardian Email', 'Discipline Total', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'], rows);
+  const rows = window.schoolData.students.map(student => [student.id, student.name, student.gender, student.class, student.level, student.disciplinePoints, student.academicScore, student.attendanceRate, student.absences, student.status]);
+  downloadCSVFile('ldk-student-roster', ['Student ID', 'Name', 'Gender', 'Class', 'Level', 'Discipline Total', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'], rows);
 }
 
 // ===== INIT =====
