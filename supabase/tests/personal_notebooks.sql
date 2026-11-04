@@ -58,4 +58,17 @@ do $$ begin
  if exists(select 1 from public.search_personal_notes(current_setting('test.notebook')::uuid,'',0)) then raise exception 'FAIL search privacy'; end if;
 end $$;
 reset role;
+
+reset role;
+select set_config('request.jwt.claim.sub','11000000-0000-4000-8000-000000000001',true);
+do $$ declare role_name text; begin
+ foreach role_name in array array['teacher','discipline_staff','discipline_officer','dean','headmaster'] loop
+  update public.user_roles set role=role_name where user_id=auth.uid();
+  execute 'set local role authenticated';
+  insert into public.personal_notebooks(name) values('Role check '||role_name);
+  if exists(select 1 from public.personal_notebooks where owner_id<>auth.uid()) then raise exception 'FAIL cross-account notebook'; end if;
+  execute 'reset role';
+ end loop;
+end $$;
 rollback;
+

@@ -181,4 +181,35 @@ do $$ begin
  if exists(select 1 from public.audit_events where entity_type='workflow_item' and entity_id=current_setting('test.rejected')) then raise exception 'FAIL private review audit exposed to Headmaster'; end if;
 end $$;
 reset role;
+
+reset role;
+update public.user_roles set role='discipline_staff' where user_id='10000000-0000-4000-8000-000000000001';
+update public.students set attendance_rate=5,absences=999 where student_id='__TEST_STUDENT__';
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+select public.submit_followup_attendance('__TEST_ATTENDANCE__','2026-11-03','Afternoon test','[{"student_id":"__TEST_STUDENT__","status":"absent"}]'::jsonb);
+do $$ begin
+ if not exists(select 1 from public.class_main_attendance_summary('__TEST_ATTENDANCE__','2026-11-03','2026-11-06') where main_sessions=3 and present_marks=2 and late_marks=1 and absent_marks=0 and attendance_rate=100) then raise exception 'FAIL followup/cache leaked into main totals'; end if;
+ begin
+  perform public.submit_followup_attendance('__TEST_ATTENDANCE__','2026-11-03','Afternoon test','[{"student_id":"__TEST_STUDENT__","status":"absent"}]'::jsonb);
+  raise exception 'FAIL duplicate followup accepted';
+ exception when unique_violation then null; end;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+select public.correct_main_attendance('30000000-0000-4000-8000-000000000001','excused','Excused absence');
+do $$ begin
+ if not exists(select 1 from public.class_main_attendance_summary('__TEST_ATTENDANCE__','2026-11-03','2026-11-06') where present_marks=1 and late_marks=1 and excused_marks=1 and absent_marks=0 and attendance_rate=100) then raise exception 'FAIL excused denominator'; end if;
+end $$;
+select public.correct_main_attendance('30000000-0000-4000-8000-000000000001','absent','Absent again for test');
+do $$ begin
+ if not exists(select 1 from public.class_main_attendance_summary('__TEST_ATTENDANCE__','2026-11-03','2026-11-06') where present_marks=1 and late_marks=1 and excused_marks=0 and absent_marks=1 and attendance_rate=66.7) then raise exception 'FAIL absent denominator'; end if;
+end $$;
+select public.correct_main_attendance('30000000-0000-4000-8000-000000000001','present','Returned at midday');
+do $$ begin
+ if not exists(select 1 from public.class_main_attendance_summary('__TEST_ATTENDANCE__','2026-11-03','2026-11-06') where present_marks=2 and late_marks=1 and excused_marks=0 and absent_marks=0 and attendance_rate=100) then raise exception 'FAIL midday return'; end if;
+ if not exists(select 1 from public.class_main_attendance_summary('__TEST_ATTENDANCE__','2026-12-01','2026-12-02') where attendance_rate is null and main_sessions=0) then raise exception 'FAIL empty range represented as zero'; end if;
+end $$;
+reset role;
 rollback;

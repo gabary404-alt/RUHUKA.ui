@@ -268,3 +268,8 @@ input,select,textarea{font:inherit}
 /* Distinct attendance states in the four-option control. */
 .tog-btn.on-w{background:var(--w);color:#111;border-color:var(--w)}
 .tog-btn.on-x{background:var(--s3);color:var(--t);border-color:var(--t3)}
+
+
+/* Quiet depth without a continuously running drawing loop. */
+#land{background-image:radial-gradient(ellipse at 85% 10%,rgba(21,128,61,.12),transparent 45%)}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important;transition:none!important}.hero-globe-wrap{display:none}.card-tilt,.rank-card-tilt{transform:none!important}}
