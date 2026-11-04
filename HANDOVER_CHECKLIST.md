@@ -33,25 +33,25 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] B08 Implement audited Discipline Officer reset codes; no password visibility.
 - [ ] B09 Implement password recovery/email delivery, expiry and replay protection.
 - [ ] B10 Build Headmaster-only staff creation, role assignment and disabling.
-- [ ] B11 Build Headmaster/Dean teacher-class assignments and verify revocation.
+- [x] B11 Build Headmaster/Dean teacher-class assignments and verify revocation.
 - [ ] B12 Enforce all agreed roles server-side; remove legacy broad admin loopholes.
 - [ ] B13 Test Student, teacher, patron/matron, officer, Dean and Headmaster allow/deny cases.
 - [ ] B14 Review auth security settings including existing leaked-password warning, email configuration and rate limits.
 
 ## C. Roster, calendar and historical records
 
-- [ ] C01 Build Headmaster class/roster management with clear validation.
-- [ ] C02 Support three terms with Headmaster-configured year/start/end dates.
+- [x] C01 Build Headmaster class/roster management with clear validation.
+- [x] C02 Support three terms with Headmaster-configured year/start/end dates.
 - [ ] C03 Version class enrolments/year data so new-year changes preserve history.
-- [ ] C04 Build individual student additions by Discipline Officers with HIGH priority Headmaster notice.
-- [ ] C05 Restrict name/class/status edits to Headmaster; officer correction requests recorded.
-- [ ] C06 Implement archived/transferred/graduated statuses with current-roster exclusions and historical access.
+- [x] C04 Build individual student additions by Discipline Officers with HIGH priority Headmaster notice.
+- [x] C05 Restrict name/class/status edits to Headmaster; officer correction requests recorded.
+- [x] C06 Implement archived/transferred/graduated statuses with current-roster exclusions and historical access.
 - [ ] C07 Obtain synthetic/redacted school roster, academic and discipline source examples.
 - [ ] C08 Build Excel/CSV roster validation and changes preview; reject invalid batches as a whole.
 - [ ] C09 Preserve omitted fields, avoid score changes and avoid automatic repeat invitations during roster updates.
 - [ ] C10 Build Headmaster action-specific, one-successful-use roster import grants for officers.
 - [ ] C11 Test concurrent grant consumption; failures do not consume grants.
-- [ ] C12 Separate private guardian contacts from ordinary lookup/reports and test permissions.
+- [x] C12 Separate private guardian contacts from ordinary lookup/reports and test permissions.
 - [ ] C13 Check duplicate IDs, mistaken imports, safe corrections and concurrent roster edits.
 
 ## D. Attendance daily workflow
@@ -109,9 +109,9 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 
 - [ ] G01 Build role-specific Today dashboard from actual tasks/counts, each opening its relevant action.
 - [ ] G02 Show missing attendance, explanations, unresolved upload issues and priority roster changes by permission.
-- [ ] G03 Persist in-app notifications with actor/action/target/time and unread/read state.
-- [ ] G04 Provide school-wide notices for Headmaster/Dean/officers and assigned-class teacher notices.
-- [ ] G05 Deliver one student announcement feed with correct targeting/history.
+- [x] G03 Persist in-app notifications with actor/action/target/time and unread/read state.
+- [x] G04 Provide school-wide notices for Headmaster/Dean/officers and assigned-class teacher notices.
+- [x] G05 Deliver one student announcement feed with correct targeting/history.
 - [x] G06 Connect personal named notebooks/notes/checklists to signed-in user ownership; no shared staff notebook.
 - [ ] G07 Verify notebook cross-account denial, reload/cross-device sync, conflicts and safe deletion.
 - [ ] G08 Provide useful attendance/academic/discipline reports with consistent date/class/release filters.
@@ -195,3 +195,5 @@ School source-file examples; approved public wording/claims; school year/term da
 - 4 Nov five-item session: D08 completed in connected pilot with two-step review totals, explicit pending/success/error states and duplicate warning; mocked integration/pure-state tests pass. D09 completed with narrow authenticated submitter display-name helper and correction counts derived from audit (not timestamps); SQL and render tests pass. D11 completed with pre-submit and online-event server checks, preserving unsubmitted device drafts on conflict; mocked reconnect test passes, database unique index remains race protection. D15 completed in pilot with reason, before/after, actor/time history UI and authenticated database audit access; UI-render and SQL privacy/forgery tests pass. E03 completed via rollback SQL tests for rejection (attendance unchanged), replay, stale approval (request stays pending), duplicate pending and cross-student denial, plus audit decisions. Fixed confidential decision text exposure in workflow audit and changed attendance approval note to a neutral reference. 43 Node tests pass; extended SQL transaction passes. 20/128 verified. I01/I02/I09/D16/D17 retain actual device, connection-race and cross-session acceptance work; completed technical items do not imply handover readiness.
 
 - 4 Nov second five-item session: D12 completed with database main-only date/class summary, excused denominator/null empty ranges, and removal of stale cached demo absence/rate baselines. D13 completed with validated transactional follow-up operation, duplicate lesson guard, separate pilot mode/name/draft key and read-only follow-up viewing; direct client inserts revoked. D14 completed with explicit Present/Late/Excused labels and separate official-summary counts; SQL tests verify midday Present, Late attended, Excused denominator and absence transitions. G06 completed: named notebooks/notes/checklists connected to account ownership, previous actual owner browser save/reopen evidence plus SQL test of all five required staff/admin roles and student denial. G07 remains cross-device/deletion/conflict acceptance. H06 completed: removed background/foreground star loops, click sparks, cursor/parallax and card tilt effects; globe remains visibility-paused; reduced-motion fallback added. Deployed landing/Admin notebook smoke passed, no application console errors. 46 Node tests and both extended SQL rollback suites pass. 25/128 verified. I01/I02/D16/D17 and final portal integration remain open. No owner action or merge needed yet.
+
+- 4 Nov ten-item session: B11 Headmaster/Dean teacher directory and assignment/revocation operation/UI tested. C01 basic class creation and single-record roster management with validation built; bulk/year-versioning remain separate. C02 terms 1–3 with dates, overlap guard and Headmaster form tested. C04 officer single addition creates HIGH priority Headmaster notification. C05 direct edits Headmaster-only; officer requests loaded into edit form and atomically resolved on save. C06 Active/Transferred/Graduated/Archived states supported with retained attendance; current demo/pilot attendance/rankings exclude inactive students. C12 ordinary exports/lookup omit contacts; contact table restricted to Headmaster management and officer read; teacher/Dean/student/patron/legacy-admin denial tested. G03 private recipient notices with actor/action/target/priority/time/read state. G04 authorised school-wide and assigned-class publishing. G05 persistent targeted student feed (latest 100 explicitly labelled). 52 Node tests pass; school-operations SQL suite passes and rolls back all six fixtures. 35/128 verified. These are technical build/permission checks in pilot, not live school acceptance. D18 class-lock trigger is implemented but remains open pending simultaneous-session verification. No new owner access/decision needed. Keep PR #10 draft.
