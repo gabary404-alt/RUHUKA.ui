@@ -127,4 +127,58 @@ do $$ begin
  if exists(select 1 from public.workflow_items where id=current_setting('test.explanation')::uuid) then raise exception 'FAIL dean can read private explanation'; end if;
 end $$;
 reset role;
+
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+do $$ declare rejected boolean:=false; begin begin perform public.review_absence_explanation(current_setting('test.explanation')::uuid,true,'Again'); exception when others then rejected:=true; end; if not rejected then raise exception 'FAIL repeated decision accepted'; end if; end $$;
+
+select public.correct_main_attendance('30000000-0000-4000-8000-000000000001','absent','New test absence');
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000003',true);
+set local role authenticated;
+select set_config('test.rejected',public.submit_absence_explanation('30000000-0000-4000-8000-000000000001','Second request')::text,true);
+do $$ declare rejected boolean:=false; begin begin perform public.submit_absence_explanation('30000000-0000-4000-8000-000000000001','Duplicate'); exception when others then rejected:=true; end; if not rejected then raise exception 'FAIL duplicate pending accepted'; end if; end $$;
+
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+select public.review_absence_explanation(current_setting('test.rejected')::uuid,false,'Private review decision');
+do $$ begin
+ if not exists(select 1 from public.attendance_records where id='30000000-0000-4000-8000-000000000001' and status='absent') then raise exception 'FAIL rejection changed attendance'; end if;
+ if not exists(select 1 from public.audit_events where entity_id=current_setting('test.rejected') and details->>'after'='rejected') then raise exception 'FAIL rejection audit'; end if;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000003',true);
+set local role authenticated;
+select set_config('test.stale',public.submit_absence_explanation('30000000-0000-4000-8000-000000000001','Awaiting review')::text,true);
+reset role;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+select public.correct_main_attendance('30000000-0000-4000-8000-000000000001','present','Returned late');
+do $$ declare rejected boolean:=false; begin begin perform public.review_absence_explanation(current_setting('test.stale')::uuid,true,'Stale'); exception when others then rejected:=true; end; if not rejected then raise exception 'FAIL stale approval accepted'; end if; end $$;
+
+do $$ begin
+ if not exists(select 1 from public.workflow_items where id=current_setting('test.stale')::uuid and status='pending') then raise exception 'FAIL stale review lost pending request'; end if;
+ if not exists(select 1 from public.main_attendance_overview_v2('2026-11-03') where class_name='__TEST_ATTENDANCE__' and submitter_name='TEST teacher' and corrected_records=1) then raise exception 'FAIL names/correction status'; end if;
+end $$;
+do $$ declare rejected boolean:=false; begin begin insert into public.audit_events(actor_user_id,action,entity_type) values(auth.uid(),'fake','attendance_record'); exception when others then rejected:=true; end; if not rejected then raise exception 'FAIL forged audit accepted'; end if; end $$;
+
+reset role;
+-- Give the first test account a student role linked to no student: cannot explain another student's record.
+update public.user_roles set role='student' where user_id='10000000-0000-4000-8000-000000000001';
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+do $$ declare rejected boolean:=false; begin begin perform public.submit_absence_explanation('30000000-0000-4000-8000-000000000001','Not mine'); exception when others then rejected:=true; end; if not rejected then raise exception 'FAIL cross-student explanation accepted'; end if; end $$;
+
+do $$ begin
+ if exists(select 1 from public.audit_events where entity_type='attendance_record') then raise exception 'FAIL student audit exposure'; end if;
+end $$;
+reset role;
+update public.user_roles set role='headmaster' where user_id='10000000-0000-4000-8000-000000000001';
+set local role authenticated;
+do $$ begin
+ if exists(select 1 from public.audit_events where entity_type='workflow_item' and entity_id=current_setting('test.rejected')) then raise exception 'FAIL private review audit exposed to Headmaster'; end if;
+end $$;
+reset role;
 rollback;

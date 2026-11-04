@@ -63,14 +63,14 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [x] D05 Require officer correction reason and preserve before/after audit in SQL tests.
 - [ ] D06 Integrate connected attendance into final Staff/Admin navigation with real identity, no demo selector.
 - [ ] D07 Show school-local date, assigned/current classes, readable names and explicit statuses on phones.
-- [ ] D08 Show submission review totals, pending/success/error status and clear duplicate warning.
-- [ ] D09 Show missing/submitted classes, authenticated submitter display name/time and correction status.
+- [x] D08 Show submission review totals, pending/success/error status and clear duplicate warning.
+- [x] D09 Show missing/submitted classes, authenticated submitter display name/time and correction status.
 - [ ] D10 Verify drafts restore for matching user/class/date and survive reload/network loss in actual browser.
-- [ ] D11 Recheck server register on reconnect; preserve conflict evidence without silent overwrite.
+- [x] D11 Recheck server register on reconnect; preserve conflict evidence without silent overwrite.
 - [ ] D12 Verify official totals exclude follow-up lessons, handle excused days and reset stale demo totals.
 - [ ] D13 Build validated separate follow-up register workflow without changing main statistics.
 - [ ] D14 Distinguish late arrival, present return and excused absence consistently in screens/reports.
-- [ ] D15 Connect officer correction history UI and verify audit authenticity/visibility across roles.
+- [x] D15 Connect officer correction history UI and verify audit authenticity/visibility across roles.
 - [ ] D16 Test simultaneous two-session submissions and no partial saves.
 - [ ] D17 Verify teacher/patron submission appears on officer device, including reconnect/refresh behaviour.
 - [ ] D18 Resolve concurrent class roster mutations while taking/submitting attendance.
@@ -79,7 +79,7 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 
 - [x] E01 SQL-test student explanation submission and atomic officer approval changing linked absence to Excused.
 - [x] E02 SQL-test privacy: submitting student/officer only; patron, Headmaster and Dean cannot read private explanations.
-- [ ] E03 Verify rejected/repeated/stale reviews, duplicate requests and cross-student abuse; audit all decisions.
+- [x] E03 Verify rejected/repeated/stale reviews, duplicate requests and cross-student abuse; audit all decisions.
 - [ ] E04 Complete student/officer explanation screens in final portals with readable context and decision state.
 - [ ] E05 Add optional photo/PDF proof in private storage with type/size limits, retention and permission tests.
 - [ ] E06 Ensure private attachments never appear in public URLs, logs, exports or AI requests.
@@ -191,3 +191,5 @@ School source-file examples; approved public wording/claims; school year/term da
 - 3 Nov: B03 completed with actual deployed owner-account email/password sign-in and explicit Headmaster role, followed by signout returning to login and clearing visible private notebook content. G06/G07 progressed: account-private notebook created, note/body/checklist autosaved and reloaded from server; checklist remained complete. Only labelled synthetic setup content used, left in owner notebook RUHUKA setup checks. 37 automated tests pass; separate ownership/conflict SQL tests passed earlier. Full cross-device/mobile, real conflict recovery and final portal integration remain open. Tracker 15/121 verified. No merge recommendation yet.
 
 - 4 Nov: Class letter reviewed (8/10 conditional on school reporting practice), scoped in CLASS_LETTER_BRIEF.md and added as K01–K07. Total now 128; 15 verified, 113 open. Notebook full-search/pagination replaces 200-note limit; SQL rollback suite tested 206 notes, pages beyond 200, body search/literal wildcard and cross-account denial. No extra boxes checked: browser/mobile and full feature acceptance remain open.
+
+- 4 Nov five-item session: D08 completed in connected pilot with two-step review totals, explicit pending/success/error states and duplicate warning; mocked integration/pure-state tests pass. D09 completed with narrow authenticated submitter display-name helper and correction counts derived from audit (not timestamps); SQL and render tests pass. D11 completed with pre-submit and online-event server checks, preserving unsubmitted device drafts on conflict; mocked reconnect test passes, database unique index remains race protection. D15 completed in pilot with reason, before/after, actor/time history UI and authenticated database audit access; UI-render and SQL privacy/forgery tests pass. E03 completed via rollback SQL tests for rejection (attendance unchanged), replay, stale approval (request stays pending), duplicate pending and cross-student denial, plus audit decisions. Fixed confidential decision text exposure in workflow audit and changed attendance approval note to a neutral reference. 43 Node tests pass; extended SQL transaction passes. 20/128 verified. I01/I02/I09/D16/D17 retain actual device, connection-race and cross-session acceptance work; completed technical items do not imply handover readiness.
