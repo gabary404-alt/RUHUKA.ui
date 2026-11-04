@@ -273,3 +273,6 @@ input,select,textarea{font:inherit}
 /* Quiet depth without a continuously running drawing loop. */
 #land{background-image:radial-gradient(ellipse at 85% 10%,rgba(21,128,61,.12),transparent 45%)}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important;transition:none!important}.hero-globe-wrap{display:none}.card-tilt,.rank-card-tilt{transform:none!important}}
+
+/* Original local SVGs stay readable without JS, motion or external CDNs. */
+.hero-illustration{width:clamp(210px,32vw,390px);margin:0 auto 12px;position:relative;z-index:2;pointer-events:none;animation:ruhuka-float 7s ease-in-out infinite}.hero-illustration img{display:block;width:100%;height:auto}.hero{flex-direction:column;padding-top:100px;padding-bottom:52px}.hero h1{font-size:clamp(56px,9vw,106px);margin-bottom:16px}.hero-st{margin-top:44px}.hero-glow{animation:none}.hero-orb{animation:none!important}@keyframes ruhuka-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}@media(max-width:600px){.hero{padding-top:86px}.hero-illustration{width:220px;margin-bottom:0}.hero h1{font-size:clamp(42px,12vw,64px)}.hero-sub{font-size:16px}.hero-st{margin-top:32px}}@media(prefers-reduced-motion:reduce){.hero-illustration{animation:none;transform:none}}
