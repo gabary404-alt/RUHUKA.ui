@@ -1788,13 +1788,10 @@ function subAtt() {
 }
 
 function recalculateAttendanceStats(student) {
-  if (student.attendanceBaseAbsences === undefined) student.attendanceBaseAbsences = Number(student.absences || 0);
   const records = window.schoolData.attendanceRecords.filter(record => record.studentId === student.id && !(record.period || '').toLowerCase().includes('follow-up'));
-  student.absences = Number(student.attendanceBaseAbsences) + records.filter(record => record.status === 'absent').length;
+  student.absences = records.filter(record => record.status === 'absent').length;
   const counted = records.filter(record => record.status !== 'excused');
-  if (counted.length) {
-    student.attendanceRate = Math.round(counted.filter(record => record.status === 'present' || record.status === 'late').length / counted.length * 1000) / 10;
-  }
+  student.attendanceRate = counted.length ? Math.round(counted.filter(record => record.status === 'present' || record.status === 'late').length / counted.length * 1000) / 10 : null;
 }
 let dmVal = 0;
 function setDM() { toast('Official discipline points cannot be changed on this website.'); }
