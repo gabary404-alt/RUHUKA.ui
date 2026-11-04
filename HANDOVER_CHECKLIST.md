@@ -1,6 +1,6 @@
 # RUHUKA first handover checklist
 
-Updated: 3 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
+Updated: 4 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
 
 This is the delivery tracker. A checked item means the specifically stated outcome was verified, not that its whole feature is production-ready. Open items may already have partial code. Each working session picks the next dependency-ready item, records evidence and reports completed IDs, blockers and any owner action. Reopen a checked item when later changes invalidate its evidence. No calendar promise overrides acceptance checks.
 
@@ -83,11 +83,11 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] E04 Complete student/officer explanation screens in final portals with readable context and decision state.
 - [ ] E05 Add optional photo/PDF proof in private storage with type/size limits, retention and permission tests.
 - [ ] E06 Ensure private attachments never appear in public URLs, logs, exports or AI requests.
-- [ ] E07 Implement five consecutive recorded main school-day absence concerns; missing register is unknown.
-- [ ] E08 Keep concerns open until reviewed; present/late/excused breaks the streak, not an already-open concern.
-- [ ] E09 Implement reopening after closure without return and new streak after return.
-- [ ] E10 Keep academic below 50% and discipline below 20/40 separate; per-category review/history.
-- [ ] E11 Verify concerns produce staff follow-up tasks without automated disciplinary decisions.
+- [x] E07 Implement five consecutive recorded main school-day absence concerns; missing register is unknown.
+- [x] E08 Keep concerns open until reviewed; present/late/excused breaks the streak, not an already-open concern.
+- [x] E09 Implement reopening after closure without return and new streak after return.
+- [x] E10 Keep academic below 50% and discipline below 20/40 separate; per-category review/history.
+- [x] E11 Verify concerns produce staff follow-up tasks without automated disciplinary decisions.
 
 ## F. Academic releases and discipline imports
 
@@ -107,8 +107,8 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 
 ## G. Daily work, notifications and reporting
 
-- [ ] G01 Build role-specific Today dashboard from actual tasks/counts, each opening its relevant action.
-- [ ] G02 Show missing attendance, explanations, unresolved upload issues and priority roster changes by permission.
+- [x] G01 Build role-specific Today dashboard from actual tasks/counts, each opening its relevant action.
+- [x] G02 Show missing attendance, explanations, unresolved upload issues and priority roster changes by permission.
 - [x] G03 Persist in-app notifications with actor/action/target/time and unread/read state.
 - [x] G04 Provide school-wide notices for Headmaster/Dean/officers and assigned-class teacher notices.
 - [x] G05 Deliver one student announcement feed with correct targeting/history.
@@ -116,7 +116,7 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] G07 Verify notebook cross-account denial, reload/cross-device sync, conflicts and safe deletion.
 - [ ] G08 Provide useful attendance/academic/discipline reports with consistent date/class/release filters.
 - [ ] G09 Export Excel/CSV and print/PDF; totals match filtered screen and exclude private contacts.
-- [ ] G10 Test one-click paths from Today items; remove duplicate or nonfunctional dashboard controls.
+- [x] G10 Test one-click paths from Today items; remove duplicate or nonfunctional dashboard controls.
 
 ## H. AI, public website and visual polish
 
@@ -126,8 +126,8 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] H04 Use school-approved knowledge; disclose lack of live lookup, no fabricated freshness/citations.
 - [ ] H05 Verify keyboard/screen-reader/reduced-motion chat behaviour.
 - [x] H06 Remove click sparks/cursor effects and unnecessary portal animation loops safely.
-- [ ] H07 Create two approved lightweight original 3D-looking illustrations and show owner preview.
-- [ ] H08 Make illustrations useful without animation; reduce motion and loading failures handled.
+- [x] H07 Create two approved lightweight original 3D-looking illustrations and show owner preview.
+- [x] H08 Make illustrations useful without animation; reduce motion and loading failures handled.
 - [ ] H09 Replace unverified school claims/details with school-approved public information.
 - [ ] H10 Implement meaningful Privacy, Terms and Support pages and verify every public navigation link.
 - [ ] H11 Restrict public editing to Headmaster/named school-authorised editors; audit edits.
@@ -204,3 +204,11 @@ School source-file examples; approved public wording/claims; school year/term da
 - Recovered those three SQL files into the current PR #10 branch without its legacy UI changes.
 - Applied and verified active-role checks for class/student reads. Rollback SQL covers active assigned teacher access, disabled teacher/student denial, and stale assignments after teacher role removal.
 - A07 remains open until the full historical baseline is reconciled. B04 and B12 remain open pending broader session and role-matrix verification. No additional handover box is claimed by this review.
+
+
+### Ten-item follow-up and Today session — 4 November 2026
+E07–E11: persisted attendance/academic/discipline follow-ups, source references, category-specific human review, revision checks and review/reopening history. Attendance uses five consecutive submitted main registers; unsubmitted days are unknown, missing student marks break the recorded streak, follow-up lessons do not count, and Present/Late/Excused break a streak without auto-closing existing cases. A reviewed attendance case reopens only on a new recorded absence without a return; a new streak after a return creates separate history. Academic and discipline thresholds remain separate. Source adapter currently reads the latest applied subject batch (weighted by maximum marks) and latest applied discipline snapshot. Missing results are not fabricated as zero; final named-release/supplied-overall integration and school source validation remain F01–F08 work.
+G01/G02/G10: role-specific Today tasks from real database counts, permitted explanation counts without confidential text, missing class registers, pending roster corrections, priority notices and unresolved upload-status records. UI opens the appropriate existing pilot route or read-only upload details; it explicitly says import correction is still being built. Cases refresh on opening Today and at 30-second intervals while visible; Today task counts poll every five seconds. No background delivery or real-time push is claimed.
+H07/H08: two original local SVG illustrations created and previewed, replacing hero canvas globe/shooting stars and adding a school-day illustration to Today. Assets are approximately 2.1 KB and 1.7 KB, contain no scripts/external resources, and are readable without animation. Reduced motion disables the hero float; failed decorative images do not remove any controls or text.
+Verification: 65 Node tests pass, extended SQL rollback suite passes, all seven synthetic test accounts removed by rollback. Vercel preview commit 7f0e20258f9299a94269ff99fcc45c93cdddd1de is READY; landing and both asset renders plus signed-out /connected/ entry were browser-checked. No new application console error observed (extension/Vercel login messages were excluded). Actual signed-in Today browser acceptance, narrow/tablet keyboard and cross-device work remain I01/I09/I10; no claim of school production readiness.
+Tracker: 45/128 checked, 83 open. PR #10 stays draft/unmerged. No owner action required for this batch.

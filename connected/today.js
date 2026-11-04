@@ -32,6 +32,7 @@ function mountToday(host,api,roles,current,navigate,day){
    cases.forEach(c=>{
     const row=el('article');row.className='row';row.append(el('h4',c.full_name+' · '+c.student_id),el('p',c.class_name+' · '+(c.status==='open'?'Needs review':'Reviewed')),el('p',evidenceText(c)));
     row.append(el('small',c.evidence.rule));
+    if(c.category==='academic')row.append(el('p','Based on recorded subjects in this applied batch. The full academic release import and completeness checks are still being built.'));
     const sources=el('details'),summary=el('summary','View source references');sources.append(summary);
     if(c.category==='attendance')c.evidence.sources.forEach(s=>sources.append(el('p',s.date+' · Attendance record '+s.record_id)));
     else {sources.append(el('p','Source batch: '+c.evidence.batch_id));if(c.category==='academic')c.evidence.sources.forEach(id=>sources.append(el('p','Subject record: '+id)));}
