@@ -122,14 +122,14 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 
 - [ ] H01 Retain existing AI and verify live provider success, failure, retry, cancellation and progressive display.
 - [ ] H02 Move trusted instructions server-side; bound requests, timeout/cost/rate exposure and error diagnostics.
-- [ ] H03 Keep private records/actions out of AI; test prompt abuse and accidental data transmission.
+- [x] H03 Keep private records/actions out of AI; test prompt abuse and accidental data transmission.
 - [ ] H04 Use school-approved knowledge; disclose lack of live lookup, no fabricated freshness/citations.
-- [ ] H05 Verify keyboard/screen-reader/reduced-motion chat behaviour.
+- [x] H05 Verify keyboard/screen-reader/reduced-motion chat behaviour.
 - [x] H06 Remove click sparks/cursor effects and unnecessary portal animation loops safely.
 - [x] H07 Create two approved lightweight original 3D-looking illustrations and show owner preview.
 - [x] H08 Make illustrations useful without animation; reduce motion and loading failures handled.
 - [ ] H09 Replace unverified school claims/details with school-approved public information.
-- [ ] H10 Implement meaningful Privacy, Terms and Support pages and verify every public navigation link.
+- [x] H10 Implement meaningful Privacy, Terms and Support pages and verify every public navigation link.
 - [ ] H11 Restrict public editing to Headmaster/named school-authorised editors; audit edits.
 
 ## I. Release verification and operational readiness
@@ -212,3 +212,11 @@ G01/G02/G10: role-specific Today tasks from real database counts, permitted expl
 H07/H08: two original local SVG illustrations created and previewed, replacing hero canvas globe/shooting stars and adding a school-day illustration to Today. Assets are approximately 2.1 KB and 1.7 KB, contain no scripts/external resources, and are readable without animation. Reduced motion disables the hero float; failed decorative images do not remove any controls or text.
 Verification: 65 Node tests pass, extended SQL rollback suite passes, all seven synthetic test accounts removed by rollback. Vercel preview commit 7f0e20258f9299a94269ff99fcc45c93cdddd1de is READY; landing and both asset renders plus signed-out /connected/ entry were browser-checked. No new application console error observed (extension/Vercel login messages were excluded). Actual signed-in Today browser acceptance, narrow/tablet keyboard and cross-device work remain I01/I09/I10; no claim of school production readiness.
 Tracker: 45/128 checked, 83 open. PR #10 stays draft/unmerged. No owner action required for this batch.
+
+
+### Final three-item session — 4 November 2026
+H03: all three AI adapters now use a shared server policy. The server accepts bounded alternating user/assistant conversation text only, rejects browser-supplied system instructions/model/tools/record-context fields, has no database clients or action tools, deterministically refuses direct private-record requests and some obvious credentials without calling the provider, and returns only normalised assistant text. Frontend sends conversation text only and does not read school data/device stores. This does not detect every sensitive fact a user might type; the interface and Privacy page explicitly warn against pasting private information. H02 remains open for durable rate/cost controls.
+H05: Enter/Shift+Enter/composition handling, open/close focus, Escape, stop, keyboard-readable transcript, completed-answer polite atomic announcement and reduced-motion immediate rendering verified with focused tests; actual deployed Enter/refusal, retained input focus, Escape/launcher focus and announcement DOM semantics were browser-checked. I03 retains human screen-reader/audio and complete device/contrast acceptance; no claim of an NVDA/VoiceOver certification.
+H10: Privacy, Terms and Support now have real internal pages, consistent navigation, skip links and practical pilot guidance. Internal paths/anchors were checked; deployed Privacy → Terms → Support navigation and native disclosure keyboard operation passed. Final school privacy/retention/legal/support-contact approval remains J02/J11. Existing external school contact claims remain H09.
+77 Node tests pass; syntax and whitespace checks pass. Preview commit 468ccd16e7063e3eb2bad671d4edabcfe27713e8 is READY. A normal learning question used local fallback because LDK_AI_API_KEY is configured only for production, not Preview (metadata checked without decrypting). This is not evidence of a provider outage; H01 remains open for a configured live-provider test. No secret scope or database change made.
+Tracker: 48/128 checked, 80 open. Keep PR #10 draft/unmerged. No owner action needed tonight.
