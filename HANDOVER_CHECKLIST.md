@@ -6,11 +6,11 @@ This is the delivery tracker. A checked item means the specifically stated outco
 
 ## Current position
 
-The public site still runs main commit 82bc3a2a39b6ed490a8b72097518721918e46a33 (merged PR #8). Its Vercel production deployment is READY. Draft PR #10 at 8a23cba12dae9d604dd5a4a1d260aeb4fc2d02cd has a separate READY preview; its lighter illustrations, connected pilot, Today workflow and other updates are not yet production. Do not confuse preview progress with changes already visible on the live site.
+The public site still runs main commit 82bc3a2a39b6ed490a8b72097518721918e46a33 (merged PR #8). Its Vercel production deployment is READY. Draft PR #10 now includes design commit 7e16c23aaa38b61a0ca812196e321e68efe1e245 with a separate READY preview; its lighter illustrations, connected pilot, Today workflow and other updates are not yet production. Do not confuse preview progress with changes already visible on the live site.
 
-RUHUKA system (jsqiqxflgokfdooogcst) remains the active database. No database change, application-code change, feature removal, production promotion or merge is authorised in this review-only session. Only this tracker is updated.
+RUHUKA system (jsqiqxflgokfdooogcst) remains the active database. The initial 5 November review changed only this tracker. A subsequent authorised design increment now restores native scrolling, reduces visual rendering work/spacing and adds a small original helper to the existing chat control in PR #10. No database change, deferred-feature removal, production promotion or merge is included in that increment.
 
-### Accepted scope update — 5 November 2026 (overrides earlier scope/session wording)
+### Agreed first-handover scope — 5 November 2026
 
 - Make the existing design lighter, more compact and reliable on phones first, then tablets and desktop. Correct scrolling before adding visual polish. Preserve useful spacing, legibility, touch targets and RUHUKA's green identity.
 - Keep AI, but make answers direct and short by default. Answer the question first; normally use 2–4 short sentences or at most 3 short bullets. Avoid generic introductions, repetition and long unsolicited explanations. More detail can be supplied when requested or necessary. Keep existing privacy and accessibility protections.
@@ -18,15 +18,16 @@ RUHUKA system (jsqiqxflgokfdooogcst) remains the active database. No database ch
 - Defer the personal Notebook in both Academic/Discipline Staff and every Admin role. Remove its visible navigation/widgets/routes when implementation is authorised; do not delete existing device/server notes, ownership rules, audit history or migration evidence.
 - Keep the Student Portal's other approved views unless separately changed. Staff daily work must function without every student owning a phone/computer or submitting something online. Removing absence justification alone does not solve device access for every remaining student-facing feature.
 - Parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards and elaborate 3D remain deferred. Existing lightweight illustrations may remain only if they meet the performance/readability target; do not add new decorative complexity.
+- Preserve attractive visual character with the existing lightweight book illustration and a small original LDK/RUHUKA helper face in the existing chat launcher/header. No new floating widget, copied third-party mascot, canvas scene or animation library. The helper asset is 971 bytes and remains static; typography, colour and simple borders provide the rest of the character.
 - A universal guarantee for every device/browser is not a valid acceptance criterion. Test an explicit matrix of common supported devices/browsers, with simple static/readable fallbacks and slow-network behaviour.
 
 ### Revised tracker accounting
 
 The original **128 IDs are preserved**: **116 active first-handover checks (36 verified, 80 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
-Five formerly checked active IDs are reopened for the new scope: A06 (requirements alignment), G01/G02/G10 (Today tasks/actions), and H10 (information/help copy). This is scope revalidation, not a claim that the previous tests failed. No new implementation check was completed in this session.
+Five formerly checked active IDs are reopened for the new scope: A06 (requirements alignment), G01/G02/G10 (Today tasks/actions), and H10 (information/help copy). This is scope revalidation, not a claim that the previous tests failed. The later scrolling/visual increment is partial progress on I01/I02/H09; no additional full handover checkbox is claimed until the remaining acceptance checks pass.
 
-### Next implementation order (not started; mapped to existing IDs)
+### Implementation order (native-scroll/visual increment in progress; mapped to existing IDs)
 
 1. A08: prepare the reduced-scope release plan and reconcile old PRs. Do not merge old notebook/explanation UI just because its tests once passed.
 2. I01: replace custom wheel interception/animated scrolling with reliable native scrolling; inspect body/portal/modal/table/chat overflow, focus, touch and back navigation. Never suppress a normal scroll gesture without a necessary accessible reason.
@@ -271,3 +272,11 @@ Tracker: 48/128 checked, 80 open. Keep PR #10 draft/unmerged. No owner action ne
 
 ### Scope review session — 5 November 2026
 Reviewed current GitHub main/draft PR #10, Vercel production/latest preview and live landing page, including a read-only desktop scroll attempt. Updated this tracker only. Twelve original notebook/explanation IDs are deferred; five affected completed active items are reopened. Current release accounting: 36 verified + 80 open + 12 deferred = 128 original tracked IDs. Historical work/evidence stays intact; no application feature or data changed. Implementation awaits a later instruction.
+
+
+### First lightweight design increment — 5 November 2026
+Reviewed the tracker again before implementation. Followed the existing scrolling/performance priority and kept attractive green identity rather than stripping useful design. Created an original 971-byte SVG helper in the existing chat launcher/header; retained the local book illustration. No extra widget/framework/library.
+Removed the custom wheel override/animation loop, reveal observer dependency, pointer-following achievement-card tilt/glow, blurred hero decorations and backdrop blur. Reveal content is visible without waiting for JavaScript. Reduced section spacing and made the hero a compact desktop grid with an existing responsive single-column fallback. Added viewport-bounded modal scrolling; modal/phone acceptance remains open. Corrected the heading gradient for light-theme contrast.
+Observed preview at 1348px width: native downward scrolling moved from 0 to 936px; no horizontal page overflow; hero height approximately 547px; zero canvases and zero visible backdrop-filter elements; book/helper images loaded. Existing chat open/focus still works. Both theme states checked; a light-theme heading improvement is included in the follow-up commit.
+Raw script.js reduced from 125,028 to 120,599 bytes; style.css reduced by approximately 2.8 KB before the small contrast adjustment. Helper SVG is 971 bytes (456 bytes under local gzip). These are source-size observations, not measured transfer timing, CPU savings or a slow-network claim.
+77 Node tests and syntax/whitespace checks pass. Remaining: real phone/tablet/keyboard and slow-network checks, removal of deferred feature entry points, concise chat behaviour and the rest of the scoped workflow. I01/I02/H09 stay open. Tracker unchanged: 36 verified + 80 open + 12 deferred. Keep PR #10 draft/unmerged.
