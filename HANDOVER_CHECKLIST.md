@@ -1,25 +1,61 @@
 # RUHUKA first handover checklist
 
-Updated: 4 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
+Updated: 5 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
 
 This is the delivery tracker. A checked item means the specifically stated outcome was verified, not that its whole feature is production-ready. Open items may already have partial code. Each working session picks the next dependency-ready item, records evidence and reports completed IDs, blockers and any owner action. Reopen a checked item when later changes invalidate its evidence. No calendar promise overrides acceptance checks.
 
 ## Current position
 
-Public main site is still a browser-local demonstration. PR #9 contains named notebook collections; PR #10 contains the connected pilot at /connected/ plus applied database migrations. The pilot is not the final portal. RUHUKA system (jsqiqxflgokfdooogcst) is the active database; the older ruhuka project is excluded. Owner email has an explicitly authorised temporary Headmaster role. No school roster is imported. SQL rollback tests passed; mocked/unit tests passed; real cross-device/mobile acceptance is outstanding.
+The public site still runs main commit 82bc3a2a39b6ed490a8b72097518721918e46a33 (merged PR #8). Its Vercel production deployment is READY. Draft PR #10 at 8a23cba12dae9d604dd5a4a1d260aeb4fc2d02cd has a separate READY preview; its lighter illustrations, connected pilot, Today workflow and other updates are not yet production. Do not confuse preview progress with changes already visible on the live site.
 
-Scope accepted 3 November: integrate backend alongside frontend. Retain AI and general learning answers. Defer parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards, and elaborate interactive 3D. Keep manual school decisions and historical records. Two lightweight illustrations are approved for review. English first.
+RUHUKA system (jsqiqxflgokfdooogcst) remains the active database. No database change, application-code change, feature removal, production promotion or merge is authorised in this review-only session. Only this tracker is updated.
+
+### Accepted scope update — 5 November 2026 (overrides earlier scope/session wording)
+
+- Make the existing design lighter, more compact and reliable on phones first, then tablets and desktop. Correct scrolling before adding visual polish. Preserve useful spacing, legibility, touch targets and RUHUKA's green identity.
+- Keep AI, but make answers direct and short by default. Answer the question first; normally use 2–4 short sentences or at most 3 short bullets. Avoid generic introductions, repetition and long unsolicited explanations. More detail can be supplied when requested or necessary. Keep existing privacy and accessibility protections.
+- Defer student absence-justification submission, including proof uploads and related first-handover entry points. This does not remove ordinary attendance or Discipline Officer corrections to Present/Late/Excused. Preserve existing private submissions/history and decide safe handling before hiding existing review views; do not delete records.
+- Defer the personal Notebook in both Academic/Discipline Staff and every Admin role. Remove its visible navigation/widgets/routes when implementation is authorised; do not delete existing device/server notes, ownership rules, audit history or migration evidence.
+- Keep the Student Portal's other approved views unless separately changed. Staff daily work must function without every student owning a phone/computer or submitting something online. Removing absence justification alone does not solve device access for every remaining student-facing feature.
+- Parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards and elaborate 3D remain deferred. Existing lightweight illustrations may remain only if they meet the performance/readability target; do not add new decorative complexity.
+- A universal guarantee for every device/browser is not a valid acceptance criterion. Test an explicit matrix of common supported devices/browsers, with simple static/readable fallbacks and slow-network behaviour.
+
+### Revised tracker accounting
+
+The original **128 IDs are preserved**: **116 active first-handover checks (36 verified, 80 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+
+Five formerly checked active IDs are reopened for the new scope: A06 (requirements alignment), G01/G02/G10 (Today tasks/actions), and H10 (information/help copy). This is scope revalidation, not a claim that the previous tests failed. No new implementation check was completed in this session.
+
+### Next implementation order (not started; mapped to existing IDs)
+
+1. A08: prepare the reduced-scope release plan and reconcile old PRs. Do not merge old notebook/explanation UI just because its tests once passed.
+2. I01: replace custom wheel interception/animated scrolling with reliable native scrolling; inspect body/portal/modal/table/chat overflow, focus, touch and back navigation. Never suppress a normal scroll gesture without a necessary accessible reason.
+3. I02: establish measured load/render baselines; reduce continuous canvas/animation work, expensive blur/transparency, unnecessary startup scripts and hidden-portal/demo work. Load nonessential features only when needed; keep critical staff work usable if optional assets fail.
+4. I01/I03/J02: verify representative narrow widths (320/360/390px), tablet (768px), desktop (1024/1280px), landscape, zoom and phone-keyboard behaviour on agreed browsers. Real device checks remain required; a desktop screenshot is not phone acceptance.
+5. H09: shorten generic/repeated copy and oversized gaps/hero sections/cards. Keep necessary instructions and comfortable readable/tappable controls.
+6. H01/H02/H05: apply concise chat instructions and output limits, test short practical answers and optional requested detail, and preserve keyboard/focus/reduced-motion/announcement behaviour.
+7. A08/D06: remove new student absence-submission buttons/forms/navigation and proof-upload promises from all affected demo/pilot entry points. Review the direct submission API exposure for the deferred feature; preserve old records/privacy and staff correction rights.
+8. A08: remove Staff/Admin notebook shortcuts, widgets and entry points across all roles and the connected pilot. Preserve existing notes, private ownership and migration history; verify nothing is silently lost.
+9. G01/G02/G10/H10: align Today counts/actions, AI help, public feature claims and support/privacy guidance with the reduced scope. Keep historical data accessible only where authorised and do not advertise unavailable flows.
+10. I01/I02/I03/I09/I10: demonstrate the retained daily staff workflow on the supported device/network matrix, then review a concrete preview before any merge/production release.
+
+### Read-only review evidence — 5 November 2026
+
+- GitHub main and PR #10 remain separate; PR #10 is open/draft/unmerged. Vercel reports production (main) and latest PR #10 preview READY.
+- Live https://ruhukaui.vercel.app/ still renders four canvas elements (click spark, background stars, globe, foreground stars) and loads main portal/demo scripts plus notebook.js at startup.
+- Production script.js still has a custom wheel listener with preventDefault(), a requestAnimationFrame scroll loop and global CSS smooth scrolling. The PR #10 script still contains the custom wheel path even though other animation loops were removed.
+- At the observed 1348px desktop viewport, the hero is 936px tall. A normal downward browser scroll gesture was followed by scrollY=0; this is a concrete desktop reproduction to investigate, not evidence about every phone/browser.
+- Production has multiple blur/backdrop-filter effects, reveal transitions and long promotional sections. These are code/layout observations, not a measured CPU/network benchmark or proof that any single effect causes every device problem.
+- The current preview AI server policy permits up to 800 output tokens and lacks the newly requested concise-answer rule.
+- Production still advertises student absence justification; the current connected preview still exposes notebook controls. No such feature was removed during this review.
+- No signed-in school account, private note or student record was opened, changed or deleted during this review.
 
 ## A. Baseline and first outstanding checks
 
 - [x] A01 Create this complete delivery tracker and record current state/accepted scope.
-- [x] A02 Verify named notebooks preserve existing notes through creation, switching and reload using focused tests; fix observed issues.
-- [x] A03 Verify notebook checklist editing, completion, removal, search and confirmed deletion with focused tests.
-- [x] A04 Verify notebook storage failures and old-note migration without overwriting existing content.
-- [ ] A05 Browser-check notebook on phone, tablet and desktop and all required Staff/Admin roles; record screenshots.
-- [x] A06 Reconcile older requirements/handoff documents with this accepted scope.
+- [ ] A06 Reconcile requirements, historical handoff and pilot help with the 5 November scope: lighter UI, concise AI, deferred student absence submissions and Staff/Admin notebooks.
 - [ ] A07 Reconcile applied database migrations, repository files and old draft PR #4; document reproducible baseline without resetting the live project.
-- [ ] A08 Review PR #9 and #10 changes, resolve conflicts and mark only verified increments ready for review.
+- [ ] A08 Reconcile PR #4/#9/#10 against the revised first-handover scope; exclude notebook/student-explanation feature exposure, preserve historical data/migrations, resolve conflicts and prepare a reviewed release increment.
 
 ## B. Identity and access
 
@@ -61,7 +97,7 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [x] D03 Block direct authenticated main-register insert bypasses in SQL tests.
 - [x] D04 Test assigned teacher submission and school-wide patron submission without officer correction rights.
 - [x] D05 Require officer correction reason and preserve before/after audit in SQL tests.
-- [ ] D06 Integrate connected attendance into final Staff/Admin navigation with real identity, no demo selector.
+- [ ] D06 Integrate connected attendance into final Staff/Admin navigation with real identity; remove demo role selectors and do not require a student device/login to complete daily attendance. Student absence-submission entry points are deferred.
 - [ ] D07 Show school-local date, assigned/current classes, readable names and explicit statuses on phones.
 - [x] D08 Show submission review totals, pending/success/error status and clear duplicate warning.
 - [x] D09 Show missing/submitted classes, authenticated submitter display name/time and correction status.
@@ -75,14 +111,8 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] D17 Verify teacher/patron submission appears on officer device, including reconnect/refresh behaviour.
 - [ ] D18 Resolve concurrent class roster mutations while taking/submitting attendance.
 
-## E. Absence explanations and concerns
+## E. Attendance, academic and discipline concerns (student submissions deferred)
 
-- [x] E01 SQL-test student explanation submission and atomic officer approval changing linked absence to Excused.
-- [x] E02 SQL-test privacy: submitting student/officer only; patron, Headmaster and Dean cannot read private explanations.
-- [x] E03 Verify rejected/repeated/stale reviews, duplicate requests and cross-student abuse; audit all decisions.
-- [ ] E04 Complete student/officer explanation screens in final portals with readable context and decision state.
-- [ ] E05 Add optional photo/PDF proof in private storage with type/size limits, retention and permission tests.
-- [ ] E06 Ensure private attachments never appear in public URLs, logs, exports or AI requests.
 - [x] E07 Implement five consecutive recorded main school-day absence concerns; missing register is unknown.
 - [x] E08 Keep concerns open until reviewed; present/late/excused breaks the streak, not an already-open concern.
 - [x] E09 Implement reopening after closure without return and new streak after return.
@@ -107,56 +137,54 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 
 ## G. Daily work, notifications and reporting
 
-- [x] G01 Build role-specific Today dashboard from actual tasks/counts, each opening its relevant action.
-- [x] G02 Show missing attendance, explanations, unresolved upload issues and priority roster changes by permission.
+- [ ] G01 Recheck role-specific Today dashboard against the revised scope; use actual permitted tasks/counts, without notebook shortcuts or new student-explanation tasks.
+- [ ] G02 Show missing attendance, unresolved upload issues and priority roster changes by permission; remove deferred student-explanation prompts and avoid presenting deferred workflows as available.
 - [x] G03 Persist in-app notifications with actor/action/target/time and unread/read state.
 - [x] G04 Provide school-wide notices for Headmaster/Dean/officers and assigned-class teacher notices.
 - [x] G05 Deliver one student announcement feed with correct targeting/history.
-- [x] G06 Connect personal named notebooks/notes/checklists to signed-in user ownership; no shared staff notebook.
-- [ ] G07 Verify notebook cross-account denial, reload/cross-device sync, conflicts and safe deletion.
 - [ ] G08 Provide useful attendance/academic/discipline reports with consistent date/class/release filters.
 - [ ] G09 Export Excel/CSV and print/PDF; totals match filtered screen and exclude private contacts.
-- [x] G10 Test one-click paths from Today items; remove duplicate or nonfunctional dashboard controls.
+- [ ] G10 Recheck every Today action after scope reduction; remove dead/duplicate controls and all deferred notebook/student-explanation paths.
 
 ## H. AI, public website and visual polish
 
-- [ ] H01 Retain existing AI and verify live provider success, failure, retry, cancellation and progressive display.
-- [ ] H02 Move trusted instructions server-side; bound requests, timeout/cost/rate exposure and error diagnostics.
+- [ ] H01 Make chatbot replies direct and concise by default (normally 2–4 short sentences or up to 3 short bullets; answer first, no filler); allow more detail only when requested/needed. Verify configured live provider, failure, retry, stop and accessible progressive display.
+- [ ] H02 Enforce trusted server instructions and concise response/output limits; finish durable rate/cost controls, timeouts and safe diagnostics without exposing private records.
 - [x] H03 Keep private records/actions out of AI; test prompt abuse and accidental data transmission.
 - [ ] H04 Use school-approved knowledge; disclose lack of live lookup, no fabricated freshness/citations.
 - [x] H05 Verify keyboard/screen-reader/reduced-motion chat behaviour.
 - [x] H06 Remove click sparks/cursor effects and unnecessary portal animation loops safely.
 - [x] H07 Create two approved lightweight original 3D-looking illustrations and show owner preview.
 - [x] H08 Make illustrations useful without animation; reduce motion and loading failures handled.
-- [ ] H09 Replace unverified school claims/details with school-approved public information.
-- [x] H10 Implement meaningful Privacy, Terms and Support pages and verify every public navigation link.
+- [ ] H09 Remove repetitive/generic promotional copy and unnecessary spacing; retain useful school information, readable text/touch targets and RUHUKA identity. Replace unverified school claims/details only with approved information.
+- [ ] H10 Keep Privacy, Terms and Support links working; revise their content for the deferred notebook/student-explanation scope, honest storage/AI limitations and practical staff help; recheck public navigation.
 - [ ] H11 Restrict public editing to Headmaster/named school-authorised editors; audit edits.
 
 ## I. Release verification and operational readiness
 
-- [ ] I01 Test real narrow phone, tablet and desktop layouts, keyboard entry and navigation in all portals.
-- [ ] I02 Test slow/interrupted connectivity, storage limits, offline drafts and retry without duplicate writes.
+- [ ] I01 Verify native scrolling, keyboard/focus and layouts on the agreed phone/tablet/desktop matrix; include main page, Staff/Admin/retained Student views, chat, tables, modals and phone keyboard. Fix scroll traps, overflow and oversized empty sections.
+- [ ] I02 Measure initial JS/CSS/asset weight and loading work before/after; reduce decorative rendering and unused/hidden-portal startup work. Test slow/interrupted connections, storage limits, offline attendance drafts and duplicate-safe retry.
 - [ ] I03 Check labels, focus, contrast, touch targets and screen-reader status/error announcements.
 - [ ] I04 Separate preview/test/production configuration and prevent demo records entering real workflows.
 - [ ] I05 Check keys, exposed endpoints, RLS/grants, storage, logs and dependency versions; no privileged frontend keys.
 - [ ] I06 Configure error monitoring and an actionable support path without private data leakage.
 - [ ] I07 Confirm backup/retention capability and perform a documented recovery exercise in an isolated environment.
 - [ ] I08 Validate deployment rollback and database migration forward/recovery plan.
-- [ ] I09 Run complete multi-role attendance → explanation → officer decision → report demonstration.
-- [ ] I10 Run roster/import/results/announcements/notebook/account recovery acceptance scenarios.
+- [ ] I09 Run the retained multi-role attendance → Discipline Officer correction with reason/history → report demonstration, without requiring student online submissions.
+- [ ] I10 Run roster/import/results/announcements/account recovery acceptance scenarios; confirm deferred notebook and student-explanation entry points are absent.
 - [ ] I11 Resolve critical/high defects, document accepted nonblocking limitations and repeat affected checks.
 
 ## J. School acceptance and first handover
 
 - [ ] J01 Identify school decision maker and small pilot team; confirm actual daily attendance practice/import formats.
-- [ ] J02 Agree acceptance scenarios, supported devices, data handling, ownership and recurring service costs.
+- [ ] J02 Agree acceptance scenarios and a realistic supported device/browser matrix, phone-first usability, data handling, ownership and recurring costs. Core school work must not depend on each student owning a device.
 - [ ] J03 Pilot with a small authorised group; collect task-completion time, mistakes and usability feedback.
 - [ ] J04 Obtain school-approved roster/content/contact data and verify first import totals.
 - [ ] J05 Create school-owned Headmaster account and service ownership/access; verify recovery before removing temporary access.
 - [ ] J06 Retain historical actors/audit attribution during ownership transfer.
 - [ ] J07 Provide short role guides, in-page help, admin setup/recovery instructions and walkthrough.
 - [ ] J08 Remove demo role/password shortcuts, test users and sample claims from production.
-- [ ] J09 Confirm school can take attendance, review explanations, publish results and recover access independently.
+- [ ] J09 Confirm staff can take/correct attendance, review follow-up concerns, publish results and recover access independently, without student-device dependence.
 - [ ] J10 Director/school approve final acceptance evidence; deploy signed-off release and record version/date.
 - [ ] J11 Agree post-handover support/contact, monitoring and update responsibility.
 - [ ] J12 Deliver access inventory, costs, known limitations, deferred backlog and first-week follow-up arrangement.
@@ -172,9 +200,28 @@ Scope accepted 3 November: integrate backend alongside frontend. Retain AI and g
 - [ ] K06 Print school-branded letter with Strive to Excel, correct totals and unclipped supporting detail; no automatic external sending.
 - [ ] K07 Run school acceptance examples and confirm the letter reduces retyping in practice; retain Today dashboard.
 
+## Deferred feature records — retained for later, excluded from first handover
+
+These original IDs are not active release checkboxes. “Previously verified” preserves technical evidence only; no feature has been removed yet in this review session. Earlier session logs describe the old scope and do not override the 5 November decision.
+
+| Original ID | Previous technical status | Deferred work |
+|---|---|---|
+| A02 | Previously verified | Verify named notebooks preserve existing notes through creation, switching and reload using focused tests; fix observed issues. |
+| A03 | Previously verified | Verify notebook checklist editing, completion, removal, search and confirmed deletion with focused tests. |
+| A04 | Previously verified | Verify notebook storage failures and old-note migration without overwriting existing content. |
+| A05 | Not complete | Browser-check notebook on phone, tablet and desktop and all required Staff/Admin roles; record screenshots. |
+| E01 | Previously verified | SQL-test student explanation submission and atomic officer approval changing linked absence to Excused. |
+| E02 | Previously verified | SQL-test privacy: submitting student/officer only; patron, Headmaster and Dean cannot read private explanations. |
+| E03 | Previously verified | Verify rejected/repeated/stale reviews, duplicate requests and cross-student abuse; audit all decisions. |
+| E04 | Not complete | Complete student/officer explanation screens in final portals with readable context and decision state. |
+| E05 | Not complete | Add optional photo/PDF proof in private storage with type/size limits, retention and permission tests. |
+| E06 | Not complete | Ensure private attachments never appear in public URLs, logs, exports or AI requests. |
+| G06 | Previously verified | Connect personal named notebooks/notes/checklists to signed-in user ownership; no shared staff notebook. |
+| G07 | Not complete | Verify notebook cross-account denial, reload/cross-device sync, conflicts and safe deletion. |
+
 ## Owner/school inputs (request only when dependent work is ready)
 
-School source-file examples; approved public wording/claims; school year/term dates; school-owned account identity; authorised pilot participants and acceptance decisions; service/email/billing ownership where needed. Never request passwords in chat. No owner action needed to start A02.
+School source-file examples; approved public wording/claims; school year/term dates; school-owned account identity; authorised pilot participants and acceptance decisions; service/email/billing ownership where needed. Never request passwords in chat. No owner action is needed for this review; request school/device/source inputs only when the next authorised task depends on them.
 
 ## Session log
 
@@ -220,3 +267,7 @@ H05: Enter/Shift+Enter/composition handling, open/close focus, Escape, stop, key
 H10: Privacy, Terms and Support now have real internal pages, consistent navigation, skip links and practical pilot guidance. Internal paths/anchors were checked; deployed Privacy → Terms → Support navigation and native disclosure keyboard operation passed. Final school privacy/retention/legal/support-contact approval remains J02/J11. Existing external school contact claims remain H09.
 77 Node tests pass; syntax and whitespace checks pass. Preview commit 468ccd16e7063e3eb2bad671d4edabcfe27713e8 is READY. A normal learning question used local fallback because LDK_AI_API_KEY is configured only for production, not Preview (metadata checked without decrypting). This is not evidence of a provider outage; H01 remains open for a configured live-provider test. No secret scope or database change made.
 Tracker: 48/128 checked, 80 open. Keep PR #10 draft/unmerged. No owner action needed tonight.
+
+
+### Scope review session — 5 November 2026
+Reviewed current GitHub main/draft PR #10, Vercel production/latest preview and live landing page, including a read-only desktop scroll attempt. Updated this tracker only. Twelve original notebook/explanation IDs are deferred; five affected completed active items are reopened. Current release accounting: 36 verified + 80 open + 12 deferred = 128 original tracked IDs. Historical work/evidence stays intact; no application feature or data changed. Implementation awaits a later instruction.
