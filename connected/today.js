@@ -32,10 +32,10 @@ function mountToday(host,api,roles,current,navigate,day){
    cases.forEach(c=>{
     const row=el('article');row.className='row';row.append(el('h4',c.full_name+' · '+c.student_id),el('p',c.class_name+' · '+(c.status==='open'?'Needs review':'Reviewed')),el('p',evidenceText(c)));
     row.append(el('small',c.evidence.rule));
-    if(c.category==='academic')row.append(el('p','Based on recorded subjects in this applied batch. The full academic release import and completeness checks are still being built.'));
+    if(c.category==='academic')row.append(el('p','Based on the recorded academic source. Named releases use the supplied overall percentage; missing subject marks and publication warnings must be reviewed in Academic results.'));
     const sources=el('details'),summary=el('summary','View source references');sources.append(summary);
     if(c.category==='attendance')c.evidence.sources.forEach(s=>sources.append(el('p',s.date+' · Attendance record '+s.record_id)));
-    else {sources.append(el('p','Source batch: '+c.evidence.batch_id));if(c.category==='academic')c.evidence.sources.forEach(id=>sources.append(el('p','Subject record: '+id)));}
+    else {sources.append(el('p','Source batch: '+c.evidence.batch_id));if(c.category==='academic')c.evidence.sources.forEach(id=>sources.append(el('p','Academic source record/release: '+id)));}
     row.append(sources);
     const historyBox=el('div');row.append(button('View review history',async()=>{
      if(!valid())return;try{const events=await rpc('school_concern_history',{concern_id:c.id});if(!valid()||version!==generation)return;
