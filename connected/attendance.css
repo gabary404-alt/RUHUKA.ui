@@ -7,3 +7,11 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
 .today-illustration{float:right;max-width:30%;height:auto;margin:-10px 0 8px 16px}#today-desk:after{content:"";display:block;clear:both}@media(max-width:600px){.today-illustration{width:100px;max-width:28%;margin:0 0 8px 8px}}
 
 .workspace-brand{font-weight:800;font-size:23px;text-decoration:none;color:var(--p)}.workspace-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:16px 0;position:sticky;top:0;padding:8px 0;background:var(--sky-top);z-index:10}.workspace-nav button{margin:0;background:var(--s1)}.workspace-nav button[aria-current=page]{background:var(--p);color:white}#workspace{padding:0;border:0;background:none}#workspace>section{margin-top:12px}.muted{font-size:14px;color:var(--t2)}.school-form{padding:14px 18px;border:1px solid var(--b);border-radius:12px;margin:12px 0;background:var(--s1)}.school-form summary{cursor:pointer;min-height:44px;display:list-item;align-content:center}.school-form summary h3{display:inline;font-size:17px}.school-form summary:focus-visible{outline:3px solid var(--a);outline-offset:3px}header{gap:12px}input,select,textarea{min-width:0;max-width:100%}#attendance-view h2{margin-bottom:12px}#identity{overflow-wrap:anywhere}#portal-title{font-size:clamp(25px,5vw,34px);margin:12px 0}h3{line-height:1.4}.row{overflow-wrap:anywhere}@media(max-width:600px){header{font-size:14px}header button{margin-left:auto}.workspace-nav button{font-size:14px;padding:10px 8px}.school-form{padding:10px 14px}}
+
+/* Reports keep long records in local disclosures, with a plain full print view. */
+.report-print{display:none}
+@media print{
+ body>*{display:none!important}body>.report-print{display:block!important;margin:0;padding:0;border:0;background:white;color:#111;font:10pt/1.4 Arial,sans-serif}
+ .report-print table{border-collapse:collapse;width:100%;font-size:8pt;table-layout:fixed}.report-print th,.report-print td{padding:5px;border:1px solid #aaa;overflow-wrap:anywhere;vertical-align:top}.report-print thead{display:table-header-group}.report-print tr{break-inside:avoid}.report-print h1{font-size:18pt}.report-print h2,.report-print h3{break-after:avoid}
+ @page{margin:12mm;size:landscape}
+}

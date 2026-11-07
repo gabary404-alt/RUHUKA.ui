@@ -17,5 +17,5 @@ function mountAcademics(host,api,roles,current){let stopped=false,generation=0,p
  async function refreshClasses(){if(working)return;refresh.disabled=true;try{const previous=classSelect.value,classes=await api('/rest/v1/school_classes?select=class_name&order=class_name');if(!valid())return;classSelect.replaceChildren();classes.forEach(c=>{const o=el('option',c.class_name);o.value=c.class_name;classSelect.append(o)});classSelect.value=classes.some(c=>c.class_name===previous)?previous:classes[0]?.class_name||'';if(previous&&previous!==classSelect.value){parent=null;cancel.hidden=true;correction.textContent='';invalidate();detail.hidden=true;}check.disabled=!classes.length;await loadList();}catch(e){say(e.message)}finally{if(valid())refresh.disabled=false;}}
  const ready=refreshClasses();return{ready,openRelease,dispose(){stopped=true;generation++;host.replaceChildren()}};
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={csvMatrix,parseAcademicCSV,mountAcademics};else root.mountAcademics=mountAcademics;
+if(typeof module!=='undefined'&&module.exports)module.exports={csvMatrix,parseAcademicCSV,mountAcademics};else {root.mountAcademics=mountAcademics;root.RUHUKACSV={matrix:csvMatrix};}
 })(typeof window!=='undefined'?window:globalThis);

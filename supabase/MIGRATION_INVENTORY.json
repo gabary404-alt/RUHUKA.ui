@@ -223,5 +223,35 @@
     "version": "20261107112937",
     "path": "supabase/migrations/20261107112937_show_unread_academic_publications_on_headmaster_today.sql",
     "sha256": "9534e2b3495261cef762ea38a160704ce3f76a2051acf7caf8f636feacdd0e84"
+  },
+  {
+    "version": "20261107154503",
+    "path": "supabase/migrations/20261107154503_official_discipline_snapshots_with_guarded_import_and_corrections.sql",
+    "sha256": "0d29f29690657c37de5521a88214cc8abed3977dcfc06e19330c4eee09c92b39"
+  },
+  {
+    "version": "20261107154805",
+    "path": "supabase/migrations/20261107154805_role_scoped_filtered_school_reports.sql",
+    "sha256": "b4ab92448943f50da60fec22e4d774bcc30f55fee2d1eb6227111997caf3b7c8"
+  },
+  {
+    "version": "20261107155418",
+    "path": "supabase/migrations/20261107155418_append_only_student_class_and_year_history.sql",
+    "sha256": "ac83426493b242e9119bc64a3cc69cc4857cf8434a7849e17835576e3d0015dd"
+  },
+  {
+    "version": "20261107155806",
+    "path": "supabase/migrations/20261107155806_headmaster_reviewed_class_year_changes.sql",
+    "sha256": "acf0c13cc4fc2458103336a6fb514b30ff1655221613b0874efb3745695684dc"
+  },
+  {
+    "version": "20261107160112",
+    "path": "supabase/migrations/20261107160112_preserve_official_event_evidence_on_totals_only_corrections.sql",
+    "sha256": "d7df798aed3f914cf1877552ab8d1c0497d18588490efa4eaaef04e5d665e801"
+  },
+  {
+    "version": "20261107160456",
+    "path": "supabase/migrations/20261107160456_surface_official_discipline_updates_on_today.sql",
+    "sha256": "b2cdc015d508492f3e9e029f0220c971d0ccfcf882d326fadbaf4c801d15641e"
   }
 ]

@@ -1,0 +1,117 @@
+begin;
+insert into auth.users(id)select('18000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid from generate_series(1,9)n;
+insert into public.profiles(id,display_name,is_active)select('18000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'DISCIPLINE fixture '||n,true from generate_series(1,9)n on conflict(id)do update set is_active=true;
+insert into public.user_roles(user_id,role)values('18000000-0000-4000-8000-000000000001','discipline_officer'),('18000000-0000-4000-8000-000000000002','headmaster'),('18000000-0000-4000-8000-000000000003','dean'),('18000000-0000-4000-8000-000000000004','teacher'),('18000000-0000-4000-8000-000000000005','discipline_staff'),('18000000-0000-4000-8000-000000000006','student'),('18000000-0000-4000-8000-000000000007','discipline_officer'),('18000000-0000-4000-8000-000000000008','teacher'),('18000000-0000-4000-8000-000000000009','discipline_officer');
+insert into public.school_classes(class_name,grade,academic_year)values('__DISC_CLASS__','S1','TEST'),('__DISC_OTHER__','S2','TEST');
+insert into public.students(student_id,full_name,class_name,status)select '__DISC_'||x||'__','Synthetic '||x,'__DISC_CLASS__','Active'from unnest(array['A','B','C'])x;
+update public.students set auth_user_id='18000000-0000-4000-8000-000000000006'where student_id='__DISC_C__';
+insert into public.student_private_contacts(student_id,guardian_name,guardian_phone,guardian_email)values('__DISC_A__','PRIVATE_GUARDIAN','PRIVATE_PHONE','private@example.test');
+insert into public.teacher_class_assignments(teacher_user_id,class_name)values('18000000-0000-4000-8000-000000000004','__DISC_CLASS__');
+create temporary table discipline_test(data jsonb,id uuid,newer uuid,academic_id uuid);
+insert into discipline_test(data)values(jsonb_build_object('class_name','__DISC_CLASS__','release_name','Official weekly discipline','recorded_on',(now()at time zone'Africa/Kigali')::date-1,'source_reference','Synthetic official book page 12','source_filename','totals.csv','events_filename','events.csv','rows','[{"student_id":"__DISC_A__","official_total":20},{"student_id":"__DISC_B__","official_total":20},{"student_id":"__DISC_C__","official_total":0}]'::jsonb,'events',jsonb_build_array(jsonb_build_object('student_id','__DISC_C__','event_key','SYNTH-1','event_date',(now()at time zone'Africa/Kigali')::date-2,'reason','Synthetic source reason','source_recorded_by','Original school recorder','points_change',null))));
+grant all on discipline_test to authenticated;
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+do $$<<run>>declare d jsonb:=(select data from discipline_test);p jsonb;id uuid;changed jsonb;begin
+ p:=public.discipline_preview(d);
+ begin perform public.discipline_preview(jsonb_set(d,'{rows}',(d->'rows')-2));raise exception 'FAIL partial totals';exception when raise_exception then if sqlerrm='FAIL partial totals'then raise;end if;end;
+ begin perform public.discipline_preview(jsonb_set(d,'{rows,1}',d->'rows'->0));raise exception 'FAIL duplicate IDs';exception when raise_exception then if sqlerrm='FAIL duplicate IDs'then raise;end if;end;
+ begin perform public.discipline_preview(jsonb_set(d,'{rows,0,official_total}','41'));raise exception 'FAIL above 40';exception when raise_exception then if sqlerrm='FAIL above 40'then raise;end if;end;
+ begin perform public.discipline_preview(jsonb_set(d,'{rows,0,official_total}','-1'));raise exception 'FAIL negative total';exception when raise_exception then if sqlerrm='FAIL negative total'then raise;end if;end;
+ begin perform public.discipline_preview(jsonb_set(d,'{rows,0,official_total}','null'));raise exception 'FAIL blank invented zero';exception when raise_exception then if sqlerrm='FAIL blank invented zero'then raise;end if;end;
+ begin perform public.discipline_preview(jsonb_set(d,'{events,0,student_id}','"outside"'));raise exception 'FAIL unmatched evidence';exception when raise_exception then if sqlerrm='FAIL unmatched evidence'then raise;end if;end;
+ begin perform public.discipline_preview(jsonb_set(d,'{events}',jsonb_build_array(d->'events'->0,d->'events'->0)));raise exception 'FAIL duplicate events';exception when raise_exception then if sqlerrm='FAIL duplicate events'then raise;end if;end;
+ begin perform public.discipline_apply(d,'tampered','48000000-0000-4000-8000-000000000009');raise exception 'FAIL tampered preview';exception when serialization_failure then null;end;
+ id:=public.discipline_apply(d,p->>'preview_token','48000000-0000-4000-8000-000000000001');update discipline_test set id=run.id;
+ if public.discipline_apply(d,p->>'preview_token','48000000-0000-4000-8000-000000000001')<>id then raise exception 'FAIL retry';end if;
+ changed:=d||'{"source_filename":"renamed.csv"}';p:=public.discipline_preview(changed);if public.discipline_apply(changed,p->>'preview_token','48000000-0000-4000-8000-000000000002')<>id then raise exception 'FAIL renamed file duplicate';end if;
+ if(public.discipline_release_detail(id)->'rows'->2->>'official_total')::numeric<>0 then raise exception 'FAIL actual zero';end if;
+ if(public.discipline_release_detail(id)->'rows'->0->>'rank')::int<>1 or(public.discipline_release_detail(id)->'rows'->1->>'rank')::int<>1 or(public.discipline_release_detail(id)->'rows'->2->>'rank')::int<>3 then raise exception 'FAIL independent discipline ties';end if;
+ begin perform public.apply_discipline_import(gen_random_uuid());raise exception 'FAIL legacy apply route';exception when insufficient_privilege then null;end;
+ begin insert into public.discipline_import_snapshots(batch_id,student_id,official_total)values(gen_random_uuid(),'__DISC_A__',40);raise exception 'FAIL raw snapshot';exception when insufficient_privilege then null;end;
+ begin insert into public.import_batches(import_type,status,created_by)values('discipline','review',auth.uid());raise exception 'FAIL raw staging batch';exception when insufficient_privilege then null;end;
+ begin update public.students set official_discipline_points=40 where student_id='__DISC_A__';raise exception 'FAIL manual points';exception when insufficient_privilege then null;end;
+ begin update public.discipline_releases set source_reference='forged';raise exception 'FAIL source mutation';exception when insufficient_privilege then null;end;
+ perform public.refresh_school_concerns();
+end $$;
+reset role;
+do $$begin
+ if(select count(*)from public.discipline_releases where class_name='__DISC_CLASS__')<>1 then raise exception 'FAIL double import';end if;
+ if(select count(*)from public.school_notifications where recipient_id in('18000000-0000-4000-8000-000000000002','18000000-0000-4000-8000-000000000007')and action='discipline_import_published')<>2 then raise exception 'FAIL head/fellow officer notice';end if;
+ if not exists(select 1 from public.students where student_id='__DISC_C__'and official_discipline_points=0)then raise exception 'FAIL cache official zero';end if;
+ if not exists(select 1 from public.import_batches b join public.discipline_releases a on a.batch_id=b.id where a.class_name='__DISC_CLASS__'and b.status='applied'and b.reviewed_by is null)then raise exception 'FAIL reviewer still required';end if;
+ if not exists(select 1 from public.school_concerns where student_id='__DISC_C__'and category='discipline'and(evidence->>'official_total')::numeric=0)then raise exception 'FAIL discipline followup';end if;
+end $$;
+-- Another upload exists today. Correcting yesterday must not replace today's cached total.
+set local role authenticated;
+do $$declare d jsonb:=(select jsonb_set(data,'{recorded_on}',to_jsonb((now()at time zone'Africa/Kigali')::date))from discipline_test);p jsonb;n uuid;begin
+ d:=jsonb_set(d,'{rows,2,official_total}','30');d:=jsonb_set(d,'{events,0,reason}','"Today synthetic reason"');p:=public.discipline_preview(d);n:=public.discipline_apply(d,p->>'preview_token','48000000-0000-4000-8000-000000000003');update discipline_test set newer=n;
+end $$;
+reset role;
+update public.students set status='Archived'where student_id='__DISC_B__';
+update public.school_classes set academic_year='NEXT'where class_name='__DISC_CLASS__';
+set local role authenticated;
+do $$declare d jsonb:=(select data||jsonb_build_object('replaces_id',id,'correction_reason','Verified source correction')from discipline_test);p jsonb;rid uuid;old uuid:=(select id from discipline_test);begin
+ d:=jsonb_set(d,'{rows,2,official_total}','10');d:=jsonb_set(d,'{events,0,reason}','"Corrected synthetic reason"');p:=public.discipline_preview(d);
+ if jsonb_array_length(public.discipline_preview(d-'events')->'events')<>1 then raise exception 'FAIL totals-only correction dropped evidence';end if;
+ if p->>'academic_year'<>'TEST'or jsonb_array_length(p->'rows')<>3 then raise exception 'FAIL original year/cohort';end if;
+ rid:=public.discipline_apply(d,p->>'preview_token','48000000-0000-4000-8000-000000000004');
+ if(public.discipline_release_detail(old,true)->'rows'->2->>'official_total')::numeric<>0 then raise exception 'FAIL old source changed';end if;
+ if jsonb_array_length(public.discipline_release_detail(rid)->'rows')<>2 or jsonb_array_length(public.discipline_release_detail(rid,true)->'rows')<>3 then raise exception 'FAIL inactive filter';end if;
+ if public.discipline_release_detail(rid)->'events'->0->>'source_recorded_by'<>'Original school recorder'then raise exception 'FAIL original recorder';end if;
+ begin perform public.discipline_preview(d);raise exception 'FAIL correction reused stale parent';exception when serialization_failure then null;end;
+end $$;
+reset role;
+do $$begin if(select official_discipline_points from public.students where student_id='__DISC_C__')<>30 then raise exception 'FAIL old correction overwrote newer snapshot';end if;end $$;
+-- Create real, distinct main and followup data in this rollback transaction.
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000005',true);
+set local role authenticated;
+select public.submit_main_attendance('__DISC_CLASS__',(now()at time zone'Africa/Kigali')::date-1,'[{"student_id":"__DISC_A__","status":"late"},{"student_id":"__DISC_C__","status":"absent"}]');
+select public.submit_main_attendance('__DISC_CLASS__',(now()at time zone'Africa/Kigali')::date,'[{"student_id":"__DISC_A__","status":"excused"},{"student_id":"__DISC_C__","status":"present"}]');
+select public.submit_followup_attendance('__DISC_CLASS__',(now()at time zone'Africa/Kigali')::date,'Synthetic extra lesson','[{"student_id":"__DISC_A__","status":"absent"},{"student_id":"__DISC_C__","status":"absent"}]');
+do $$declare r jsonb;begin
+ r:=public.school_report('attendance','__DISC_CLASS__',(now()at time zone'Africa/Kigali')::date-3,(now()at time zone'Africa/Kigali')::date);
+ if(r->'totals'->>'submitted_registers')::int<>2 or(r->'totals'->>'unique_students_absent')::int<>1 or(r->'totals'->>'absence_marks')::int<>1 or(r->'totals'->>'attendance_percent')::numeric<>66.67 then raise exception 'FAIL attendance report totals/unknown/followup';end if;
+ if r::text like'%PRIVATE_%'or r::text like'%guardian%'or r::text like'%note%'then raise exception 'FAIL private report fields';end if;
+ begin perform public.school_report('discipline','__DISC_CLASS__',current_date-2,current_date,(select newer from discipline_test));raise exception 'FAIL patron discipline';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000003',true);
+set local role authenticated;
+do $$<<academic>>declare d jsonb;p jsonb;id uuid;begin
+ d:=jsonb_build_object('class_name','__DISC_CLASS__','release_name','Synthetic term results','recorded_on',(now()at time zone'Africa/Kigali')::date,'source_filename','synthetic.csv','subjects','[{"name":"Math","maximum":100}]'::jsonb,'rows','[{"student_id":"__DISC_A__","marks":{"Math":100},"overall":100},{"student_id":"__DISC_C__","marks":{"Math":null},"overall":80}]'::jsonb);p:=public.academic_preview(d);id:=public.academic_publish(d,p->>'preview_token','48000000-0000-4000-8000-000000000005','Missing test under review');update discipline_test set academic_id=academic.id;
+ if(public.school_report('academic','__DISC_CLASS__',current_date-1,current_date,id)->'rows'->1->>'overall')::numeric<>80 then raise exception 'FAIL academic report';end if;
+ begin perform public.discipline_preview((select data from discipline_test));raise exception 'FAIL Dean discipline upload';exception when insufficient_privilege then null;end;
+ begin perform public.school_report('discipline','__DISC_CLASS__',current_date-2,current_date,(select newer from discipline_test));raise exception 'FAIL Dean discipline report';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+do $$declare r jsonb;begin
+ r:=public.school_report('discipline','__DISC_CLASS__',current_date-2,current_date,(select newer from discipline_test));
+ if not exists(select 1 from jsonb_array_elements(public.school_today(current_date)->'tasks')x where x->>'kind'='discipline_publications'and(x->>'count')::integer=3)then raise exception 'FAIL discipline Today notice';end if;
+ if jsonb_array_length(r->'rows')<>2 or r::text like'%PRIVATE_%'or r::text like'%marks%'then raise exception 'FAIL separate discipline report';end if;
+ begin perform public.school_report('discipline','__DISC_OTHER__',current_date-2,current_date,(select newer from discipline_test));raise exception 'FAIL wrong report class';exception when raise_exception then if sqlerrm='FAIL wrong report class'then raise;end if;end;
+ begin perform public.school_report('discipline','__DISC_CLASS__',current_date-10,current_date-5,(select newer from discipline_test));raise exception 'FAIL wrong report date';exception when raise_exception then if sqlerrm='FAIL wrong report date'then raise;end if;end;
+ begin perform public.discipline_preview((select data from discipline_test));raise exception 'FAIL Headmaster discipline upload';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000004',true);
+set local role authenticated;
+do $$begin perform public.school_report('academic','__DISC_CLASS__',current_date-2,current_date,(select academic_id from discipline_test));begin perform public.school_report('attendance','__DISC_OTHER__',current_date-2,current_date);raise exception 'FAIL teacher other class';exception when insufficient_privilege then null;end;end $$;
+reset role;
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000006',true);
+set local role authenticated;
+do $$declare r jsonb;begin
+ r:=public.my_student_records();if(r->'discipline'->>'official_total')::numeric<>30 then raise exception 'FAIL own latest total';end if;
+ if(r->'discipline_events')::text like'%Synthetic source reason%'then raise exception 'FAIL superseded source evidence shown as current';end if;
+ begin perform public.school_report('attendance','__DISC_CLASS__',current_date-2,current_date);raise exception 'FAIL student report';exception when insufficient_privilege then null;end;
+ begin perform public.discipline_release_detail((select newer from discipline_test));raise exception 'FAIL student class discipline';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
+update public.profiles set is_active=false where id='18000000-0000-4000-8000-000000000009';
+select set_config('request.jwt.claim.sub','18000000-0000-4000-8000-000000000009',true);
+set local role authenticated;
+do $$begin begin perform public.discipline_preview((select data from discipline_test));raise exception 'FAIL disabled officer';exception when insufficient_privilege then null;end;end $$;
+reset role;
+rollback;
