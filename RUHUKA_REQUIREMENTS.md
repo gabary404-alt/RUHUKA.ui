@@ -1,3 +1,11 @@
+## 7 November decisions — public school website and testing data
+
+The public website serves visitors learning about Lycée de Kigali as well as the school community. Restore visitor navigation (Our school, Learning & school life, Contact); keep School sign in as a separate route into private tools. Publish only confirmed facts. Old-site combinations, clubs, leaders, contacts and statistics are proposals in verification/SCHOOL_CONTENT_PROPOSALS.md until director/school approval. Do not use old marketing content to invent privacy or service promises.
+
+The director confirmed existing notes and old records are disposable development data. Preservation is no longer a first-handover requirement for those identified test records. Prepare targeted cleanup before real school import; keep the working director account, schema, security and deployment history. Do not reset the whole Supabase project or assume device data in other browsers was removed.
+
+Staff accounts: Headmaster-only invitation, reviewed role assignment and disabling; recipients set their own passwords. Server-owned active roles determine access. Email delivery/redirect acceptance remains required. Roster import begins with explicit CSV template, server validation, before/after review, atomic apply and safe retry; no score/account/contact changes or repeated invitations. School Excel formats and officer import grants remain unfinished.
+
 # RUHUKA first handover requirements
 Updated 7 November 2026. Read this together with HANDOVER_CHECKLIST.md.
 

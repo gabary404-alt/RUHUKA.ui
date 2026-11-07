@@ -8,14 +8,14 @@ This is the delivery tracker. A checked item means the specifically stated outco
 
 Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains code commit 1fb1a696c2c7052958f526bf165ef0d9a78ed00e and a READY preview. The public page is lightweight, sign-in opens the real role-based workspace, and postponed notebook/absence-submission controls are removed. These changes are not yet production.
 
-RUHUKA system (jsqiqxflgokfdooogcst) has migration 20261107072057 applied: new student absence submissions are blocked, historical records remain, and an authenticated own-student read endpoint supports retained student views. Officer attendance corrections remain available. No notebook records or device notes were deleted. See verification/RESUMED_TEN_ITEMS_2026-11-07.md for evidence and limits.
+RUHUKA system (jsqiqxflgokfdooogcst) has migration 20261107072057 applied: new student absence submissions are blocked, historical records remain, and an authenticated own-student read endpoint supports retained student views. Officer attendance corrections remain available. The director has confirmed old notes/records are disposable tests; targeted cleanup is planned before real school import. No blanket deletion occurred. See verification/RESUMED_TEN_ITEMS_2026-11-07.md for evidence and limits.
 
 ### Agreed first-handover scope — 5 November 2026
 
 - Make the existing design lighter, more compact and reliable on phones first, then tablets and desktop. Correct scrolling before adding visual polish. Preserve useful spacing, legibility, touch targets and RUHUKA's green identity.
 - Keep AI, but make answers direct and short by default. Answer the question first; normally use 2–4 short sentences or at most 3 short bullets. Avoid generic introductions, repetition and long unsolicited explanations. More detail can be supplied when requested or necessary. Keep existing privacy and accessibility protections.
-- Defer student absence-justification submission, including proof uploads and related first-handover entry points. This does not remove ordinary attendance or Discipline Officer corrections to Present/Late/Excused. Preserve existing private submissions/history and decide safe handling before hiding existing review views; do not delete records.
-- Defer the personal Notebook in both Academic/Discipline Staff and every Admin role. Remove its visible navigation/widgets/routes when implementation is authorised; do not delete existing device/server notes, ownership rules, audit history or migration evidence.
+- Defer student absence-justification submission, including proof uploads and related first-handover entry points. This does not remove ordinary attendance or Discipline Officer corrections to Present/Late/Excused. Existing submissions are development tests and may be removed in a targeted pre-handover cleanup. Do not delete real school data or reset the project.
+- Defer the personal Notebook in both Academic/Discipline Staff and every Admin role. Visible entry points are removed. Existing test notes need not be retained; targeted cleanup may remove them while keeping account security and database structure.
 - Keep the Student Portal's other approved views unless separately changed. Staff daily work must function without every student owning a phone/computer or submitting something online. Removing absence justification alone does not solve device access for every remaining student-facing feature.
 - Parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards and elaborate 3D remain deferred. Existing lightweight illustrations may remain only if they meet the performance/readability target; do not add new decorative complexity.
 - Preserve attractive visual character with the existing lightweight book illustration and a small original LDK/RUHUKA helper face in the existing chat launcher/header. No new floating widget, copied third-party mascot, canvas scene or animation library. The helper asset is 971 bytes and remains static; typography, colour and simple borders provide the rest of the character.
@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has migration 20261107072057 applied: new s
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (41 verified, 75 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (44 verified, 72 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -63,7 +63,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] B01 Identify active Supabase project and inspect schema/policies/migration history.
 - [x] B02 Bootstrap owner's explicitly approved temporary Headmaster account and record audit.
 - [x] B03 Complete actual sign-in/sign-out tests on deployed pilot and remove stale-session exposure.
-- [ ] B04 Finish session expiry/renewal/revocation tests including disabled accounts and role changes.
+- [x] B04 Finish session expiry/renewal/revocation tests including disabled accounts and role changes.
 - [ ] B05 Implement student ID + password login without exposing emails or account enumeration.
 - [ ] B06 Implement verified-email student invitations and first-password setup.
 - [ ] B07 Implement private one-time school setup codes for students without usable email.
@@ -71,7 +71,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] B09 Implement password recovery/email delivery, expiry and replay protection.
 - [ ] B10 Build Headmaster-only staff creation, role assignment and disabling.
 - [x] B11 Build Headmaster/Dean teacher-class assignments and verify revocation.
-- [ ] B12 Enforce all agreed roles server-side; remove legacy broad admin loopholes.
+- [x] B12 Enforce all agreed roles server-side; remove legacy broad admin loopholes.
 - [ ] B13 Test Student, teacher, patron/matron, officer, Dean and Headmaster allow/deny cases.
 - [ ] B14 Review auth security settings including existing leaked-password warning, email configuration and rate limits.
 
@@ -85,7 +85,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] C06 Implement archived/transferred/graduated statuses with current-roster exclusions and historical access.
 - [ ] C07 Obtain synthetic/redacted school roster, academic and discipline source examples.
 - [ ] C08 Build Excel/CSV roster validation and changes preview; reject invalid batches as a whole.
-- [ ] C09 Preserve omitted fields, avoid score changes and avoid automatic repeat invitations during roster updates.
+- [x] C09 Preserve omitted fields, avoid score changes and avoid automatic repeat invitations during roster updates.
 - [ ] C10 Build Headmaster action-specific, one-successful-use roster import grants for officers.
 - [ ] C11 Test concurrent grant consumption; failures do not consume grants.
 - [x] C12 Separate private guardian contacts from ordinary lookup/reports and test permissions.
@@ -288,3 +288,15 @@ Implemented the reduced-scope public page and real workspace navigation, removed
 87 Node tests pass. Extended daily_followup.sql rollback suite passed, including privacy, disabled-role denial, own-record isolation, missing-vs-zero results, blocked new submissions and retained officer corrections. Test accounts remaining: zero. Preview public/sign-in widths 320, 768 and 1280px have no horizontal overflow; narrow menu opens and Escape closes it; public → sign-in and Support → Privacy → Terms → Home work. Browser frames are CSS viewport evidence, not a physical-phone/keyboard trial. Source HTML reduced from 95,926 to 5,926 bytes; initial application script is public.js (2,110 bytes); chat loads on request. No measured slow-network speed claim.
 
 Completed five existing IDs: A06, G01, G02, G10, H10. Current accounting: **41 verified + 75 open + 12 deferred = 128**. The ten work items are not ten automatically completed handover checks. D06/I01/I02/H01/H02/A08 remain open for real-role demonstration, device/network acceptance, configured AI response and durable limits, and release review. PR #10 remains draft; do not merge yet. PR #4 is superseded and PR #9 is deferred; keep their branches if closing unmerged.
+
+### 7 November — visitor website, accounts and roster session
+
+Tackled the next ten work items. Visitor homepage restored with separate School sign in; pending school facts are clearly unconfirmed, and the old-site content proposal is recorded for director review. Requirements now permit targeted removal of identified test notes/records. No wholesale data reset.
+
+Added Headmaster staff directory, reviewed invitations, reviewed role/enabled changes and account setup/recovery page. A JWT-verified Edge Function keeps the Auth admin key on the server. Direct profile/role mutations are revoked; legacy broad admin authorisation is disabled. Current server role/session checks apply; disabling expires old sessions and re-enabling does not revive them. Browser UI polls current access every 30 seconds while visible. No real email/invitation was sent; email settings, callback allowlist, actual recovery/replay and signed-in staff UI acceptance remain B09/B10/B14.
+
+CSV roster preview shows new/changed/unchanged and before/after fields. Atomic Headmaster apply revalidates the preview against current rows, locks classes, stores a request receipt and records row history. It preserves omitted students, blank existing status, scores, linked accounts and contacts; no invitations. Excel parsing, school format confirmation and one-use officer grants remain C07/C08/C10/C11.
+
+100 Node tests pass. accounts_roster_handover.sql and daily_followup.sql rollback suites pass. Multi-identity SQL demonstrates teacher submission → officer visibility → correction/audit → corrected totals; this is not a two-device signed-in browser demonstration. No synthetic test accounts remain. Session tests include refresh/rejection UI, changed roles, disabled account, unknown/expired server sessions and non-revival after re-enable. Source migration history reconciled, including earlier scripts archived under history; isolated rebuild/recovery remains A07/I08.
+
+Three technical checks completed: B04 (session/access tests), B12 (server role enforcement and broad admin loophole removal), C09 (omitted-field/score/account/invitation preservation on roster updates). **44 verified + 72 open + 12 deferred = 128**. Built features can still have pending acceptance steps. PR #10 stays draft; no merge/production promotion. Detailed task-by-task status: verification/ACCOUNTS_ROSTER_SESSION_2026-11-07.md.

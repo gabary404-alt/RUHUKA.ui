@@ -20,3 +20,11 @@ Notebook code/private tables and old device notes are retained for later; the ac
 
 ## Verification boundaries
 See verification/RESUMED_TEN_ITEMS_2026-11-07.md and supabase/tests/daily_followup.sql. Unit/mocked tests and SQL rollback fixtures are not physical-device or school acceptance. Real phone keyboard, slow network, full multi-user workflow, account setup/recovery, complete imports and school acceptance remain open. No production merge is authorised by this document.
+
+## 7 November account and roster increment
+
+Headmaster navigation now includes Staff accounts and Roster import. Staff invitations are handled by JWT-verified Supabase Edge Function staff-accounts; roles and account disabling use server-audited Headmaster RPCs. No Auth admin key is shipped to the browser. Staff recipients set their own password at account.html. Auth email delivery, production callback deployment and redirect allowlisting must be verified before invitations are used. No real invitations have been sent by this session.
+
+Roster imports accept the downloadable CSV template (max 500 KB, 1000 rows). Before/after preview is read-only. Confirmation uses a server token for current roster state and actor-bound request ID to avoid a second application after a dropped response. Unsupported Excel files explain how to save as CSV. School-specific Excel parsing/officer grants remain unfinished.
+
+Current server access is checked every 30 seconds while visible and when returning to the tab. Disabled or changed roles close the workspace without deleting attendance drafts. Supabase session validity remains a server permission check, independent of visible frontend controls. Physical devices, actual email, real role walkthrough and slow networks still require acceptance.

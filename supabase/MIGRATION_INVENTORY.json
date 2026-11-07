@@ -1,0 +1,187 @@
+[
+  {
+    "version": "20261012175745",
+    "path": "supabase/history/20261012175745_attendance_foundation_and_demo_student_cleanup.sql",
+    "sha256": "b904f56c5a9933e2329fd3961c1dd20c2131714ac4ba7b4467234d00cb30ad9e"
+  },
+  {
+    "version": "20261012185237",
+    "path": "supabase/history/20261012185237_academic_results_and_bulk_import_foundation.sql",
+    "sha256": "c2196946686adcd43932c082c96662713675e426ecdbbeffaba1c5e6ee92bfdf"
+  },
+  {
+    "version": "20261012185319",
+    "path": "supabase/history/20261012185319_discipline_import_context_fields.sql",
+    "sha256": "58d0be15fef1d4d03b010640ce63fa485b7b6caada0db7064d81921bf230bba1"
+  },
+  {
+    "version": "20261012185721",
+    "path": "supabase/history/20261012185721_student_discipline_score_field.sql",
+    "sha256": "9325ebd4a0f977b16abd66ecd0dae33c7e4b11eec06772d2d52ca1016c91da7f"
+  },
+  {
+    "version": "20261012185748",
+    "path": "supabase/history/20261012185748_idempotent_academic_and_discipline_imports.sql",
+    "sha256": "f35cadb89d3c8262cce8731602a649f37c458975c4c244851ae1807e29b14358"
+  },
+  {
+    "version": "20261012185851",
+    "path": "supabase/history/20261012185851_allow_students_to_read_own_profile_record.sql",
+    "sha256": "252eb2969b22d5a164d4e5f0b0567e2a2063006c86aee173e0dc75d41f9be5cb"
+  },
+  {
+    "version": "20261012190009",
+    "path": "supabase/history/20261012190009_fix_discipline_import_conflict_index.sql",
+    "sha256": "6aa224ec6c0f1c886ed000b7cb82868a0b70f9c9cb3115034945fb3b216ec8a4"
+  },
+  {
+    "version": "20261012190808",
+    "path": "supabase/history/20261012190808_allow_multiple_attendance_periods_per_day.sql",
+    "sha256": "3f158e54f7a1e47b682ff64a701755224d83e6bad8353ac3606ad5ee1bcd4d69"
+  },
+  {
+    "version": "20261020165638",
+    "path": "supabase/migrations/20261020165638_002_reset_and_apply_new_schema.sql",
+    "sha256": "8f02e4da0c2f5f6cce23f1debb85010731f5dfacd8855614869ced31f52ad58e"
+  },
+  {
+    "version": "20261026190220",
+    "path": "supabase/migrations/20261026190220_shared_accounts_attendance_realtime_discipline_imports.sql",
+    "sha256": "8cfd59cced9fb8acd8a825aeb0e3fb056bf8fdf55e510ac09de1151007fbe2ea"
+  },
+  {
+    "version": "20261026190416",
+    "path": "supabase/migrations/20261026190416_tighten_school_access_and_import_controls.sql",
+    "sha256": "a82649b8b76bd57428cf48aaa8e91e18d8edbaa4f73d56a26862fda1661e81df"
+  },
+  {
+    "version": "20261026190523",
+    "path": "supabase/migrations/20261026190523_index_school_foreign_keys.sql",
+    "sha256": "496b9c9b66027e2f3385be6f113ff3499e9ad814f8a5f59af79acdd1012dd2c0"
+  },
+  {
+    "version": "20261027180652",
+    "path": "supabase/migrations/20261027180652_allow_class_wide_teacher_assignments.sql",
+    "sha256": "af32269b9d021f1c7de279f0f74b00510cdaa68e9b7bc764511e8e8b42553eea"
+  },
+  {
+    "version": "20261103174849",
+    "path": "supabase/migrations/20261103174849_restrict_submitted_main_attendance_updates.sql",
+    "sha256": "16ea74fda176b16a3f2126de522a718f874a692617fdc3f8af629f5ccdf55b31"
+  },
+  {
+    "version": "20261103180521",
+    "path": "supabase/migrations/20261103180521_officer_attendance_correction_reason_history.sql",
+    "sha256": "240417bd3c22e879d9a11000621fc54f95015e68f6204c17dde776ba5435777b"
+  },
+  {
+    "version": "20261103180633",
+    "path": "supabase/migrations/20261103180633_atomic_teacher_main_attendance_submission.sql",
+    "sha256": "d648b7f6cbd81a6d4e6935467ed6c30e2bb21e4c68b4958d3b15d39a4023d1a6"
+  },
+  {
+    "version": "20261103184710",
+    "path": "supabase/migrations/20261103184710_exclusive_validated_main_attendance_and_patron_scope.sql",
+    "sha256": "0c4c8444ed1a58dca0b8f50df006c8b9f99739738766caa2245b694ac3c382d0"
+  },
+  {
+    "version": "20261103184815",
+    "path": "supabase/migrations/20261103184815_staff_daily_attendance_overview.sql",
+    "sha256": "fd49f618b8bfec9d230739982ca60aa93b76d92c08c7e56f5e536c8d915f351f"
+  },
+  {
+    "version": "20261103190757",
+    "path": "supabase/migrations/20261103190757_private_absence_explanations_and_atomic_officer_review.sql",
+    "sha256": "d378875d13b4e297c924dc3a8dd29b89a385c38dafa3077e3718e4ff5af86d8b"
+  },
+  {
+    "version": "20261103193157",
+    "path": "supabase/migrations/20261103193157_private_user_notebooks_with_revision_checks.sql",
+    "sha256": "646111b795026e9e9c1becdaff01017c5e66916b2046204d3de9c6b7262ea9f7"
+  },
+  {
+    "version": "20261104173934",
+    "path": "supabase/migrations/20261104173934_private_notebook_search_pagination.sql",
+    "sha256": "8a09be516eb5158363fddb57a2758f90cb0a90771444a98fa0c5bc28f6941f10"
+  },
+  {
+    "version": "20261104174408",
+    "path": "supabase/migrations/20261104174408_attendance_overview_names_and_correction_status.sql",
+    "sha256": "f09a7ea44110917728837e1cc634938613a995c324fd08e97eb41f13ab55d7de"
+  },
+  {
+    "version": "20261104174620",
+    "path": "supabase/migrations/20261104174620_keep_explanation_decisions_private_in_audit.sql",
+    "sha256": "ab7fde6087650153616bd542aac84eb7032ea6f8c5cca2d93c9a517f04badcb0"
+  },
+  {
+    "version": "20261104175004",
+    "path": "supabase/migrations/20261104175004_derive_correction_status_from_audit_records.sql",
+    "sha256": "184bb5036c7aa477ba151e9bc073912903df0cff2782526f948d0c3d6e7d9303"
+  },
+  {
+    "version": "20261104175929",
+    "path": "supabase/migrations/20261104175929_validated_followup_and_official_main_summary.sql",
+    "sha256": "5a9ec63f7a3e57901b7cff2b3600089b49296f200c3e4bbdab9e0689e0e7f25d"
+  },
+  {
+    "version": "20261104181427",
+    "path": "supabase/migrations/20261104181427_school_roster_calendar_notices_and_announcements.sql",
+    "sha256": "450a02ca62d72e15831594e91094d3cc115f8762c0e3c86546dad1a96dff3732"
+  },
+  {
+    "version": "20261104181532",
+    "path": "supabase/migrations/20261104181532_teacher_directory_and_atomic_roster_request_resolution.sql",
+    "sha256": "3d5705e899d23811c52dcb6de27d99466681ef179b3786a78522ddf7a00fd8df"
+  },
+  {
+    "version": "20261104184445",
+    "path": "supabase/migrations/20261104184445_restrict_private_contact_read_and_write_scope.sql",
+    "sha256": "1fe370aaf6f1bad600633ae85c3f54bb017b061ccf2a90ce3b5bfa492adeaa30"
+  },
+  {
+    "version": "20261104185612",
+    "path": "supabase/migrations/20261104185612_active_role_required_for_linked_school_record_reads.sql",
+    "sha256": "1cb06eaba29678336ddd4ba361ebef35564bf3d8f830c34d9d8d471881499c5a"
+  },
+  {
+    "version": "20261104191012",
+    "path": "supabase/migrations/20261104191012_school_followup_concerns_and_today_tasks.sql",
+    "sha256": "8884fe1a352f39acbb4fb002bb24f9d0850a4683c83f72d5ce5e8e42721cabe3"
+  },
+  {
+    "version": "20261104191148",
+    "path": "supabase/migrations/20261104191148_reopen_attendance_followup_only_on_new_absence.sql",
+    "sha256": "b30005ccd3431be00f5fdba66489fb0a1fdd7b4acd7979de2b8fca254eeb40a1"
+  },
+  {
+    "version": "20261104191913",
+    "path": "supabase/migrations/20261104191913_private_category_scoped_concern_review_history.sql",
+    "sha256": "0a80473ca1208abe1563de0d6bb40cd1096d0f25ad14fbe5ccdb35e595ab1d4d"
+  },
+  {
+    "version": "20261107072057",
+    "path": "supabase/migrations/20261107072057_first_handover_deferred_submissions_and_private_student_views.sql",
+    "sha256": "ecc136a484eb53c64f8a094cb423efe669c5a54be3629ca3fe6a06b28eab5195"
+  },
+  {
+    "version": "20261107101838",
+    "path": "supabase/migrations/20261107101838_headmaster_staff_access_and_reviewed_roster_imports.sql",
+    "sha256": "23cc7381012ef113683b35f17916acbd7be767681b01cf31edae07586ca22f29"
+  },
+  {
+    "version": "20261107102136",
+    "path": "supabase/migrations/20261107102136_explicit_roster_before_after_preview.sql",
+    "sha256": "2b5d8b0e076411763e6b131d5fc85b948074c9ee574319d5a568f7bec25052a2"
+  },
+  {
+    "version": "20261107102255",
+    "path": "supabase/migrations/20261107102255_explicitly_deny_direct_roster_receipt_access.sql",
+    "sha256": "9d44cc0d1033ea01fe74139cf88cf1eedb8376761fdc902a6e4d036d2e5d63b9"
+  },
+  {
+    "version": "20261107102330",
+    "path": "supabase/migrations/20261107102330_server_checked_workspace_access_state.sql",
+    "sha256": "b17ed5522453e69565dbf485ff7461c56dc5c66d943fcb669905bf4ab0fef70f"
+  }
+]
