@@ -336,3 +336,7 @@ Ten work items completed; three original checks technically closed: B05/B07/B08.
 
 ### Two final shared-device privacy fixes — 7 November 2026
 Completed: remove temporary student/report/class-letter print copies on sign-out/access-clear and printing failures; clear unfinished account passwords and school codes on tab hiding, page exit and restored-page return. Three targeted tests added; 162 Node tests pass. These strengthen B04/I03/I05 without closing broader acceptance gates. Master count remains 75 verified / 41 open / 12 deferred. No new database change, real credentials, messages or production merge.
+
+
+### Two slow-connection fixes — 7 November 2026
+Roster validation discards a previous file's delayed read/preview after file selection changes or view disposal; old validation cannot expose an import confirmation. Academic printing discards delayed helper loads after class/release navigation and retains the student selected when Print was clicked. Three regression tests added; 165 Node tests pass. These strengthen C08/I02; full Excel/device acceptance remains open. Count unchanged: 75 verified / 41 open / 12 deferred.
