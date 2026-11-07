@@ -253,5 +253,40 @@
     "version": "20261107160456",
     "path": "supabase/migrations/20261107160456_surface_official_discipline_updates_on_today.sql",
     "sha256": "b2cdc015d508492f3e9e029f0220c971d0ccfcf882d326fadbaf4c801d15641e"
+  },
+  {
+    "version": "20261107171948",
+    "path": "supabase/migrations/20261107171948_versioned_class_letters_from_explicit_school_sources.sql",
+    "sha256": "0f7daa9c2add69849b786d640fdade9baa2a8f16495fdfa088d60b16ef93dba6"
+  },
+  {
+    "version": "20261107172206",
+    "path": "supabase/migrations/20261107172206_school_approved_public_content_and_named_editors.sql",
+    "sha256": "e7adfe46b8484149765f30af668ce4da2b9f1cbde17bd7b28d21e8e5cbeda5ed"
+  },
+  {
+    "version": "20261107172424",
+    "path": "supabase/migrations/20261107172424_reviewed_manual_promote_repeat_decisions_with_history.sql",
+    "sha256": "911ad9f7e9c929f0986b7bc1f5dba7289155b557b2c92f590658a67e358aab60"
+  },
+  {
+    "version": "20261107172810",
+    "path": "supabase/migrations/20261107172810_guard_review_year_sources_and_surface_saved_letters.sql",
+    "sha256": "35202e7708ab823eb03415aab894929d2fd2c6919bb425163158cda6dbffc178"
+  },
+  {
+    "version": "20261107172950",
+    "path": "supabase/migrations/20261107172950_explicit_manual_review_year_variable_scope.sql",
+    "sha256": "e24b81bb6305fba63cdb914e49e13bdf4375e451ba9e1d401640d9da5557becb"
+  },
+  {
+    "version": "20261107173035",
+    "path": "supabase/migrations/20261107173035_isolate_anonymous_public_text_in_read_only_projection.sql",
+    "sha256": "9472ba356270c2958219a6da4ee164054031c2219182ac543e232f0f11622aa8"
+  },
+  {
+    "version": "20261107173729",
+    "path": "supabase/migrations/20261107173729_revoke_disabled_public_editors_and_normalize_review_years.sql",
+    "sha256": "fd0c7193995b07a1baabc743131bea6c595c0d4aa1f4985535105709d3e1064d"
   }
 ]

@@ -6,3 +6,16 @@
 @media(max-width:760px){.site-nav{padding:10px 16px;gap:10px}.desktop-links{display:none}.theme-button{margin-left:auto}.menu-button{display:block}.brand{font-size:14px}.hero{grid-template-columns:1fr;padding:24px 18px 28px;gap:12px;text-align:center}.hero-illustration{grid-row:1;max-width:170px;justify-self:center}.hero h1{font-size:clamp(40px,11vw,64px)}.hero-sub{font-size:16px}.actions{justify-content:center}.hero .button{flex:1;min-width:135px}.pilot{margin-bottom:0}.section{padding:24px 18px}.cards{grid-template-columns:1fr}.card{padding:18px}.support-strip{align-items:flex-start;flex-direction:column;padding:20px}.site-footer{padding-inline:18px}.site-footer nav{flex-wrap:wrap}.public-status{right:10px;max-width:calc(100vw - 20px)}}
 
 .school-intro{display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:center}.school-intro p{color:var(--t2);max-width:65ch}.motto-card{border:1px solid var(--b);border-radius:22px;padding:24px;text-align:center;background:linear-gradient(140deg,var(--s2),var(--sky-top))}.motto-card span{display:block;font-size:clamp(36px,6vw,64px);font-weight:800;letter-spacing:.1em;color:var(--a2)}.motto-card p{margin:0}.workspace-strip{border-top:1px solid var(--b);padding-top:24px;display:flex;align-items:center;gap:24px;justify-content:space-between}.workspace-strip p{max-width:65ch;color:var(--t2)}.workspace-strip h2{font-size:25px}.workspace-strip .actions{flex-shrink:0}.muted{color:var(--t3)}@media(max-width:1000px){.desktop-links{gap:12px}.site-nav{gap:12px}.workspace-strip{flex-direction:column;align-items:flex-start}}@media(max-width:760px){.school-intro{grid-template-columns:1fr}.motto-card{padding:16px}.workspace-strip .actions{width:100%}}
+
+/* A few stationary points of light; no timer, movement, canvas or filter. */
+.hero{position:relative;isolation:isolate;--star:rgba(194,245,216,.7)}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:
+radial-gradient(circle at 3% 13%,var(--star) 0 1px,transparent 4px),
+radial-gradient(circle at 96% 18%,var(--star) 0 1px,transparent 5px),
+radial-gradient(circle at 89% 89%,var(--star) 0 1px,transparent 4px),
+radial-gradient(circle at 51% 8%,var(--star) 0 1px,transparent 3px),
+radial-gradient(circle at 67% 80%,var(--star) 0 1px,transparent 3px),
+radial-gradient(circle at 9% 92%,var(--star) 0 1px,transparent 4px)}
+[data-theme=light] .hero{--star:rgba(21,128,61,.25)}
+
+#public-introduction,#public-academics,#public-activities,#public-news,#public-contact{white-space:pre-wrap;overflow-wrap:anywhere}
