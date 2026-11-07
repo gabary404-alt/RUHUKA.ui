@@ -1,0 +1,13 @@
+(function(root){
+'use strict';
+function reportRows(release){return release.subjects.map(s=>({subject:s.name,maximum:s.maximum,mark:release.marks[s.name],percentage:release.marks[s.name]===null?null:Math.round(10000*release.marks[s.name]/s.maximum)/100}));}
+function createStudentReport(student,release){const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);return n};const box=el('section');box.id='ruhuka-report-print';box.className='report-print student-report-print';box.append(el('p','LYCÉE DE KIGALI'),el('h1','Student results summary'),el('p','Strive to Excel'),el('p','Selected release · '+release.release_name),el('p','Student: '+student.full_name+' · '+student.student_id),el('p','Class: '+release.class_name+' · School year: '+release.academic_year+' · Result date: '+release.recorded_on),el('p','This is a summary of one recorded results release. It is not the school’s official annual report.'));
+ const table=el('table'),head=el('thead'),tr=el('tr');['Subject','Maximum','Obtained','Subject %'].forEach(t=>tr.append(el('th',t)));head.append(tr);table.append(head);const body=el('tbody');reportRows(release).forEach(r=>{const tr=el('tr');[r.subject,r.maximum,r.mark===null?'Not recorded':r.mark,r.percentage===null?'Not recorded':r.percentage+'%'].forEach(t=>tr.append(el('td',t)));body.append(tr)});table.append(body);box.append(table);
+ box.append(el('p','Overall supplied by the school: '+(release.overall===null?'Not recorded':release.overall+'%')),el('p','Calculated using subject maxima: '+(release.calculated===null||release.calculated===undefined?'Not calculated — incomplete marks':release.calculated+'%')),el('p','Class position when published: '+(release.rank===null?'Not recorded':release.rank)),el('p','Blank marks are Not recorded. Zero is an actual recorded mark. The saved rank is not recalculated for this printout.'));
+ if(release.warnings?.length)box.append(el('p',release.warnings.length+' recorded upload warnings. Review reason: '+(release.override_reason||'Not recorded')));
+ if(release.superseded_by)box.append(el('p','Historical version: a corrected release is available.'));
+ box.append(el('p','Source release: '+release.id+' · Printed '+new Date().toLocaleString()));return box;
+}
+function printStudentReport(student,release){document.getElementById('ruhuka-report-print')?.remove();const box=createStudentReport(student,release);document.body.append(box);root.addEventListener?.('afterprint',()=>box.remove(),{once:true});root.print();}
+if(typeof module!=='undefined'&&module.exports)module.exports={reportRows,createStudentReport};else root.printStudentReport=printStudentReport;
+})(typeof window!=='undefined'?window:globalThis);

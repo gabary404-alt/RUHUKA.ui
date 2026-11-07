@@ -19,3 +19,6 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
 .class-letter-paper{max-width:76ch;margin:20px auto;padding:clamp(18px,4vw,40px);background:#fff;color:#17382b;border:1px solid #c2d7c9;border-radius:10px;overflow-wrap:anywhere}.class-letter-paper h1{font-size:26px;line-height:1.25}.class-letter-paper h2{font-size:19px}.class-letter-paper p{white-space:pre-wrap}.letter-evidence{margin-top:24px}
 @page letter{size:A4 portrait;margin:16mm}
 @media print{body>.letter-print{page:letter;font-size:11pt;line-height:1.5}.letter-print p{white-space:pre-wrap;overflow-wrap:anywhere}.letter-print .letter-evidence{break-before:page;border:0;padding:0}.letter-print h1{font-size:20pt}}
+
+@page student-results{size:A4 portrait;margin:14mm}
+@media print{body>.student-report-print{page:student-results;font:11pt/1.5 Arial,sans-serif}.student-report-print h1{font-size:20pt;color:#14532d}.student-report-print table{font-size:10pt;margin:20px 0}.student-report-print th{background:#e7f3eb;color:#17382b}.student-report-print th:first-child,.student-report-print td:first-child{width:46%}.student-report-print p{overflow-wrap:anywhere}}

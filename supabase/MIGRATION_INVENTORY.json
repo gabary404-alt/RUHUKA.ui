@@ -288,5 +288,15 @@
     "version": "20261107173729",
     "path": "supabase/migrations/20261107173729_revoke_disabled_public_editors_and_normalize_review_years.sql",
     "sha256": "fd0c7193995b07a1baabc743131bea6c595c0d4aa1f4985535105709d3e1064d"
+  },
+  {
+    "version": "20261107191305",
+    "path": "supabase/migrations/20261107191305_private_student_setup_reset_codes_and_edge_only_login_targets.sql",
+    "sha256": "c25596bd959252b48131027891ac175eea043390a03203dd6dd76a7274c803b6"
+  },
+  {
+    "version": "20261107191907",
+    "path": "supabase/migrations/20261107191907_notify_headmaster_about_officer_student_access_codes.sql",
+    "sha256": "fd2196ec9e6882dd2994d7c371cb35c97221be1bd57467552d4cac70c270c945"
   }
 ]

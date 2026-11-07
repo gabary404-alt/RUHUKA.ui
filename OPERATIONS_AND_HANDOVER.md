@@ -18,7 +18,7 @@ Only the Headmaster and named active staff editors can publish public school tex
 6. Perform the staff pilot: teacher/patron main register → officer sees it → officer corrects with reason → report matches → class letter is saved/read. Use genuinely separate signed-in devices, including a phone, and retry a dropped connection. SQL fixtures do not replace this school/device exercise.
 7. Publish reviewed academic and discipline sources using the strict pilot CSV templates. Confirm original school-file mapping before bulk school use. Test a missing mark, a real zero, a mismatch and an explicit correction. The original version must remain.
 8. Review public wording with the school. Headmaster may nominate named editors, publish the approved five text sections and verify the visitor page. Blank/unavailable facts stay placeholders. No real school facts were published during development testing.
-9. Complete student setup/recovery before promising optional student accounts. Student-ID login, setup codes and audited reset codes remain pending. Existing email sign-in is for assigned accounts; never expose or retrieve another user's password.
+9. Complete student setup/recovery before promising optional student accounts. Student-ID login, one-time setup codes and audited reset codes are implemented; positive school/student/device acceptance is still pending. Staff use assigned email accounts. Never expose or retrieve another user's password.
 10. Record agreed school support contact, provider owners, recurring cost limits, supported browsers/devices and acceptance evidence. These are school/director decisions, not facts the software can guess.
 
 ## Email setup and recovery: gates are currently OFF
@@ -47,3 +47,10 @@ Before production: complete account/device/role/file/AI and school acceptance, v
 Record the failing screen/action, school-local date/time, visible status and whether records were saved. Keep screenshots redacted; never include passwords, medical evidence, guardian contacts or private explanations in public tickets or AI requests. Do not clear device drafts or reset the database as a general repair step. Readable retained data plus an honest visible error is safer than claiming a failed save succeeded.
 
 The school's approved support contact, actual service costs, backup retention and full supported-device list are still awaiting confirmation. The final handover inventory must record these and accepted nonblocking limitations before J10/J12 can close.
+
+
+Student account procedure: Headmaster or Discipline Officer opens School desk → Student account setup and reset, checks the exact student ID and confirms issuing a code. Deliver it privately to the student/authorised guardian. The code is displayed once, then hidden after two minutes or leaving the view; history never reveals it. Setup expires after 24 hours; reset after 20 minutes. A new code revokes earlier unused codes. The student enters ID/code and chooses a 12–128 character password on the account page, then signs in using Student. Headmaster can disable/enable a student account; old sessions and unused codes are invalidated. Officer issuance notifies the Headmaster with high priority.
+
+A network/Auth failure after code consumption can leave a partial outcome: the interface says so. Try signing in; if it fails, ask for a fresh code after the five-minute processing guard. Do not assume a failed request completed. Codes/passwords must not be put into support tickets, messages, screenshots or audit notes. No email is sent by this workflow.
+
+Student results print is a single published release, with recorded maxima, missing marks, supplied overall and saved rank. It is explicitly unofficial. Annual aggregation, grading bands, school logos/QR/signatures and official report acceptance await a readable school sample and confirmed rules.

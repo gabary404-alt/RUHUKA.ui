@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inve
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (72 verified, 44 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (75 verified, 41 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -64,10 +64,10 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] B02 Bootstrap owner's explicitly approved temporary Headmaster account and record audit.
 - [x] B03 Complete actual sign-in/sign-out tests on deployed pilot and remove stale-session exposure.
 - [x] B04 Finish session expiry/renewal/revocation tests including disabled accounts and role changes.
-- [ ] B05 Implement student ID + password login without exposing emails or account enumeration.
+- [x] B05 Implement student ID + password login without exposing emails or account enumeration.
 - [ ] B06 Implement verified-email student invitations and first-password setup.
-- [ ] B07 Implement private one-time school setup codes for students without usable email.
-- [ ] B08 Implement audited Discipline Officer reset codes; no password visibility.
+- [x] B07 Implement private one-time school setup codes for students without usable email.
+- [x] B08 Implement audited Discipline Officer reset codes; no password visibility.
 - [ ] B09 Implement password recovery/email delivery, expiry and replay protection.
 - [ ] B10 Build Headmaster-only staff creation, role assignment and disabling.
 - [x] B11 Build Headmaster/Dean teacher-class assignments and verify revocation.
@@ -328,3 +328,7 @@ C03/D18/F06/F09/F10/F11/F12/G08/G09/H09 completed technically. 134 Node tests an
 K02/K03/K04/K05/K06/F13/H11/B13/J07/A08 verified technically; 72 verified + 44 open + 12 deferred = 128. Code 4ac3181e2263b295f3bb0d61696a3ffe5b733ad8 in draft PR #10; READY preview reviewed for stationary stars/public layout and role guides. Class letters use recorded source snapshots, separate explanation, reviewed saves/versions, Headmaster notice/read and portrait print. Manual promote/repeat is one explicit human decision at a time; threshold only highlights review. Public school text is Headmaster/named-editor controlled, with review/audit and anonymous approved-text-only projection.
 
 148 Node tests and the new integrated rollback suite pass. The earlier six suites retain recorded evidence; they were not all rerun in this session. 58 migration sources inventoried; no actual school data, public facts, editor grant, progression decision or email remains from testing. See verification/LETTERS_PUBLIC_REVIEW_SESSION_2026-11-07.md, RELEASE_PLAN.md, connected/guide.html and OPERATIONS_AND_HANDOVER.md. K01/K07 school usefulness, actual private-role/device/print and production handover acceptance remain open. PR #4 superseded/#9 deferred/#10 draft; do not merge separately or promote yet. No report card is required for these completed technical tasks; C07/F02 still await approved examples.
+
+
+### Final student access and report-reference increment — 7 November 2026
+Ten work items completed; three original checks technically closed: B05/B07/B08. **75 verified + 41 open + 12 deferred = 128**. These counts do not equate ten work items with ten master checks. Student ID login, one-time setup and audited reset codes are implemented with Edge/SQL tests. Positive real student/browser and device acceptance remain open. I05 remains open for the broader dependency/log/security review. The supplied screenshot informs a single-release results summary, not a fabricated official annual report; C07/F02 remain open. See verification/STUDENT_ACCESS_REPORT_SESSION_2026-11-07.md.

@@ -1,7 +1,7 @@
 // No third-party dependencies. Admin credentials stay inside the Edge Function.
 Deno.serve(async(req)=>{
  const origin=req.headers.get('Origin')||'';
- const allowed=origin==='https://ruhukaui.vercel.app'||/^https:\/\/ruhuka-[a-z0-9-]+\.vercel\.app$/.test(origin);
+ const allowed=origin==='https://ruhukaui.vercel.app'||/^https:\/\/ruhuka-[a-z0-9-]+-izere-osees-projects\.vercel\.app$/.test(origin);
  const headers={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin',...(allowed?{'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST, OPTIONS'}:{})};
  const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers});
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
