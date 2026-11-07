@@ -1,5 +1,17 @@
-> Current delivery status: read [HANDOVER_CHECKLIST.md](./HANDOVER_CHECKLIST.md) and the requirements scope update of 3 November. This older narrative is historical, not proof of feature completion.
+# Current handover position — 7 November 2026
+This section describes the active scope. The older notes below are retained as history and may describe features now postponed.
 
+- Public site: lightweight introduction, local SVG identity, help/information pages and real-account sign-in. Heavy prototype portal scripts no longer load on the public page.
+- Real workspace: role-derived Student/Staff/Admin views at /connected/. Today, Attendance and School desk have separate panels. Students retain only their own recorded results/attendance and announcement feed.
+- Notebook and online student absence submissions are postponed. Active entry points are removed; records/notes and historical permissions remain. New absence submission RPC/direct inserts are blocked; manual officer corrections still work.
+- AI is concise by default, private-record/action access is unavailable, and optional chat loads on demand. Production-only AI key scope is unchanged.
+- Original 128-ID delivery tracker remains authoritative. Actual phone keyboard, full multi-device demonstration, complete account provisioning/imports and school acceptance remain required before release.
+- All changes are in draft PR #10. Do not merge the old notebook PR #9 or old migration/UI PR #4; useful history is preserved.
+- Follow HANDOVER_CHECKLIST.md and RUHUKA_REQUIREMENTS.md for the current requirements. A passing code test is not proof of full school readiness.
+
+---
+
+# Historical project notes
 # RUHUKA — Master Project Handoff
 
 > **Current requirements (2026-11-02):** Read [RUHUKA_REQUIREMENTS.md](./RUHUKA_REQUIREMENTS.md) first. The owner has completed a new requirements interview. That document supersedes conflicting role rules, review requirements, parent scope and frontend-only handover statements below. The first school delivery must be fully functional; frontend review comes before backend integration. This older document remains historical context.

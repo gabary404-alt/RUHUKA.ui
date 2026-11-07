@@ -66,7 +66,7 @@ set local role authenticated;
 do $$declare c public.school_concerns;payload jsonb;begin
  if exists(select 1 from public.school_concerns where category='academic')then raise exception 'FAIL officer academic scope';end if;
  payload:=public.school_today(current_date);
- if not exists(select 1 from jsonb_array_elements(payload->'tasks')t where t->>'kind'='explanations')then raise exception 'FAIL officer pending explanations';end if;
+ if exists(select 1 from jsonb_array_elements(payload->'tasks')t where t->>'kind'='explanations')then raise exception 'FAIL postponed explanation task is visible';end if;
  if payload::text like'%CONFIDENTIAL_REASON%'then raise exception 'FAIL reason in task payload';end if;
  select*into c from public.school_concerns where student_id='__TODAY_ABSENT__'and category='attendance';
  begin perform public.review_school_concern(c.id,c.revision-1,'Stale');raise exception 'FAIL stale review';exception when serialization_failure then null;end;
@@ -143,4 +143,55 @@ do $$begin
  if not exists(select 1 from public.audit_events where entity_type='school_concern'and action='concern_reviewed')then raise exception 'FAIL review audit';end if;
  if exists(select 1 from public.students where student_id like'__TODAY_%'and(academic_score is not null or official_discipline_points is not null))then raise exception 'FAIL concerns changed scores';end if;
 end $$;
+
+-- Retained student views expose only the linked record and canonical applied sources.
+reset role;
+select set_config('request.jwt.claim.sub','13000000-0000-4000-8000-000000000006',true);
+set local role authenticated;
+do $$declare result jsonb;before_count integer;begin
+ result:=public.my_student_records();
+ if result#>>'{student,student_id}'<>'__TODAY_ABSENT__' then raise exception 'FAIL own linked student summary';end if;
+ if jsonb_array_length(result->'academic')<>0 or result->'discipline'<>'null'::jsonb then raise exception 'FAIL other students results exposed';end if;
+ if jsonb_array_length(result->'attendance')=0 then raise exception 'FAIL retained own attendance view';end if;
+ if result::text like'%CONFIDENTIAL_REASON%' or result::text like'%guardian%' then raise exception 'FAIL private explanation/contact in student summary';end if;
+ select count(*)into before_count from public.workflow_items where item_type='absence_justification';
+ begin perform public.submit_absence_explanation(gen_random_uuid(),'New online submission');raise exception 'FAIL deferred RPC accepts submissions';exception when feature_not_supported then null;end;
+ begin insert into public.workflow_items(item_type,student_id,requested_by,payload)values('absence_justification','__TODAY_ABSENT__',auth.uid(),'{"explanation":"Must not be saved"}');raise exception 'FAIL direct deferred insert';exception when insufficient_privilege then null;end;
+ if(select count(*)from public.workflow_items where item_type='absence_justification')<>before_count then raise exception 'FAIL historical explanations changed';end if;
+end $$;
+reset role;
+update public.students set auth_user_id=null where student_id='__TODAY_ABSENT__';
+update public.students set auth_user_id='13000000-0000-4000-8000-000000000006'where student_id='__TODAY_LOW__';
+set local role authenticated;
+do $$declare result jsonb;begin result:=public.my_student_records();
+ if jsonb_array_length(result->'academic')<>2 or(result#>>'{discipline,official_total}')::numeric<>19 then raise exception 'FAIL own applied results missing';end if;
+end $$;
+reset role;
+update public.students set auth_user_id=null where student_id='__TODAY_LOW__';
+update public.students set auth_user_id='13000000-0000-4000-8000-000000000006'where student_id='__TODAY_ZERO__';
+set local role authenticated;
+do $$declare result jsonb;begin result:=public.my_student_records();
+ if(result#>>'{academic,0,score}')::numeric<>0 then raise exception 'FAIL legitimate zero lost';end if;
+end $$;
+reset role;
+update public.profiles set is_active=false where id='13000000-0000-4000-8000-000000000006';
+set local role authenticated;
+do $$begin begin perform public.my_student_records();raise exception 'FAIL disabled student summary';exception when insufficient_privilege then null;end;end $$;
+reset role;
+select set_config('request.jwt.claim.sub','13000000-0000-4000-8000-000000000004',true);
+set local role authenticated;
+do $$begin begin perform public.my_student_records();raise exception 'FAIL teacher summary impersonation';exception when insufficient_privilege then null;end;end $$;
+reset role;
+-- Restore only the synthetic officer and verify manual correction still works.
+update public.profiles set is_active=true where id='13000000-0000-4000-8000-000000000003';
+select set_config('request.jwt.claim.sub','13000000-0000-4000-8000-000000000003',true);
+set local role authenticated;
+do $$declare record uuid;begin
+ select id into record from public.attendance_records where student_id='__TODAY_ABSENT__'and status='absent'limit 1;
+ perform public.correct_main_attendance(record,'present','Student returned: reviewed by the Discipline Office');
+ if not exists(select 1 from public.attendance_records where id=record and status='present')then raise exception 'FAIL officer correction after scope reduction';end if;
+ if not exists(select 1 from public.workflow_items where item_type='absence_justification'and payload->>'explanation'='CONFIDENTIAL_REASON_NEVER_IN_TODAY')then raise exception 'FAIL old private explanation lost';end if;
+end $$;
+reset role;
+
 rollback;

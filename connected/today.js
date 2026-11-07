@@ -78,13 +78,13 @@ function mountToday(host,api,roles,current,navigate,day){
    if(scan&&has('headmaster','dean','discipline_officer')){await rpc('refresh_school_concerns');lastScan=Date.now();}
    const data=await rpc('school_today',{day:selectedDay});if(!valid()||selectedDay!==day())return;
    cards.replaceChildren();
-   data.tasks.forEach(task=>{const card=el('article');card.className='today-card';card.append(el('h3',task.title),el('p',String(task.count)+(task.kind==='missing_attendance'?' class':' pending')),
-    button(({attendance:'Open attendance',explanations:'Review explanations',roster:'Review corrections',notices:'Open notifications',concerns:'Open follow-ups',uploads:'View upload details'})[task.action]||'Open',()=>openTask(task)));cards.append(card);});
+   data.tasks.filter(task=>['attendance','roster','notices','concerns','uploads'].includes(task.action)).forEach(task=>{const card=el('article');card.className='today-card';card.append(el('h3',task.title),el('p',String(task.count)+(task.kind==='missing_attendance'?' class':' pending')),
+    button(({attendance:'Open attendance',roster:'Review corrections',notices:'Open notifications',concerns:'Open follow-ups',uploads:'View upload details'})[task.action]||'Open',()=>openTask(task)));cards.append(card);});
    if(!data.tasks.length)cards.append(el('p',has('student')?'No pending tasks here. School announcements are available in the School desk.':'No pending tasks were found in the recorded data. Missing school data is not proof that everything has been completed.'));
    say('Attendance date: '+data.day+' · Open follow-ups: current · Checked '+new Date(data.checked_at).toLocaleTimeString());
   }catch(error){say('Could not refresh Today. The previous view may be out of date. '+error.message);}finally{busy=false;if(valid())refreshButton.disabled=false;}
  }
- const timer=setInterval(()=>{if(valid()&&!document.hidden)refresh(Date.now()-lastScan>=30000);},5000);
+ const timer=setInterval(()=>{if(valid()&&!document.hidden&&!host.hidden)refresh(Date.now()-lastScan>=30000);},5000);
  const visibility=()=>{if(!document.hidden)refresh(true);};document.addEventListener?.('visibilitychange',visibility);
  refresh(true);
  return {refresh:()=>refresh(true),dispose(){stopped=true;generation++;clearInterval(timer);document.removeEventListener?.('visibilitychange',visibility);host.replaceChildren();}};

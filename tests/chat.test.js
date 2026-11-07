@@ -26,13 +26,13 @@ function setup(fetchImpl, options = {}) {
   const nodes = new Map();
   const node = id => { if (!nodes.has(id)) nodes.set(id,new Node()); return nodes.get(id); };
   const listeners = {};
-  const ctx = { document: { getElementById:node,createElement:()=>new Node(),addEventListener:(k,v)=>listeners[k]=v },
+  const ctx = { document: { readyState:options.readyState,getElementById:node,createElement:()=>new Node(),addEventListener:(k,v)=>listeners[k]=v },
     AbortController, console, clearTimeout, TextEncoder,
     setTimeout:(cb,ms)=>setTimeout(cb,ms===45000?(options.timeout || 1000):ms),
     navigator:{onLine:options.online!==false},matchMedia:()=>({matches:options.reduced!==false}),
     AI_CONFIG:{USE_API:options.api!==false,API_URL:'/api/chat',MODEL:'existing-model',SYSTEM_PROMPT:'No private records or live search.'},fetch:fetchImpl
   };
-  ctx.window=ctx;vm.createContext(ctx);vm.runInContext(code,ctx);listeners.DOMContentLoaded();
+  ctx.window=ctx;vm.createContext(ctx);vm.runInContext(code,ctx);listeners.DOMContentLoaded?.();
   return {ctx,node,messages:()=>node('ai-messages').children.map(n=>n.textContent)};
 }
 const response = text => ({ok:true,json:async()=>({choices:[{message:{content:text}}]})});
@@ -45,7 +45,7 @@ test('supported provider JSON and invalid data',()=>{
 });
 test('offline help does not export or inspect private school data',()=>{
   assert.match(localHelp('export every student'),/cannot read private student records, export records/);
-  assert.match(localHelp('attendance'),/demo/);
+  assert.match(localHelp('attendance'),/Sign in/);
   assert.doesNotMatch(code,/schoolData|localStorage|createObjectURL/);
 });
 test('successful answer remains literal text and controls recover',async()=>{
@@ -98,7 +98,7 @@ test('history includes complete turns but is cleared between chats',async()=>{
 });
 test('offline mode never calls provider',async()=>{
   const s=setup(()=>{throw new Error('must not fetch')},{online:false});
-  await s.ctx.sendAIMessage('attendance');assert.match(s.messages().at(-1),/Mark Attendance/);
+  await s.ctx.sendAIMessage('attendance');assert.match(s.messages().at(-1),/Sign in/);
 });
 test('empty and too-long questions never call provider',async()=>{
   let calls=0;const s=setup(async()=>{calls++;return response('Answer')});
@@ -118,3 +118,5 @@ test('completed response has one full announcement; partial typing is not announ
  const s=setup(async()=>response('An answer long enough to reveal across several animation frames.'),{reduced:false});const pending=s.ctx.sendAIMessage('Question');await new Promise(r=>setTimeout(r,5));assert.equal(s.node('ai-announcement').textContent,'');s.ctx.stopAIResponse();await pending;assert.match(s.node('ai-announcement').textContent,/Response stopped/);
  const reduced=setup(async()=>response('Full answer'),{reduced:true});await reduced.ctx.sendAIMessage('Question');assert.equal(reduced.node('ai-announcement').textContent,'Ruhuka assistant: Full answer');assert.equal(reduced.messages().at(-1),'Full answer');
 });
+
+test('lazy-loaded chat initialises after the page has already loaded',async()=>{const s=setup(async()=>response('Answer'),{readyState:'complete'});assert.equal(s.messages().length,1);assert.ok(s.node('ai-input').listeners.keydown);await s.ctx.sendAIMessage('Hello');assert.equal(s.messages().at(-1),'Answer');});

@@ -3,10 +3,10 @@
 (function (root) {
   'use strict';
   const HELP = {
-    attendance: 'Teachers use Staff → Mark Attendance for their assigned class. Main daily attendance and follow-up lessons are separate. Ask the Discipline Office about corrections to a submitted register. The current demo saves on this browser only.',
-    results: 'Students can open Results to view their academic record and Discipline to view official discipline records. Academic and discipline rankings are separate. The current records are demonstration data.',
-    absence: 'Open Student → Absence to explain an absence. The intended school workflow sends it to the Discipline Officer for review. The current demo does not deliver it to another person.',
-    account: 'This version uses demo role previews, not real school accounts. Student setup codes and password resets will become available when secure accounts are connected. Never share a password or setup code in chat.',
+    attendance: 'Sign in, open Attendance and choose your class and date. Mark each student, review the totals, then confirm. Only a Discipline Officer can correct a submitted main register.',
+    results: 'Students can open My records for the information already recorded by the school. Missing results mean Not recorded. Full result uploads and ranking views are still being completed.',
+    absence: 'Contact the Discipline Office about an absence. Online student absence submissions are postponed. A Discipline Officer can correct the main attendance record with a reason.',
+    account: 'Use your assigned school email to sign in. Complete school-managed account setup and recovery are still being built; contact the school administrator if you cannot sign in. Never share passwords or setup codes here.',
     general: 'I can explain Ruhuka and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
   };
   function localHelp(message) {
@@ -117,7 +117,7 @@
     history = [];
     lastQuestion = '';
     byId('ai-messages').replaceChildren();
-    append('Hello! Ask me about Ruhuka or a general learning topic. I cannot access private student records. For current facts, check an official source; live web lookup is not connected yet.', 'assistant');
+    append('Hello! Ask about RUHUKA or a learning topic. I cannot access private records or check live web sources.', 'assistant');
     byId('ai-retry').hidden = true;
     byId('ai-input').value = '';
     setStatus('Ready');announce(quiet?'':'New chat. Previous conversation cleared.');
@@ -166,13 +166,13 @@
       const complete = await reveal(run, reply);
       if (complete && active === run) {
         if (online) history = [...history, { role: 'user', content: message }, { role: 'assistant', content: reply }].slice(-12);
-        setStatus(online ? 'Response complete · Current facts are not verified' : 'Local help · Live AI unavailable');
+        setStatus(online ? 'Response complete · Current facts are not verified' : 'Local help · AI service unavailable');
         announce((online?'Ruhuka assistant: ':'Local help: ')+reply);
       }
     } finally { release(run); }
   };
   root.retryAIMessage = function () { if (lastQuestion) root.sendAIMessage(lastQuestion); };
-  document.addEventListener('DOMContentLoaded', () => {
+  function initialiseChat() {
     byId('ai-input').addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
         event.preventDefault(); root.sendAIMessage();
@@ -182,5 +182,6 @@
       if (event.key === 'Escape'&&!byId('ai-chat-panel').hidden) {event.preventDefault();event.stopPropagation();root.toggleAI();}
     });
     root.clearAIConversation(true);
-  });
+  }
+  if(document.readyState==='loading'||!document.readyState)document.addEventListener('DOMContentLoaded',initialiseChat);else initialiseChat();
 })(typeof window === 'undefined' ? globalThis : window);

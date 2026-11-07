@@ -1,153 +1,43 @@
-# Ruhuka — agreed first functional handover
+# RUHUKA first handover requirements
+Updated 7 November 2026. Read this together with HANDOVER_CHECKLIST.md.
 
-Decisions confirmed by the project owner through 2026-11-03 (Africa/Kigali).
-This document supersedes conflicting older briefs and the frontend-only handover
-scope in RUHUKA_MASTER_HANDOFF.md. Requirements below are not implementation claims.
+## Purpose
+RUHUKA helps Lycée de Kigali staff record attendance, maintain school records and follow up work without repeatedly copying it. The site must be simple enough for routine staff use, especially on phones. Core attendance must work without each student owning a phone.
 
-## Delivery and design
+## Current implementation
+The public page is a small introduction with real-account sign-in links. The role-checked workspace at /connected/ has Student, Staff and Admin navigation. It is a pilot, not a completed school release. The public production deployment has not been updated until a reviewed merge/release is authorised.
+The active database is RUHUKA system (jsqiqxflgokfdooogcst). The older project is excluded. The owner's temporary Headmaster account is not the final school-owned handover account.
 
-- Build and verify frontend and backend together in complete workflows using
-  synthetic test records, as approved 3 November. The actual school handover requires a functioning backend.
-- Preserve the current green/red identity and existing first-release features,
-  including notebooks and AI help. Prioritize phones while supporting desktop.
-- English first. Other languages will be directed by the owner later.
-- Exactly three portals: Student, Staff and Admin. Parent portal is deferred.
-- Keep tasks short and understandable; school staff should operate daily without
-  a developer. Ongoing support is expected.
+## Roles
+- Teacher: main/follow-up attendance for assigned classes; assigned-class announcements.
+- Patron/matron: school-wide attendance; no officer corrections or private concern reviews.
+- Discipline Officer: attendance corrections with reasons/history, discipline follow-ups, single student additions with high-priority Headmaster notice, roster correction requests, relevant school notices.
+- Dean of Studies: academic work and academic follow-ups, teacher assignments and school notices.
+- Headmaster: roster/classes/terms, teacher assignments, priority notices, oversight and controlled school permissions.
+- Student: own recorded academic/discipline/attendance information and targeted school announcements. No online absence-submission form.
+Server permissions, not a browser role selector, decide access. No one can see a student's password.
 
-## Roles and permissions
+## First-handover workflows
+1. One submitted main register per class/day. Reject incomplete, invalid, duplicate or wrong-class marks atomically.
+2. Separate follow-up lesson registers; these do not change official main-attendance totals.
+3. Present/Late count as attended; Excused is separate. Missing records mean unknown, not absent or zero.
+4. Officers correct submitted main attendance with a reason; retain original value, actor and time. Ordinary staff cannot overwrite another submission.
+5. Today lists permitted missing registers, follow-up concerns, upload issues and priority roster notices. Each available control opens its real action.
+6. Class/student management, three Headmaster-configured terms, teacher assignments, individual officer additions and protected bulk-import permissions.
+7. Freely named academic releases and official discipline imports remain required. Different subject maxima are weighted; missing marks are not zero. Academic and discipline rankings stay separate. Dean/officer publish without a separate reviewer, with required notices/history.
+8. Below-threshold concerns lead to human review, not automatic punishment or promotion. Attendance concerns use five consecutive recorded main absences; returns break a streak but do not silently close an open case.
+9. School/class announcements and private recipient notifications retain targeting and history.
+10. Account setup/recovery, student ID sign-in, complete imports, school-owned service/access transfer and real-device/multi-role acceptance must be completed before handover.
+11. Class letters remain on the checklist after trustworthy sources/reports are ready. Generated numbers stay tied to records; editable wording stays separate.
 
-| Role | Agreed responsibilities |
-| --- | --- |
-| Student | Own results, separate academic/discipline class rankings, attendance, absence explanations, announcements |
-| Academic Staff (teachers) | Assigned-class attendance, read-only student lookup, assigned-class announcements, notebook |
-| Discipline Staff (patrons/matrons) | School-wide attendance, read-only lookup, notebook; no discipline imports or clearing concerns |
-| Discipline Officer (Admin) | Attendance corrections, absence review, discipline imports, concerns, individual student additions, reset codes, announcements |
-| Dean of Studies (Admin) | Academic imports/corrections, teacher assignments, promotion review/settings, announcements |
-| Headmaster (Admin) | Roster, staff accounts/roles, teacher assignments, delegated permissions, term dates, reports/oversight, announcements |
+## Design and AI
+Keep the green identity, readable typography, compact layouts, book illustration and small original helper in the existing chat control. No heavy animation library, continuous canvas scene or extra floating mascot.
+Use native scrolling. Load public-page code first; load optional chat only when opened. Do not generate sample school records on a normal page visit.
+AI answers start with the answer, normally 2–4 short sentences or up to three short bullets. More detail is available when requested. Keep private records, credentials and actions out of the assistant. It has no live web search. Full rate/cost controls and configured live-provider testing remain open.
 
-- Only Discipline Officers correct submitted attendance, including midday returns.
-  This supersedes the earlier suggestion that patrons/matrons could correct it.
-- Headmaster manages edits to names/classes and transferred/archived statuses.
-  Discipline Officers request those corrections.
-- Discipline Officers add individual students directly; notify the Headmaster
-  with HIGH priority. No additional grant is required.
-- Whole-roster import by a Discipline Officer requires a Headmaster grant to that
-  officer. It is consumed by ONE successful import, not failed validation/upload.
-- Permissions are specific actions, not an unrestricted superuser switch.
-- Public content editing is allowed to the Headmaster and named editors/developers
-  authorized by the school. Developer status alone grants no access.
-- UI visibility is not authorization. These rules must be enforced server-side
-  during integration, with per-role tests and audit records.
+## Postponed
+Personal notebooks for all Staff/Admin roles; online student absence submissions and proof uploads; parent portal/messaging; SMS; automatic promotion decisions; advanced charts/school-wide leaderboards; elaborate 3D.
+Existing notes, device copies, private submissions and audit evidence are preserved. New student absence submissions are blocked at the database boundary. Historical privacy restrictions remain. Manual officer attendance corrections stay available.
 
-## Attendance and explanations
-
-- One main attendance per class per school-local date. A teacher or patron normally
-  submits it. Follow-up lesson registers do not affect official daily statistics.
-- Reject a second main submission with a clear already-submitted message. Preserve
-  the existing register, including when two people submit concurrently.
-- Discipline Officers can correct submitted records. Preserve before/after values,
-  reason, authenticated editor and timestamp. Present with a late-arrival explanation
-  differs from an excused absence.
-- Discipline Office overview lists submitted/missing class registers by date and
-  shows the submitter and time. Missing registers are not student absences.
-- Students can submit explanations with optional photo/PDF proof. Send only to
-  Discipline Officers. Approval changes the linked absence to excused with history.
-- Save drafts on the device through connectivity loss, scoped to the signed-in
-  user. Show Not submitted until server confirmation. Recheck duplicate submissions
-  on reconnect; do not silently overwrite someone else's register.
-- Flag five consecutive recorded main-attendance school days absent. Missing
-  attendance is unknown, never automatically absent. Present/late/excused ends
-  the streak. An existing concern stays open until reviewed.
-- After closure, another absent day reopens a concern if the student has not
-  returned; after return, a new five-day streak creates a new concern.
-- Academic below 50% and official discipline below 20/40 remain separate concerns.
-  Clearing one category does not clear the others. No automated disciplinary action.
-
-## Academics, reports and promotion
-
-- Dean names a results release freely and uploads whenever needed, e.g. Beginning
-  of Term Tests. Preserve earlier releases and separate their rankings.
-- Upload has one student per row, individual subject marks and an overall percentage
-  in the last column. Subjects may have different maximum marks.
-- Overall calculation: sum earned marks / sum possible marks * 100. Use the
-  school-supplied overall for rankings; surface discrepancies rather than silently
-  replacing it. Blank is Not recorded; explicit zero is a valid recorded mark.
-- Warn the Dean about missing marks. Allow Review/fix or Publish anyway; retain
-  unresolved warnings and record the override. Published students WITH a supplied
-  overall percentage remain ranked even with a blank subject mark.
-- Academic and discipline rankings remain separate, within the student's own class.
-  Ties share positions (1,2,2,4). Never silently treat a missing total as zero.
-- Dean publishes and corrects results without Headmaster approval. Notify Headmaster
-  on uploads and corrections; retain before/after history and update rankings.
-- Automatic promotion suggestions/decisions are deferred. Retain explicit manual
-  school decisions and historical records. Future suggestions need an explicitly
-  agreed annual results basis and threshold; never silently choose a formula.
-- Three terms/year, with Headmaster-configured dates. Historical classes, marks and
-  attendance must not be rewritten by a new year's roster.
-- Excel and CSV imports; Excel, CSV and printable/PDF reports. Filters must affect
-  both displayed values and exports. Ordinary reports exclude private contacts.
-- Official source-file layouts, maximum-mark representation, and rounding tolerance
-  need synthetic/redacted samples before final parser acceptance. No real student
-  data in the current demo.
-
-## Discipline imports and roster
-
-- External school system is the authority for discipline points. No manual website
-  form for adding/deducting official points.
-- Discipline Officer previews/applies imports directly, without a second reviewer.
-  Notify Headmaster and fellow Discipline Officers; identify uploader and changes.
-- Keep validation, source evidence and upload history. Notifications replace approval
-  waiting, not validation or accountability.
-- Roster bulk import: preserve omitted fields, preview changes, no score changes or
-  automatic re-invitations, reject invalid batches rather than quietly skipping rows.
-- Preserve archived/transferred/graduated history; exclude inactive records from
-  current attendance and active rankings.
-
-## Accounts, notices and public content
-
-- Student login is ID + password. Email setup first; SMS deferred pending costs.
-- Verified parent/guardian email OR a privately issued school one-time setup code
-  can support students without email. Never give everyone a shared default password.
-- Discipline Officers can issue temporary reset codes, with a recorded action.
-  They must never see a student's password.
-- Only Headmaster creates staff accounts, assigns roles and disables access.
-  Both Headmaster and Dean assign teachers to classes.
-- Headmaster, Dean and Discipline Officers can publish school-wide announcements.
-  Teachers post to assigned classes. Student announcements stay in one feed.
-- Announcements are in-app only for first handover, not email/SMS delivery.
-- School-approved public details/achievements must replace unverified sample claims.
-
-## AI assistant
-
-- Help with Ruhuka, school-approved information and general/learning questions.
-- No access to private student records, no data exports or administrative actions.
-- Replies should appear progressively with a waiting indicator and usable stop/error
-  states. Preserve accessibility and reduced-motion support.
-- Current information requires actual current-source retrieval with meaningful
-  citations. Do not promise freshness merely by adding a system prompt.
-- Current endpoint is EjoLabs JSON response, not a verified streaming/search API.
-  Frontend progressive reveal is an interim UI behavior, not live token streaming.
-- Production work still needs server-controlled instructions, verified provider
-  capabilities, bounded requests/rate limits, approved school knowledge and current
-  source retrieval. Never expose privileged credentials in frontend code.
-
-## Reviewable implementation sequence
-
-1. Chat UI and requirements baseline (first change).
-2. Attendance calculation/duplicate/correction/absence/overview flows and tests.
-3. Roster, scoped one-use grants, staff assignments, notifications and public editors.
-4. Academic releases/imports/corrections, reports and promotion review.
-5. Mobile/offline/attachment/notebook/announcement QA and accessible first-use help.
-6. Reconcile existing Supabase migrations, then implement auth, persistence, storage,
-   access controls, notifications and shared updates in tested steps.
-7. Verify cross-device workflows, role isolation, imports, recovery, email delivery,
-   AI provider/source behavior and school acceptance before functional handover.
-
-No production-ready or fully functional claim until the final verification passes.
-
-## Approved scope update — 3 November
-
-HANDOVER_CHECKLIST.md is the delivery/acceptance tracker and supersedes the initial sequence above. Backend work proceeds alongside frontend work.
-
-Defer parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards and elaborate interactive 3D. Retain AI chat and general learning support with live-provider verification. Today dashboard is essential and opens real role-appropriate actions. Remove click sparks/cursor effects, duplicated or placeholder controls and manual discipline point-changing routes. Two lightweight original 3D-looking illustrations are approved for review with static/reduced-motion fallbacks. Named personal notebooks include + New notebook without replacing existing notes. The authorised temporary owner Headmaster account is replaced by a separate school-owned account at handover, preserving audit actors.
+## Delivery evidence
+The checklist preserves all 128 original IDs and separates active and deferred work. Only verified outcomes are ticked. Mocked tests and SQL fixtures are not a substitute for actual school/device acceptance. Record limitations, open checks and any action needed from the director in plain language.

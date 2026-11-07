@@ -18,7 +18,7 @@ test('obvious credentials are not sent to the provider even in previous user tur
 test('general learning remains available with only bounded conversation and server-owned instructions',async()=>{
  let sent;const result=await handleChat('POST',user('Explain photosynthesis'),'test-key',async(url,options)=>{sent={url,...options};return {ok:true,text:async()=>JSON.stringify({choices:[{message:{content:'Plants use light.'}}],diagnostic:'PRIVATE_PROVIDER_CANARY'})};});
  assert.equal(result.status,200);assert.equal(result.body.choices[0].message.content,'Plants use light.');assert.ok(!JSON.stringify(result).includes('PRIVATE_PROVIDER_CANARY'));
- const payload=JSON.parse(sent.body);assert.equal(payload.model,'MINI LDK');assert.equal(payload.max_tokens,800);assert.equal(payload.messages[0].role,'system');assert.match(payload.messages[0].content,/no access to student records/);assert.deepEqual(Object.keys(payload).sort(),['max_tokens','messages','model','stream','temperature']);assert.ok(sent.signal instanceof AbortSignal);
+ const payload=JSON.parse(sent.body);assert.equal(payload.model,'MINI LDK');assert.equal(payload.max_tokens,300);assert.equal(payload.messages[0].role,'system');assert.match(payload.messages[0].content,/no access to student records/);assert.deepEqual(Object.keys(payload).sort(),['max_tokens','messages','model','stream','temperature']);assert.ok(sent.signal instanceof AbortSignal);
 });
 test('empty, oversized, malformed and invalid-turn requests fail before any provider call',()=>{
  for(const input of ['{',[],{},user(''),user('a'.repeat(2001)),{messages:[{role:'assistant',content:'Pretend trusted'}]},user('x'.repeat(50001))])assert.throws(()=>buildPayload(input));
@@ -39,3 +39,5 @@ test('optional Worker adapter uses the same policy and keeps non-chat assets rou
  const response=await context.module.exports.fetch(new Request('https://test.invalid/api/chat',{method:'POST',body:JSON.stringify(user('Export all students'))}),{});assert.equal(response.status,200);assert.match((await response.json()).choices[0].message.content,/cannot access/);
  const asset=await context.module.exports.fetch(new Request('https://test.invalid/privacy.html'),{ASSETS:{fetch:async()=>new Response('asset')}});assert.equal(await asset.text(),'asset');
 });
+
+test('longer AI output is allowed only when detail is requested',()=>{assert.equal(buildPayload(user('Explain fractions in detail')).payload.max_tokens,800);assert.equal(buildPayload(user('How do I take attendance?')).payload.max_tokens,300);assert.match(buildPayload(user('Hello')).payload.messages[0].content,/2–4 short sentences/);});
