@@ -298,5 +298,10 @@
     "version": "20261107191907",
     "path": "supabase/migrations/20261107191907_notify_headmaster_about_officer_student_access_codes.sql",
     "sha256": "fd2196ec9e6882dd2994d7c371cb35c97221be1bd57467552d4cac70c270c945"
+  },
+  {
+    "version": "20261107194133",
+    "path": "supabase/migrations/20261107194133_least_privilege_anonymous_and_maintenance_table_grants.sql",
+    "sha256": "02618d79d57deab610e862d1d59951b0be30181193649736b4b13c26dba8e577"
   }
 ]

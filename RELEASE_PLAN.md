@@ -20,7 +20,7 @@ Notebook and online student absence-submission entry points remain absent. Their
 
 148 Node tests pass at code increment. New rollback SQL suite verifies letters/snapshots/privacy, official source separation, explicit human decisions/corrections, role denials, editor grant/revoke/stale publishing and anonymous public projection. Earlier six suites retain evidence for attendance/academic/import/role boundaries. See verification/LETTERS_PUBLIC_REVIEW_SESSION_2026-11-07.md for exact current verification and limitations.
 
-All 60 applied migration versions are inventoried with source checksums. This is source/history reconciliation, not proof of a clean rebuild; A07/I07/I08 remain open. Historical destructive reset/schema statements are not a fresh-install instruction and must never be rerun on the live project.
+All 61 applied migration versions are inventoried with source checksums. This is source/history reconciliation, not proof of a clean rebuild; A07/I07/I08 remain open. Historical destructive reset/schema statements are not a fresh-install instruction and must never be rerun on the live project.
 
 Before a merge recommendation: actual signed-in teacher/patron → officer → report trial, role/student/account setup and recovery, physical phone/tablet/keyboard/print/slow-network checks, school-file adaptation, AI provider/cost controls and the remaining security/operations acceptance. Email invitation/reset flags stay off. Never merge #4/#9 along with #10 as a shortcut. No current production files or service ownership were changed by this review.
 
@@ -28,3 +28,6 @@ A later release decision must name the reviewed commit and deployment, check the
 
 
 Latest increment: student ID/password entry, private one-time setup/reset codes, Headmaster student enable/disable, officer issuance notices, durable rate limits and single-release student results print. 159 Node tests and student_access rollback SQL pass. The screenshot is retained only as a visual reference, never copied as personal demo data. Positive real student acceptance and official annual-report rules remain release gates. Current tracker: 75 verified / 41 open / 12 deferred.
+
+
+Security increment: I05 review completed with least-privilege migration 20261107194133, three affected rollback suites passing and 165 Node tests retained. Current tracker: 76 verified / 40 open / 12 deferred. B14/H02/I04/I06 and actual role/device/production acceptance remain release gates; keep PR #10 draft.

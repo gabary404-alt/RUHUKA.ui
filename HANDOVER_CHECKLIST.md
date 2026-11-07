@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inve
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (75 verified, 41 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (76 verified, 40 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -167,7 +167,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] I02 Measure initial JS/CSS/asset weight and loading work before/after; reduce decorative rendering and unused/hidden-portal startup work. Test slow/interrupted connections, storage limits, offline attendance drafts and duplicate-safe retry.
 - [ ] I03 Check labels, focus, contrast, touch targets and screen-reader status/error announcements.
 - [ ] I04 Separate preview/test/production configuration and prevent demo records entering real workflows.
-- [ ] I05 Check keys, exposed endpoints, RLS/grants, storage, logs and dependency versions; no privileged frontend keys.
+- [x] I05 Check keys, exposed endpoints, RLS/grants, storage, logs and dependency versions; no privileged frontend keys.
 - [ ] I06 Configure error monitoring and an actionable support path without private data leakage.
 - [ ] I07 Confirm backup/retention capability and perform a documented recovery exercise in an isolated environment.
 - [ ] I08 Validate deployment rollback and database migration forward/recovery plan.
@@ -340,3 +340,7 @@ Completed: remove temporary student/report/class-letter print copies on sign-out
 
 ### Two slow-connection fixes — 7 November 2026
 Roster validation discards a previous file's delayed read/preview after file selection changes or view disposal; old validation cannot expose an import confirmation. Academic printing discards delayed helper loads after class/release navigation and retains the student selected when Print was clicked. Three regression tests added; 165 Node tests pass. These strengthen C08/I02; full Excel/device acceptance remains open. Count unchanged: 75 verified / 41 open / 12 deferred.
+
+
+### Security review completed — 7 November 2026
+I05 technically verified: current source key/dependency/endpoints review, database RLS/grants/views/definer configuration, storage state, secret-free diagnostics and bounded recent-log scan. Removed anonymous legacy table grants and client maintenance privileges; new postgres-owned public tables require explicit grants. Public approved text remains readable. 61 migrations inventoried. New least_privilege rollback checks and student_access/class_letters_public_progression suites pass. Existing leaked-password warning remains tracked in B14; AI durable cost/rate protection H02, environment separation I04, monitoring I06 and release/real-device acceptance remain open. **76 verified + 40 open + 12 deferred = 128**. Details: verification/SECURITY_REVIEW_2026-11-07.md.
