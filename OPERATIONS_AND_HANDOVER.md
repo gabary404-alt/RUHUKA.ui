@@ -54,3 +54,5 @@ Student account procedure: Headmaster or Discipline Officer opens School desk â†
 A network/Auth failure after code consumption can leave a partial outcome: the interface says so. Try signing in; if it fails, ask for a fresh code after the five-minute processing guard. Do not assume a failed request completed. Codes/passwords must not be put into support tickets, messages, screenshots or audit notes. No email is sent by this workflow.
 
 Student results print is a single published release, with recorded maxima, missing marks, supplied overall and saved rank. It is explicitly unofficial. Annual aggregation, grading bands, school logos/QR/signatures and official report acceptance await a readable school sample and confirmed rules.
+
+Shared devices: leaving/hiding the account page clears unfinished password and code inputs. Return and re-enter them to continue. An already-submitted request may still complete; follow its final status or try sign-in before requesting another code. Signing out removes temporary browser print copies; documents already downloaded or printed cannot be withdrawn by sign-out.

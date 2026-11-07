@@ -8,6 +8,6 @@ function createStudentReport(student,release){const el=(tag,text)=>{const n=docu
  if(release.superseded_by)box.append(el('p','Historical version: a corrected release is available.'));
  box.append(el('p','Source release: '+release.id+' · Printed '+new Date().toLocaleString()));return box;
 }
-function printStudentReport(student,release){document.getElementById('ruhuka-report-print')?.remove();const box=createStudentReport(student,release);document.body.append(box);root.addEventListener?.('afterprint',()=>box.remove(),{once:true});root.print();}
-if(typeof module!=='undefined'&&module.exports)module.exports={reportRows,createStudentReport};else root.printStudentReport=printStudentReport;
+function printStudentReport(student,release){document.getElementById('ruhuka-report-print')?.remove();const box=createStudentReport(student,release);document.body.append(box);root.addEventListener?.('afterprint',()=>box.remove(),{once:true});try{root.print();}catch{box.remove();throw Error('Printing could not open. Try again or use another browser.');}}
+if(typeof module!=='undefined'&&module.exports)module.exports={reportRows,createStudentReport,printStudentReport};else root.printStudentReport=printStudentReport;
 })(typeof window!=='undefined'?window:globalThis);

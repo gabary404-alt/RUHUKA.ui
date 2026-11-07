@@ -332,3 +332,7 @@ K02/K03/K04/K05/K06/F13/H11/B13/J07/A08 verified technically; 72 verified + 44 o
 
 ### Final student access and report-reference increment — 7 November 2026
 Ten work items completed; three original checks technically closed: B05/B07/B08. **75 verified + 41 open + 12 deferred = 128**. These counts do not equate ten work items with ten master checks. Student ID login, one-time setup and audited reset codes are implemented with Edge/SQL tests. Positive real student/browser and device acceptance remain open. I05 remains open for the broader dependency/log/security review. The supplied screenshot informs a single-release results summary, not a fabricated official annual report; C07/F02 remain open. See verification/STUDENT_ACCESS_REPORT_SESSION_2026-11-07.md.
+
+
+### Two final shared-device privacy fixes — 7 November 2026
+Completed: remove temporary student/report/class-letter print copies on sign-out/access-clear and printing failures; clear unfinished account passwords and school codes on tab hiding, page exit and restored-page return. Three targeted tests added; 162 Node tests pass. These strengthen B04/I03/I05 without closing broader acceptance gates. Master count remains 75 verified / 41 open / 12 deferred. No new database change, real credentials, messages or production merge.
