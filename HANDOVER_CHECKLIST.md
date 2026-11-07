@@ -1,14 +1,14 @@
 # RUHUKA first handover checklist
 
-Updated: 5 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
+Updated: 7 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
 
 This is the delivery tracker. A checked item means the specifically stated outcome was verified, not that its whole feature is production-ready. Open items may already have partial code. Each working session picks the next dependency-ready item, records evidence and reports completed IDs, blockers and any owner action. Reopen a checked item when later changes invalidate its evidence. No calendar promise overrides acceptance checks.
 
 ## Current position
 
-The public site still runs main commit 82bc3a2a39b6ed490a8b72097518721918e46a33 (merged PR #8). Its Vercel production deployment is READY. Draft PR #10 now includes design commit 7e16c23aaa38b61a0ca812196e321e68efe1e245 with a separate READY preview; its lighter illustrations, connected pilot, Today workflow and other updates are not yet production. Do not confuse preview progress with changes already visible on the live site.
+Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains code commit 1fb1a696c2c7052958f526bf165ef0d9a78ed00e and a READY preview. The public page is lightweight, sign-in opens the real role-based workspace, and postponed notebook/absence-submission controls are removed. These changes are not yet production.
 
-RUHUKA system (jsqiqxflgokfdooogcst) remains the active database. The initial 5 November review changed only this tracker. A subsequent authorised design increment now restores native scrolling, reduces visual rendering work/spacing and adds a small original helper to the existing chat control in PR #10. No database change, deferred-feature removal, production promotion or merge is included in that increment.
+RUHUKA system (jsqiqxflgokfdooogcst) has migration 20261107072057 applied: new student absence submissions are blocked, historical records remain, and an authenticated own-student read endpoint supports retained student views. Officer attendance corrections remain available. No notebook records or device notes were deleted. See verification/RESUMED_TEN_ITEMS_2026-11-07.md for evidence and limits.
 
 ### Agreed first-handover scope — 5 November 2026
 
@@ -23,11 +23,11 @@ RUHUKA system (jsqiqxflgokfdooogcst) remains the active database. The initial 5 
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (36 verified, 80 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (41 verified, 75 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
-Five formerly checked active IDs are reopened for the new scope: A06 (requirements alignment), G01/G02/G10 (Today tasks/actions), and H10 (information/help copy). This is scope revalidation, not a claim that the previous tests failed. The later scrolling/visual increment is partial progress on I01/I02/H09; no additional full handover checkbox is claimed until the remaining acceptance checks pass.
+A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
-### Implementation order (native-scroll/visual increment in progress; mapped to existing IDs)
+### Implementation order (remaining acceptance mapped to existing IDs)
 
 1. A08: prepare the reduced-scope release plan and reconcile old PRs. Do not merge old notebook/explanation UI just because its tests once passed.
 2. I01: replace custom wheel interception/animated scrolling with reliable native scrolling; inspect body/portal/modal/table/chat overflow, focus, touch and back navigation. Never suppress a normal scroll gesture without a necessary accessible reason.
@@ -54,7 +54,7 @@ Five formerly checked active IDs are reopened for the new scope: A06 (requiremen
 ## A. Baseline and first outstanding checks
 
 - [x] A01 Create this complete delivery tracker and record current state/accepted scope.
-- [ ] A06 Reconcile requirements, historical handoff and pilot help with the 5 November scope: lighter UI, concise AI, deferred student absence submissions and Staff/Admin notebooks.
+- [x] A06 Reconcile requirements, historical handoff and pilot help with the 5 November scope: lighter UI, concise AI, deferred student absence submissions and Staff/Admin notebooks.
 - [ ] A07 Reconcile applied database migrations, repository files and old draft PR #4; document reproducible baseline without resetting the live project.
 - [ ] A08 Reconcile PR #4/#9/#10 against the revised first-handover scope; exclude notebook/student-explanation feature exposure, preserve historical data/migrations, resolve conflicts and prepare a reviewed release increment.
 
@@ -138,14 +138,14 @@ Five formerly checked active IDs are reopened for the new scope: A06 (requiremen
 
 ## G. Daily work, notifications and reporting
 
-- [ ] G01 Recheck role-specific Today dashboard against the revised scope; use actual permitted tasks/counts, without notebook shortcuts or new student-explanation tasks.
-- [ ] G02 Show missing attendance, unresolved upload issues and priority roster changes by permission; remove deferred student-explanation prompts and avoid presenting deferred workflows as available.
+- [x] G01 Recheck role-specific Today dashboard against the revised scope; use actual permitted tasks/counts, without notebook shortcuts or new student-explanation tasks.
+- [x] G02 Show missing attendance, unresolved upload issues and priority roster changes by permission; remove deferred student-explanation prompts and avoid presenting deferred workflows as available.
 - [x] G03 Persist in-app notifications with actor/action/target/time and unread/read state.
 - [x] G04 Provide school-wide notices for Headmaster/Dean/officers and assigned-class teacher notices.
 - [x] G05 Deliver one student announcement feed with correct targeting/history.
 - [ ] G08 Provide useful attendance/academic/discipline reports with consistent date/class/release filters.
 - [ ] G09 Export Excel/CSV and print/PDF; totals match filtered screen and exclude private contacts.
-- [ ] G10 Recheck every Today action after scope reduction; remove dead/duplicate controls and all deferred notebook/student-explanation paths.
+- [x] G10 Recheck every Today action after scope reduction; remove dead/duplicate controls and all deferred notebook/student-explanation paths.
 
 ## H. AI, public website and visual polish
 
@@ -158,7 +158,7 @@ Five formerly checked active IDs are reopened for the new scope: A06 (requiremen
 - [x] H07 Create two approved lightweight original 3D-looking illustrations and show owner preview.
 - [x] H08 Make illustrations useful without animation; reduce motion and loading failures handled.
 - [ ] H09 Remove repetitive/generic promotional copy and unnecessary spacing; retain useful school information, readable text/touch targets and RUHUKA identity. Replace unverified school claims/details only with approved information.
-- [ ] H10 Keep Privacy, Terms and Support links working; revise their content for the deferred notebook/student-explanation scope, honest storage/AI limitations and practical staff help; recheck public navigation.
+- [x] H10 Keep Privacy, Terms and Support links working; revise their content for the deferred notebook/student-explanation scope, honest storage/AI limitations and practical staff help; recheck public navigation.
 - [ ] H11 Restrict public editing to Headmaster/named school-authorised editors; audit edits.
 
 ## I. Release verification and operational readiness
@@ -203,7 +203,7 @@ Five formerly checked active IDs are reopened for the new scope: A06 (requiremen
 
 ## Deferred feature records — retained for later, excluded from first handover
 
-These original IDs are not active release checkboxes. “Previously verified” preserves technical evidence only; no feature has been removed yet in this review session. Earlier session logs describe the old scope and do not override the 5 November decision.
+These original IDs are not active release checkboxes. “Previously verified” preserves technical evidence only; the active UI now hides these features, blocks new absence submissions, and preserves prior records. Earlier session logs describe the old scope and do not override the current decision.
 
 | Original ID | Previous technical status | Deferred work |
 |---|---|---|
@@ -280,3 +280,11 @@ Removed the custom wheel override/animation loop, reveal observer dependency, po
 Observed preview at 1348px width: native downward scrolling moved from 0 to 936px; no horizontal page overflow; hero height approximately 547px; zero canvases and zero visible backdrop-filter elements; book/helper images loaded. Existing chat open/focus still works. Both theme states checked; a light-theme heading improvement is included in the follow-up commit.
 Raw script.js reduced from 125,028 to 120,599 bytes; style.css reduced by approximately 2.8 KB before the small contrast adjustment. Helper SVG is 971 bytes (456 bytes under local gzip). These are source-size observations, not measured transfer timing, CPU savings or a slow-network claim.
 77 Node tests and syntax/whitespace checks pass. Remaining: real phone/tablet/keyboard and slow-network checks, removal of deferred feature entry points, concise chat behaviour and the rest of the scoped workflow. I01/I02/H09 stay open. Tracker unchanged: 36 verified + 80 open + 12 deferred. Keep PR #10 draft/unmerged.
+
+### 7 November — ten agreed work items
+
+Implemented the reduced-scope public page and real workspace navigation, removed deferred notebook and student absence forms without deleting data, filtered Today actions, shortened trusted AI defaults, revised help/requirements, removed generic/unverified promotional content, deferred chat loading, and checked responsive public/sign-in layouts. Added read-only own-student records and blocked direct new absence submissions in the database. No production merge or promotion.
+
+87 Node tests pass. Extended daily_followup.sql rollback suite passed, including privacy, disabled-role denial, own-record isolation, missing-vs-zero results, blocked new submissions and retained officer corrections. Test accounts remaining: zero. Preview public/sign-in widths 320, 768 and 1280px have no horizontal overflow; narrow menu opens and Escape closes it; public → sign-in and Support → Privacy → Terms → Home work. Browser frames are CSS viewport evidence, not a physical-phone/keyboard trial. Source HTML reduced from 95,926 to 5,926 bytes; initial application script is public.js (2,110 bytes); chat loads on request. No measured slow-network speed claim.
+
+Completed five existing IDs: A06, G01, G02, G10, H10. Current accounting: **41 verified + 75 open + 12 deferred = 128**. The ten work items are not ten automatically completed handover checks. D06/I01/I02/H01/H02/A08 remain open for real-role demonstration, device/network acceptance, configured AI response and durable limits, and release review. PR #10 remains draft; do not merge yet. PR #4 is superseded and PR #9 is deferred; keep their branches if closing unmerged.
