@@ -1,6 +1,8 @@
+Latest acceptance: secure temporary Headmaster sign-in, directory, Attendance and negative roster checks passed, followed by sign-out. 101 Node tests pass. Email invitation/reset requests remain deliberately disabled until production setup callback and mail/redirect acceptance; see release baseline. No real school roster data or email was created/sent.
+
 ## Current continuation — 7 November visitor/account/import increment
 
-PR #10 code 891d5354ae4387c9a88df1ed4ec75513815e7938 restores a visitor-first public page, adds Headmaster staff-account controls, self-service password setup/recovery pages and reviewed CSV roster imports. Database migrations through server_checked_workspace_access_state are applied; staff-accounts Edge Function v2 is active with JWT verification. Production website is unchanged. See verification/ACCOUNTS_ROSTER_SESSION_2026-11-07.md and supabase/RELEASE_BASELINE.md for evidence and release gates. Do not merge while staff invitation callback/redirect, actual email and signed-in acceptance are unverified.
+PR #10 code 891d5354ae4387c9a88df1ed4ec75513815e7938 restores a visitor-first public page, adds Headmaster staff-account controls, self-service password setup/recovery pages and reviewed CSV roster imports. Database migrations through server_checked_workspace_access_state are applied; staff-accounts Edge Function v3 is active with JWT verification. Production website is unchanged. See verification/ACCOUNTS_ROSTER_SESSION_2026-11-07.md and supabase/RELEASE_BASELINE.md for evidence and release gates. Do not merge while staff invitation callback/redirect, actual email and signed-in acceptance are unverified.
 
 The director says old notes/records were disposable tests. No blanket deletion occurred. A school-facing public page must not be replaced by a software sign-in advertisement. School facts are awaiting approval in SCHOOL_CONTENT_PROPOSALS.md.
 

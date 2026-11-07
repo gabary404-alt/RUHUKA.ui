@@ -15,6 +15,7 @@ Deno.serve(async(req)=>{
  // Validates the live auth session, not just the signature of a cached JWT.
  const identity=await fetch(url+'/auth/v1/user',{headers:userHeaders,signal:AbortSignal.timeout(10000)});if(!identity.ok)return reply(401,{message:'Sign in again.'});
  const directory=await call('/rest/v1/rpc/staff_directory',{});if(!directory.ok)return reply(403,{message:'Headmaster access required.'});
+ if(Deno.env.get('RUHUKA_STAFF_INVITES_ENABLED')!=='true')return reply(503,{message:'Staff invitations are not enabled yet. Deploy and verify the setup page, Auth redirects and email delivery first.'});
  const raw=await req.text();if(raw.length>8192)return reply(413,{message:'Request is too large.'});const input=JSON.parse(raw);
  if(input.action!=='invite'||Object.keys(input).some(k=>!['action','email','display_name','roles'].includes(k)))return reply(400,{message:'Invalid staff invitation.'});
  const email=typeof input.email==='string'?input.email.trim().toLowerCase():'';const name=typeof input.display_name==='string'?input.display_name.trim():'';const roles=input.roles;
