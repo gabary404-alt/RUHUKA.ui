@@ -6,9 +6,9 @@ This is the delivery tracker. A checked item means the specifically stated outco
 
 ## Current position
 
-Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains code commit 1fb1a696c2c7052958f526bf165ef0d9a78ed00e and a READY preview. The public page is lightweight, sign-in opens the real role-based workspace, and postponed notebook/absence-submission controls are removed. These changes are not yet production.
+Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains academic/permission code 5c8ab5aee5da3e9cbdd2708b369807828ac250e6 and a READY preview. The visitor-facing website remains separate from the real role-based workspace. Neither this release nor the earlier pilot updates are merged into production.
 
-RUHUKA system (jsqiqxflgokfdooogcst) has migration 20261107072057 applied: new student absence submissions are blocked, historical records remain, and an authenticated own-student read endpoint supports retained student views. Officer attendance corrections remain available. The director has confirmed old notes/records are disposable tests; targeted cleanup is planned before real school import. No blanket deletion occurred. See verification/RESUMED_TEN_ITEMS_2026-11-07.md for evidence and limits.
+RUHUKA system (jsqiqxflgokfdooogcst) has 45 applied migration versions, now inventoried in the repository. Named academic releases, Dean review/publication/correction, own-student results and one-use officer roster permissions are connected. Email invitation/reset requests remain deliberately disabled until production callback/mail acceptance. Old notes/records are disposable development tests; targeted cleanup is allowed, not a wholesale project reset.
 
 ### Agreed first-handover scope — 5 November 2026
 
@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has migration 20261107072057 applied: new s
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (44 verified, 72 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (52 verified, 64 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -86,10 +86,10 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] C07 Obtain synthetic/redacted school roster, academic and discipline source examples.
 - [ ] C08 Build Excel/CSV roster validation and changes preview; reject invalid batches as a whole.
 - [x] C09 Preserve omitted fields, avoid score changes and avoid automatic repeat invitations during roster updates.
-- [ ] C10 Build Headmaster action-specific, one-successful-use roster import grants for officers.
+- [x] C10 Build Headmaster action-specific, one-successful-use roster import grants for officers.
 - [ ] C11 Test concurrent grant consumption; failures do not consume grants.
 - [x] C12 Separate private guardian contacts from ordinary lookup/reports and test permissions.
-- [ ] C13 Check duplicate IDs, mistaken imports, safe corrections and concurrent roster edits.
+- [x] C13 Check duplicate IDs, mistaken imports, safe corrections and concurrent roster edits.
 
 ## D. Attendance daily workflow
 
@@ -122,14 +122,14 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 
 ## F. Academic releases and discipline imports
 
-- [ ] F01 Build freely named dated academic releases, preserving older uploads and their rankings.
+- [x] F01 Build freely named dated academic releases, preserving older uploads and their rankings.
 - [ ] F02 Parse individual subject marks/maxima and supplied overall final column from approved examples.
-- [ ] F03 Distinguish missing marks from zero; compare weighted overall and warn on discrepancies.
-- [ ] F04 Dean can review/fix or publish anyway with recorded unresolved warnings/override.
-- [ ] F05 Rank supplied totals despite blank subjects; omit missing totals, use class ties 1,2,2,4.
+- [x] F03 Distinguish missing marks from zero; compare weighted overall and warn on discrepancies.
+- [x] F04 Dean can review/fix or publish anyway with recorded unresolved warnings/override.
+- [x] F05 Rank supplied totals despite blank subjects; omit missing totals, use class ties 1,2,2,4.
 - [ ] F06 Keep academic and discipline rankings separate, excluding inactive current records.
-- [ ] F07 Dean publishes/corrects without Headmaster approval; preserve before/after and notify Headmaster.
-- [ ] F08 Validate complete academic batches and prevent partial/double application.
+- [x] F07 Dean publishes/corrects without Headmaster approval; preserve before/after and notify Headmaster.
+- [x] F08 Validate complete academic batches and prevent partial/double application.
 - [ ] F09 Import official external discipline totals/evidence; remove manual point-changing routes.
 - [ ] F10 Officer applies validated discipline imports without reviewer; notify Headmaster/fellow officers.
 - [ ] F11 Reconcile old discipline-review constraints/functions and enforce authority at database level.
@@ -302,3 +302,17 @@ CSV roster preview shows new/changed/unchanged and before/after fields. Atomic H
 Three technical checks completed: B04 (session/access tests), B12 (server role enforcement and broad admin loophole removal), C09 (omitted-field/score/account/invitation preservation on roster updates). **44 verified + 72 open + 12 deferred = 128**. Built features can still have pending acceptance steps. PR #10 stays draft; no merge/production promotion. Detailed task-by-task status: verification/ACCOUNTS_ROSTER_SESSION_2026-11-07.md.
 
 Later in the same session: secure real Headmaster sign-in succeeded. Staff directory/ownership protection, Attendance navigation, live duplicate-ID and unknown-class CSV errors were checked, then signed out. Narrow recovery layout was 320px with no horizontal overflow; expired-link UI hides the password form and clears the fragment. No new school rows/accounts/emails were created. The database currently has no classes, so positive live import requires initial school setup. Final email gates keep invitation/reset requests disabled until the production callback exists and Auth mail/redirect acceptance passes. Edge v3 active; 101 Node tests pass. Tracker remains 44 verified / 72 open / 12 deferred. B09/B10/D06/D10/D17 and release gates remain open for their stated remaining acceptance.
+
+### 7 November — ten academic/permission checks
+
+Selected ten existing IDs: C10, C11, C13, F01, F02, F03, F04, F05, F07, F08. Eight technical outcomes verified and checked: C10/C13/F01/F03/F04/F05/F07/F08. C11 remains open because overlapping requests through the SQL connector were processed serially; same-permission reuse is denied and failures leave permission unused, but genuine parallel lock contention is not established. F02 remains open: the strict CSV template/parser works, but an approved school file example and format adaptation are still needed. Do not count these two as complete.
+
+Dean-only named class releases now preserve subject maxima, blank/zero distinctions, supplied overall, calculated weighted total and publication-time ranks. Warnings require review or a recorded publish-anyway reason. Full-class validation, stale previews, request/source duplicate protection and direct-write guards are tested. Corrections create a new immutable version, retain the original year/cohort/ranks and notify Headmasters. Each academic notice opens its release; students receive only their own release rows. This is not automatic promotion or a mixed academic/discipline leaderboard.
+
+Headmaster staff cards can allow/revoke one roster import within 24 hours for an active Discipline Officer. A successful import uses the grant; bad/stale files do not. Individual student additions remain independent. Stale competing roster changes are rejected and a newly reviewed correction preserves scores/account fields. Actual simultaneous grant consumption remains C11.
+
+116 Node tests pass; academic_releases.sql, roster_permissions.sql, daily_followup.sql and accounts_roster_handover.sql pass with rolled-back fixtures. Temporary committed non-login race fixtures were removed; fixture account count returned zero. Eight new migrations applied; all 45 versions inventoried. Advisor retains only the pre-existing leaked-password-protection warning. Browser Headmaster sign-in and read-only Academic results route worked, with no upload form and no desktop overflow. No classes are configured, so this was an honest empty view, not a real published school-results demonstration. Small navigation/copy follow-up is covered by unit tests.
+
+Tracker: **52 verified + 64 open + 12 deferred = 128**. PR #10 stays draft; no merge/production promotion. See verification/ACADEMIC_PERMISSIONS_SESSION_2026-11-07.md for evidence and limits. School format examples, actual Dean/student/two-device acceptance, email, physical-phone/keyboard/network and the remaining import/report/security/handover checks remain open.
+
+Class refresh follow-up: results refresh reloads available classes; attendance navigation refreshes class choices and keeps an in-progress same-class register. Newly created classes no longer require repeated sign-in to appear. Focused tests prove class discovery and draft/mark preservation. Headmaster academic notices now also appear as unread Today tasks and open their exact release. All 116 Node tests pass; the eight-check accounting above is unchanged.

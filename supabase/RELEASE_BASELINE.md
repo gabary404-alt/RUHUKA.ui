@@ -4,7 +4,7 @@ Active project: RUHUKA system (jsqiqxflgokfdooogcst). Production website remains
 
 ## Recorded migration history
 
-All 37 applied versions are represented in MIGRATION_INVENTORY.json (path and SHA-256). The eight 12 October scripts depended on an earlier database structure; their exact recorded statements are retained under history/, not presented as a runnable fresh-database migration chain. The 20 October reset/schema script is recovered under migrations/ as the historical post-reset starting point. It includes destructive DROP statements and must never be manually rerun on the active project. Later files correspond to the applied additive migrations.
+All 45 applied versions are represented in MIGRATION_INVENTORY.json (path and SHA-256). The eight 12 October scripts depended on an earlier database structure; their exact recorded statements are retained under history/, not presented as a runnable fresh-database migration chain. The 20 October reset/schema script is recovered under migrations/ as the historical post-reset starting point. It includes destructive DROP statements and must never be manually rerun on the active project. Later files correspond to the applied additive migrations.
 
 This reconciles recorded history and source files; it does not prove a clean-database rebuild. A07/I08 remain open until an isolated fresh-database replay/current schema comparison and recovery exercise are completed. Historical checksums represent the retrieved statement text with a trailing semicolon/newline, not a claim that formatting matches the original development machine.
 
@@ -25,3 +25,9 @@ The director confirmed existing notes and old school records were development te
 PR #4 is superseded, #9 is deferred and #10 remains the integration draft. No merge/production promotion is authorised by this document.
 
 Invitations are gated off by default on both client configuration and server environment RUHUKA_STAFF_INVITES_ENABLED. Email reset requests are gated by emailRecoveryEnabled=false. Enable only after production account.html deployment, Auth redirect allowlisting and an agreed actual-email acceptance test. Supabase Edge built-in service credentials are never copied into client configuration. Secure Headmaster sign-in/sign-out and real negative roster checks passed in this session; no live school data was added.
+
+## Academic release and officer-permission increment
+
+Eight new migration versions implement immutable public-schema release/result tables with RLS and no direct client table grants, Dean-guarded preview/publication, role-checked read RPCs, student-own results and current-year follow-up sources. Legacy direct academic-record writes and client academic-batch mutations are blocked. New publications use trusted transactional code and preserve source payload fingerprints, warnings/reasons, author and previous-version references. This does not implement complete raw-file evidence storage or school-specific Excel mapping.
+
+Officer roster grants are private RPC-only rows with Headmaster issuer, fixed roster_import operation, expiry, consumption receipt and revocation. The import takes a row lock and uses permission only after success in the same transaction. Failed/stale operations roll back. Concurrent requests via the current SQL connector were serialised; independent concurrent-session proof remains open. Temporary race fixtures were cleaned, not left as staff accounts. See verification/ACADEMIC_PERMISSIONS_SESSION_2026-11-07.md.

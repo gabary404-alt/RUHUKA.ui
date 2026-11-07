@@ -1,3 +1,7 @@
+## Latest continuation — academic releases and one-use roster permissions
+
+Code 5c8ab5aee5da3e9cbdd2708b369807828ac250e6 in PR #10 adds named immutable academic releases, server preview/warnings, supplied-overall ranks, Dean publication/correction, Headmaster notifications and student-own release views. Staff accounts can allow/revoke a 24-hour one-successful-use officer roster grant. Eight new migrations are applied; 45 versions inventoried. 116 Node tests and four rollback suites pass. Tracker: 52 verified / 64 open / 12 deferred. F02 school-file adaptation and C11 genuine parallel grant testing remain open. No production merge or email enabling. Read verification/ACADEMIC_PERMISSIONS_SESSION_2026-11-07.md before continuing.
+
 Latest acceptance: secure temporary Headmaster sign-in, directory, Attendance and negative roster checks passed, followed by sign-out. 101 Node tests pass. Email invitation/reset requests remain deliberately disabled until production setup callback and mail/redirect acceptance; see release baseline. No real school roster data or email was created/sent.
 
 ## Current continuation — 7 November visitor/account/import increment

@@ -183,5 +183,45 @@
     "version": "20261107102330",
     "path": "supabase/migrations/20261107102330_server_checked_workspace_access_state.sql",
     "sha256": "b17ed5522453e69565dbf485ff7461c56dc5c66d943fcb669905bf4ab0fef70f"
+  },
+  {
+    "version": "20261107105555",
+    "path": "supabase/migrations/20261107105555_named_academic_releases_with_reviewed_atomic_publication.sql",
+    "sha256": "c32c2339469e7ccf47062d4a12d0cc23248e2581b6d351fce1c0ebd3c7d90296"
+  },
+  {
+    "version": "20261107110014",
+    "path": "supabase/migrations/20261107110014_one_successful_roster_import_permission_for_officers.sql",
+    "sha256": "54025ab94d4444e0982a0ac0d9cb8fa8fe1f213a38e44d2bcf8ddd81a14057d3"
+  },
+  {
+    "version": "20261107110056",
+    "path": "supabase/migrations/20261107110056_connect_published_releases_to_student_records_and_followups.sql",
+    "sha256": "bbb25b37006ee2b95d1c125f65680fbea293b296e8e4691deab42f3882fd4a2b"
+  },
+  {
+    "version": "20261107110101",
+    "path": "supabase/migrations/20261107110101_preserve_original_class_cohort_during_result_corrections.sql",
+    "sha256": "9e63323790c617dfd033cc8c995b2f6a30499f9606a35467be814b95d910066c"
+  },
+  {
+    "version": "20261107110148",
+    "path": "supabase/migrations/20261107110148_show_officer_one_use_permission_in_headmaster_directory.sql",
+    "sha256": "dc12a0973f80bcb0fc6b5703fe5411ab78fe6045ef768e997fb007c78a04bec5"
+  },
+  {
+    "version": "20261107111342",
+    "path": "supabase/migrations/20261107111342_scope_academic_followups_to_current_year_and_name_publishers.sql",
+    "sha256": "cb2de94111b9243d3b17c6010203d0108b22b4e93e5065d72366044a8c037287"
+  },
+  {
+    "version": "20261107111732",
+    "path": "supabase/migrations/20261107111732_require_guarded_dean_publication_for_academic_writes.sql",
+    "sha256": "81c705d85f2111d5e3b279c791d1305065d8ed7dd3aa1bb91591ce2a84e6b501"
+  },
+  {
+    "version": "20261107112937",
+    "path": "supabase/migrations/20261107112937_show_unread_academic_publications_on_headmaster_today.sql",
+    "sha256": "9534e2b3495261cef762ea38a160704ce3f76a2051acf7caf8f636feacdd0e84"
   }
 ]

@@ -4,7 +4,7 @@ The public website serves visitors learning about Lycée de Kigali as well as th
 
 The director confirmed existing notes and old records are disposable development data. Preservation is no longer a first-handover requirement for those identified test records. Prepare targeted cleanup before real school import; keep the working director account, schema, security and deployment history. Do not reset the whole Supabase project or assume device data in other browsers was removed.
 
-Staff accounts: Headmaster-only invitation, reviewed role assignment and disabling; recipients set their own passwords. Server-owned active roles determine access. Email delivery/redirect acceptance remains required. Roster import begins with explicit CSV template, server validation, before/after review, atomic apply and safe retry; no score/account/contact changes or repeated invitations. School Excel formats and officer import grants remain unfinished.
+Staff accounts: Headmaster-only invitation, reviewed role assignment and disabling; recipients set their own passwords. Server-owned active roles determine access. Email delivery/redirect acceptance remains required. Roster import begins with explicit CSV template, server validation, before/after review, atomic apply and safe retry; no score/account/contact changes or repeated invitations. School Excel formats remain unfinished. Officers now require a Headmaster-issued, one-successful-use roster grant, valid up to 24 hours; failed validation does not consume it.
 
 # RUHUKA first handover requirements
 Updated 7 November 2026. Read this together with HANDOVER_CHECKLIST.md.
@@ -32,7 +32,7 @@ Server permissions, not a browser role selector, decide access. No one can see a
 4. Officers correct submitted main attendance with a reason; retain original value, actor and time. Ordinary staff cannot overwrite another submission.
 5. Today lists permitted missing registers, follow-up concerns, upload issues and priority roster notices. Each available control opens its real action.
 6. Class/student management, three Headmaster-configured terms, teacher assignments, individual officer additions and protected bulk-import permissions.
-7. Freely named academic releases and official discipline imports remain required. Different subject maxima are weighted; missing marks are not zero. Academic and discipline rankings stay separate. Dean/officer publish without a separate reviewer, with required notices/history.
+7. Freely named academic releases are connected in the pilot; complete official discipline imports remain required. Different subject maxima are weighted; missing marks are not zero. Academic and discipline rankings stay separate. Dean/officer publish without a separate reviewer, with required notices/history.
 8. Below-threshold concerns lead to human review, not automatic punishment or promotion. Attendance concerns use five consecutive recorded main absences; returns break a streak but do not silently close an open case.
 9. School/class announcements and private recipient notifications retain targeting and history.
 10. Account setup/recovery, student ID sign-in, complete imports, school-owned service/access transfer and real-device/multi-role acceptance must be completed before handover.
@@ -45,7 +45,13 @@ AI answers start with the answer, normally 2–4 short sentences or up to three 
 
 ## Postponed
 Personal notebooks for all Staff/Admin roles; online student absence submissions and proof uploads; parent portal/messaging; SMS; automatic promotion decisions; advanced charts/school-wide leaderboards; elaborate 3D.
-Existing notes, device copies, private submissions and audit evidence are preserved. New student absence submissions are blocked at the database boundary. Historical privacy restrictions remain. Manual officer attendance corrections stay available.
+Identified old notes and records are disposable test data and may be removed in targeted cleanup before school use. Real school records and their history must be handled under the approved school policy. New student absence submissions are blocked at the database boundary. Historical privacy restrictions remain. Manual officer attendance corrections stay available.
 
 ## Delivery evidence
 The checklist preserves all 128 original IDs and separates active and deferred work. Only verified outcomes are ticked. Mocked tests and SQL fixtures are not a substitute for actual school/device acceptance. Record limitations, open checks and any action needed from the director in plain language.
+
+## Academic publication boundary
+
+The Dean names a class release, chooses its result date, uploads the pilot CSV and reviews a server-validated preview. Subject headers specify different maxima, student_id is first and overall_percent last. Every active class student must be included exactly once; missing marks/overall are blank, not zero. Incomplete subjects leave the calculated weighted total unavailable; a supplied overall can still determine the rank. Missing overall gives no rank. A discrepancy greater than 0.01 percentage points is a review warning. Warnings may be published only with a recorded reason.
+
+No Headmaster approval is required. Publication and correction notify the Headmaster. A correction creates a new version with the original year/class cohort and preserved previous ranks. Current views may hide students who moved or left, but do not rerank saved history. Student access is restricted to their own result rows. Teachers read assigned classes; the Headmaster reads school releases; the Dean publishes. School-specific Excel/CSV mapping and real-role school acceptance remain open. Academic and discipline results stay separate.

@@ -30,3 +30,11 @@ Roster imports accept the downloadable CSV template (max 500 KB, 1000 rows). Bef
 Current server access is checked every 30 seconds while visible and when returning to the tab. Disabled or changed roles close the workspace without deleting attendance drafts. Supabase session validity remains a server permission check, independent of visible frontend controls. Physical devices, actual email, real role walkthrough and slow networks still require acceptance.
 
 Release gate: current config disables staff invitation and recovery-email requests. Edge v3 additionally requires RUHUKA_STAFF_INVITES_ENABLED=true. Deploy/allowlist production account.html and verify email delivery before enabling the relevant client flags/server gate. Direct role management and CSV preview/apply do not depend on this email gate. The Headmaster directory and negative roster checks were verified live; no email or roster save was performed.
+
+## Academic results and one-use roster access
+
+Academic results navigation appears for Headmaster, Dean and teacher; only the Dean sees the upload/correction editor. CSV headers: student_id, subject/maximum columns, overall_percent last. Check → inspect proposed ranks/marks/warnings → fix CSV or supply warning reason → Publish. Native student disclosures keep long classes compact and create subject detail DOM only when opened. School formats and real Dean acceptance remain open.
+
+Corrections preserve the original release, publication ranks and original class/year cohort, even if students later move/leave. The roster-ID helper uses the selected release cohort during correction. The Headmaster receives a notice with a direct release link; students receive own rows in My records. No AI context is sent.
+
+Headmaster staff cards allow/revoke one successful roster import for an active officer within 24 hours. Officer Roster import explains permission and lets the officer refresh after approval. Preview failures do not consume the grant. An uncertain successful response can retry the same actor/request/payload after permission is consumed. Real parallel transaction acceptance remains C11.

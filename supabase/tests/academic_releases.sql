@@ -81,6 +81,6 @@ do $$begin begin perform public.academic_release_list('__ACADEMIC_CLASS__');rais
 reset role;
 select set_config('request.jwt.claim.sub','15000000-0000-4000-8000-000000000002',true);
 set local role authenticated;
-do $$begin if jsonb_array_length(public.academic_release_list('__ACADEMIC_CLASS__'))<>2 then raise exception 'FAIL Headmaster read';end if;begin perform public.academic_preview((select data from academic_test));raise exception 'FAIL Headmaster acting as Dean';exception when insufficient_privilege then null;end;end $$;
+do $$begin if jsonb_array_length(public.academic_release_list('__ACADEMIC_CLASS__'))<>2 then raise exception 'FAIL Headmaster read';end if;if not exists(select 1 from jsonb_array_elements(public.school_today(current_date)->'tasks')x where x->>'kind'='academic_publications'and(x->>'count')::integer=2)then raise exception 'FAIL Today publication notice';end if;begin perform public.academic_preview((select data from academic_test));raise exception 'FAIL Headmaster acting as Dean';exception when insufficient_privilege then null;end;end $$;
 reset role;
 rollback;
