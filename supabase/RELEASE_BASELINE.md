@@ -4,7 +4,7 @@ Active project: RUHUKA system (jsqiqxflgokfdooogcst). Production website remains
 
 ## Recorded migration history
 
-All 45 applied versions are represented in MIGRATION_INVENTORY.json (path and SHA-256). The eight 12 October scripts depended on an earlier database structure; their exact recorded statements are retained under history/, not presented as a runnable fresh-database migration chain. The 20 October reset/schema script is recovered under migrations/ as the historical post-reset starting point. It includes destructive DROP statements and must never be manually rerun on the active project. Later files correspond to the applied additive migrations.
+All 51 applied versions are represented in MIGRATION_INVENTORY.json (path and SHA-256). The eight 12 October scripts depended on an earlier database structure; their exact recorded statements are retained under history/, not presented as a runnable fresh-database migration chain. The 20 October reset/schema script is recovered under migrations/ as the historical post-reset starting point. It includes destructive DROP statements and must never be manually rerun on the active project. Later files correspond to the applied additive migrations.
 
 This reconciles recorded history and source files; it does not prove a clean-database rebuild. A07/I08 remain open until an isolated fresh-database replay/current schema comparison and recovery exercise are completed. Historical checksums represent the retrieved statement text with a trailing semicolon/newline, not a claim that formatting matches the original development machine.
 
@@ -16,7 +16,7 @@ The staff-accounts Edge Function v3 verifies the user and Headmaster permission 
 
 The invitation callback currently points to production /connected/account.html, which must be deployed and allowlisted before staff invitation acceptance. Reset links use the current account page origin, which also must be on the Auth redirect allowlist. Email delivery, expiry/replay behaviour through actual email and approved production/preview redirects remain B09/B14 acceptance work. No SMTP credentials, Auth configuration or paid service was silently changed.
 
-Roster imports: Headmaster only, CSV up to 500 KB / 1000 rows; school-specific Excel parsing and officer one-use grants remain open. Preview contains new/changed/unchanged totals and before/after fields. Atomic apply revalidates the server roster and class locks, rejects stale previews, records row changes and uses an actor-bound request receipt for safe retries. Omitted students, blank status on existing students, scores, linked accounts and contact fields are preserved. Imports do not invite accounts.
+Roster imports: Headmaster or an officer with a current one-use grant, CSV up to 500 KB / 1000 rows; school-specific Excel parsing remains open. Preview contains new/changed/unchanged totals and before/after fields. Atomic apply revalidates the server roster and class locks, rejects stale previews, records row changes and uses an actor-bound request receipt for safe retries. Omitted students, blank status on existing students, scores, linked accounts and contact fields are preserved. Imports do not invite accounts.
 
 ## Test-data decision
 
@@ -31,3 +31,11 @@ Invitations are gated off by default on both client configuration and server env
 Eight new migration versions implement immutable public-schema release/result tables with RLS and no direct client table grants, Dean-guarded preview/publication, role-checked read RPCs, student-own results and current-year follow-up sources. Legacy direct academic-record writes and client academic-batch mutations are blocked. New publications use trusted transactional code and preserve source payload fingerprints, warnings/reasons, author and previous-version references. This does not implement complete raw-file evidence storage or school-specific Excel mapping.
 
 Officer roster grants are private RPC-only rows with Headmaster issuer, fixed roster_import operation, expiry, consumption receipt and revocation. The import takes a row lock and uses permission only after success in the same transaction. Failed/stale operations roll back. Concurrent requests via the current SQL connector were serialised; independent concurrent-session proof remains open. Temporary race fixtures were cleaned, not left as staff accounts. See verification/ACADEMIC_PERMISSIONS_SESSION_2026-11-07.md.
+
+## Official discipline, report and enrolment increment
+
+Six additive versions follow the academic/permission increment. Officer-only preview/apply retains canonical official totals, optional dated source evidence, reference/filenames/fingerprints, original cohort/year, author and immutable correction versions. Raw discipline writes and legacy apply/staging are blocked; the old separate-review constraint is removed. Official snapshot trigger guards remain. Totals-only corrections preserve omitted events. Current readers/concerns exclude superseded versions and old-year/class sources where appropriate; older corrections cannot overwrite a newer cached snapshot. Headmaster and fellow officers receive notices and Today tasks.
+
+Read-only report RPCs enforce roles/class/date/release and return only whitelisted fields. CSV/native print use one loaded snapshot; source IDs and version remain visible. No assumption of expected school days or mixed ranking. Append-only private enrolment history has explicit deny RLS/no client grants and limited administrator read RPC; baseline does not invent older dates. Headmaster year changes check expected year and record reason; no automatic promotion.
+
+134 Node tests and six rollback suites pass. Actual browser role/device, physical print/PDF/Excel locale and genuine parallel-session acceptance remain open. Source examples pending. See verification/DISCIPLINE_REPORTS_SESSION_2026-11-07.md.

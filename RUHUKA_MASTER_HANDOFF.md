@@ -1,3 +1,9 @@
+## Latest continuation — discipline, reports and enrolment history
+
+PR #10 code 6ad4fbce3c11a873ef527836688ed77178ff420e adds official officer-only discipline snapshot/evidence imports with immutable correction history, no separate reviewer, Headmaster/fellow-officer notices and Today updates. Read-only class/date/release reports export CSV and native print/PDF from the loaded view. Append-only enrolment history and reviewed Headmaster year rollover preserve previous states; no automatic promotion. Attendance rechecks roster and preserves remaining draft marks before requiring another review. Public copy/gaps are shorter; local art/green identity retained.
+
+Ten technical checks completed: C03/D18/F06/F09/F10/F11/F12/G08/G09/H09. Tracker 62 verified / 54 open / 12 deferred. 134 Node tests and six rollback SQL suites pass. 51 applied migration versions inventoried. Actual signed-in phone/tablet/print and independent concurrent sessions remain open; do not call these school acceptance complete. Source format examples still pending; do not wait for them to do independent work. No production merge/email enabling. Read verification/DISCIPLINE_REPORTS_SESSION_2026-11-07.md.
+
 ## Latest continuation — academic releases and one-use roster permissions
 
 Code 5c8ab5aee5da3e9cbdd2708b369807828ac250e6 in PR #10 adds named immutable academic releases, server preview/warnings, supplied-overall ranks, Dean publication/correction, Headmaster notifications and student-own release views. Staff accounts can allow/revoke a 24-hour one-successful-use officer roster grant. Eight new migrations are applied; 45 versions inventoried. 116 Node tests and four rollback suites pass. Tracker: 52 verified / 64 open / 12 deferred. F02 school-file adaptation and C11 genuine parallel grant testing remain open. No production merge or email enabling. Read verification/ACADEMIC_PERMISSIONS_SESSION_2026-11-07.md before continuing.

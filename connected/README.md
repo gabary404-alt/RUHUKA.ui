@@ -38,3 +38,11 @@ Academic results navigation appears for Headmaster, Dean and teacher; only the D
 Corrections preserve the original release, publication ranks and original class/year cohort, even if students later move/leave. The roster-ID helper uses the selected release cohort during correction. The Headmaster receives a notice with a direct release link; students receive own rows in My records. No AI context is sent.
 
 Headmaster staff cards allow/revoke one successful roster import for an active officer within 24 hours. Officer Roster import explains permission and lets the officer refresh after approval. Preview failures do not consume the grant. An uncertain successful response can retry the same actor/request/payload after permission is consumed. Real parallel transaction acceptance remains C11.
+
+## Official discipline and reports
+
+Discipline records: Officer uploads discipline-totals-template.csv and optional discipline-events-template.csv, names/dates the class snapshot and identifies the official source. Totals must include every required student once. Events are evidence, not deductions. The server checks and atomically applies the preview; no separate reviewer. Corrections preserve older versions/cohort/year and omitted event evidence. Headmaster reads imports; officer edits only through reviewed replacement files. Notifications open the exact source and unread updates appear on Today.
+
+Reports: Main attendance or one academic/discipline release, class/date filters, CSV for Excel and native Print/save-as-PDF. Loaded snapshot is the export source; changed filters invalidate it. Missing is not zero, private fields are absent. Wide academic printing uses subject rows. Physical print/phone and real-role acceptance remain open.
+
+School desk: Administrator class/year history shows latest 500 immutable states. Headmaster can review/confirm a class-year change using expected current year and reason; no student promotion. Attendance confirmation rechecks membership and keeps remaining marks when reopening a changed roster.
