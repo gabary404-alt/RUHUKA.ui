@@ -46,7 +46,7 @@
     const container = document.getElementById('needsAttentionList');
     if (!container || !window.schoolData) { if (previousNeeds) previousNeeds(); return; }
     const cleared = clearedMap();
-    const rows = window.schoolData.students.filter(s => s.status !== 'Archived').map(s => {
+    const rows = window.schoolData.students.filter(s => s.status === 'Active').map(s => {
       const flags = [];
       if (numberOrNull(s.academicScore) !== null && Number(s.academicScore) < 50 && !cleared[s.id + ':academic']) flags.push(['academic', 'Academic result below 50% (' + s.academicScore + '%)']);
       if (numberOrNull(s.disciplinePoints) !== null && Number(s.disciplinePoints) < 20 && !cleared[s.id + ':discipline']) flags.push(['discipline', 'Official discipline below 20/40 (' + s.disciplinePoints + '/40)']);

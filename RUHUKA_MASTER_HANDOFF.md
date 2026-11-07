@@ -1,3 +1,29 @@
+## Latest continuation — academic releases and one-use roster permissions
+
+Code 5c8ab5aee5da3e9cbdd2708b369807828ac250e6 in PR #10 adds named immutable academic releases, server preview/warnings, supplied-overall ranks, Dean publication/correction, Headmaster notifications and student-own release views. Staff accounts can allow/revoke a 24-hour one-successful-use officer roster grant. Eight new migrations are applied; 45 versions inventoried. 116 Node tests and four rollback suites pass. Tracker: 52 verified / 64 open / 12 deferred. F02 school-file adaptation and C11 genuine parallel grant testing remain open. No production merge or email enabling. Read verification/ACADEMIC_PERMISSIONS_SESSION_2026-11-07.md before continuing.
+
+Latest acceptance: secure temporary Headmaster sign-in, directory, Attendance and negative roster checks passed, followed by sign-out. 101 Node tests pass. Email invitation/reset requests remain deliberately disabled until production setup callback and mail/redirect acceptance; see release baseline. No real school roster data or email was created/sent.
+
+## Current continuation — 7 November visitor/account/import increment
+
+PR #10 code 891d5354ae4387c9a88df1ed4ec75513815e7938 restores a visitor-first public page, adds Headmaster staff-account controls, self-service password setup/recovery pages and reviewed CSV roster imports. Database migrations through server_checked_workspace_access_state are applied; staff-accounts Edge Function v3 is active with JWT verification. Production website is unchanged. See verification/ACCOUNTS_ROSTER_SESSION_2026-11-07.md and supabase/RELEASE_BASELINE.md for evidence and release gates. Do not merge while staff invitation callback/redirect, actual email and signed-in acceptance are unverified.
+
+The director says old notes/records were disposable tests. No blanket deletion occurred. A school-facing public page must not be replaced by a software sign-in advertisement. School facts are awaiting approval in SCHOOL_CONTENT_PROPOSALS.md.
+
+# Current handover position — 7 November 2026
+This section describes the active scope. The older notes below are retained as history and may describe features now postponed.
+
+- Public site: lightweight introduction, local SVG identity, help/information pages and real-account sign-in. Heavy prototype portal scripts no longer load on the public page.
+- Real workspace: role-derived Student/Staff/Admin views at /connected/. Today, Attendance and School desk have separate panels. Students retain only their own recorded results/attendance and announcement feed.
+- Notebook and online student absence submissions are postponed. Active entry points are removed; records/notes and historical permissions remain. New absence submission RPC/direct inserts are blocked; manual officer corrections still work.
+- AI is concise by default, private-record/action access is unavailable, and optional chat loads on demand. Production-only AI key scope is unchanged.
+- Original 128-ID delivery tracker remains authoritative. Actual phone keyboard, full multi-device demonstration, complete account provisioning/imports and school acceptance remain required before release.
+- All changes are in draft PR #10. Do not merge the old notebook PR #9 or old migration/UI PR #4; useful history is preserved.
+- Follow HANDOVER_CHECKLIST.md and RUHUKA_REQUIREMENTS.md for the current requirements. A passing code test is not proof of full school readiness.
+
+---
+
+# Historical project notes
 # RUHUKA — Master Project Handoff
 
 > **Current requirements (2026-11-02):** Read [RUHUKA_REQUIREMENTS.md](./RUHUKA_REQUIREMENTS.md) first. The owner has completed a new requirements interview. That document supersedes conflicting role rules, review requirements, parent scope and frontend-only handover statements below. The first school delivery must be fully functional; frontend review comes before backend integration. This older document remains historical context.

@@ -26,13 +26,13 @@ function setup(fetchImpl, options = {}) {
   const nodes = new Map();
   const node = id => { if (!nodes.has(id)) nodes.set(id,new Node()); return nodes.get(id); };
   const listeners = {};
-  const ctx = { document: { getElementById:node,createElement:()=>new Node(),addEventListener:(k,v)=>listeners[k]=v },
+  const ctx = { document: { readyState:options.readyState,getElementById:node,createElement:()=>new Node(),addEventListener:(k,v)=>listeners[k]=v },
     AbortController, console, clearTimeout, TextEncoder,
     setTimeout:(cb,ms)=>setTimeout(cb,ms===45000?(options.timeout || 1000):ms),
     navigator:{onLine:options.online!==false},matchMedia:()=>({matches:options.reduced!==false}),
     AI_CONFIG:{USE_API:options.api!==false,API_URL:'/api/chat',MODEL:'existing-model',SYSTEM_PROMPT:'No private records or live search.'},fetch:fetchImpl
   };
-  ctx.window=ctx;vm.createContext(ctx);vm.runInContext(code,ctx);listeners.DOMContentLoaded();
+  ctx.window=ctx;vm.createContext(ctx);vm.runInContext(code,ctx);listeners.DOMContentLoaded?.();
   return {ctx,node,messages:()=>node('ai-messages').children.map(n=>n.textContent)};
 }
 const response = text => ({ok:true,json:async()=>({choices:[{message:{content:text}}]})});
@@ -45,7 +45,7 @@ test('supported provider JSON and invalid data',()=>{
 });
 test('offline help does not export or inspect private school data',()=>{
   assert.match(localHelp('export every student'),/cannot read private student records, export records/);
-  assert.match(localHelp('attendance'),/demo/);
+  assert.match(localHelp('attendance'),/Sign in/);
   assert.doesNotMatch(code,/schoolData|localStorage|createObjectURL/);
 });
 test('successful answer remains literal text and controls recover',async()=>{
@@ -93,14 +93,30 @@ test('new chat clears context and an older request cannot overwrite it',async()=
 test('history includes complete turns but is cleared between chats',async()=>{
   const bodies=[];const s=setup(async(u,o)=>{bodies.push(JSON.parse(o.body));return response('Answer');});
   await s.ctx.sendAIMessage('one');await s.ctx.sendAIMessage('two');
-  assert.equal(bodies[1].messages.length,4);
-  s.ctx.clearAIConversation();await s.ctx.sendAIMessage('three');assert.equal(bodies[2].messages.length,2);
+  assert.equal(bodies[1].messages.length,3);
+  s.ctx.clearAIConversation();await s.ctx.sendAIMessage('three');assert.equal(bodies[2].messages.length,1);
 });
 test('offline mode never calls provider',async()=>{
   const s=setup(()=>{throw new Error('must not fetch')},{online:false});
-  await s.ctx.sendAIMessage('attendance');assert.match(s.messages().at(-1),/Mark Attendance/);
+  await s.ctx.sendAIMessage('attendance');assert.match(s.messages().at(-1),/Sign in/);
 });
 test('empty and too-long questions never call provider',async()=>{
   let calls=0;const s=setup(async()=>{calls++;return response('Answer')});
   await s.ctx.sendAIMessage('   ');await s.ctx.sendAIMessage('a'.repeat(2001));assert.equal(calls,0);
 });
+
+test('outgoing chat contains only conversation text and never reads private application stores',async()=>{
+ const bodies=[];const s=setup(async(u,o)=>{bodies.push(JSON.parse(o.body));return response('General answer')});s.ctx.schoolData={privateRecords:'PRIVATE_APP_CANARY'};s.ctx.localStorage={getItem(){throw Error('Private storage was touched')}};await s.ctx.sendAIMessage('Explain fractions');assert.deepEqual(Object.keys(bodies[0]),['messages']);assert.deepEqual(bodies[0].messages,[{role:'user',content:'Explain fractions'}]);assert.ok(!JSON.stringify(bodies).includes('PRIVATE_APP_CANARY'));
+});
+test('keyboard Enter sends, while Shift+Enter and composition preserve typing',async()=>{
+ let calls=0;const s=setup(async()=>{calls++;return response('Answer')});const input=s.node('ai-input');input.value='Study help';let prevented=0;const event={key:'Enter',preventDefault(){prevented++}};input.listeners.keydown({...event,shiftKey:true});input.listeners.keydown({...event,isComposing:true});assert.equal(calls,0);input.listeners.keydown(event);await new Promise(r=>setImmediate(r));assert.equal(calls,1);assert.equal(prevented,1);assert.equal(input.focused,true);
+});
+test('assistant open/close updates expanded state and Escape returns focus to the launcher',()=>{
+ const s=setup(async()=>response('Answer'));s.node('ai-chat-panel').hidden=true;s.ctx.toggleAI();assert.equal(s.node('ai-chat-panel').hidden,false);assert.equal(s.node('ai-fab').attrs['aria-expanded'],'true');assert.equal(s.node('ai-input').focused,true);let handled=0;s.node('ai-chat-panel').listeners.keydown({key:'Escape',preventDefault(){handled++},stopPropagation(){handled++}});assert.equal(handled,2);assert.equal(s.node('ai-chat-panel').hidden,true);assert.equal(s.node('ai-fab').focused,true);assert.equal(s.node('ai-fab').attrs['aria-expanded'],'false');
+});
+test('completed response has one full announcement; partial typing is not announced',async()=>{
+ const s=setup(async()=>response('An answer long enough to reveal across several animation frames.'),{reduced:false});const pending=s.ctx.sendAIMessage('Question');await new Promise(r=>setTimeout(r,5));assert.equal(s.node('ai-announcement').textContent,'');s.ctx.stopAIResponse();await pending;assert.match(s.node('ai-announcement').textContent,/Response stopped/);
+ const reduced=setup(async()=>response('Full answer'),{reduced:true});await reduced.ctx.sendAIMessage('Question');assert.equal(reduced.node('ai-announcement').textContent,'Ruhuka assistant: Full answer');assert.equal(reduced.messages().at(-1),'Full answer');
+});
+
+test('lazy-loaded chat initialises after the page has already loaded',async()=>{const s=setup(async()=>response('Answer'),{readyState:'complete'});assert.equal(s.messages().length,1);assert.ok(s.node('ai-input').listeners.keydown);await s.ctx.sendAIMessage('Hello');assert.equal(s.messages().at(-1),'Answer');});

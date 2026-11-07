@@ -19,3 +19,4 @@ test('duplicate main submission stops before any records change',()=>{
  const before=JSON.stringify(records);const {context,messages}=setup(records);context.subAtt();
  assert.match(messages[0],/already been submitted/);assert.equal(JSON.stringify(records),before);
 });
+test('recalculation discards stale cached demo totals and unknown rate',()=>{const {context}=setup([{studentId:'1',period:'Main daily attendance',status:'excused'},{studentId:'1',period:'Follow-up lesson',status:'absent'}]);const student={id:'1',absences:99,attendanceBaseAbsences:99,attendanceRate:95};context.recalculateAttendanceStats(student);assert.equal(student.absences,0);assert.equal(student.attendanceRate,null);});

@@ -228,7 +228,7 @@ function loadStudents() {
 
 function computeClassStats() {
   const classMap = {};
-  window.schoolData.students.filter(s => s.status !== 'Archived').forEach(s => {
+  window.schoolData.students.filter(s => s.status === 'Active').forEach(s => {
     if (!classMap[s.class]) {
       classMap[s.class] = { name: s.class, level: s.level, students: [], teacher: 'TBD' };
     }
@@ -275,21 +275,21 @@ function getAcademicRankings() {
 }
 
 function getTop30Overall() {
-  return window.schoolData.students.filter(s => s.status !== 'Archived' && combinedPerformanceIndex(s) !== null)
+  return window.schoolData.students.filter(s => s.status === 'Active' && combinedPerformanceIndex(s) !== null)
     .map(s => ({ ...s, index: Math.round(combinedPerformanceIndex(s) * 10) / 10 }))
     .sort((a, b) => b.index - a.index)
     .slice(0, 30);
 }
 
 function getTop30Discipline() {
-  return window.schoolData.students.filter(s => s.status !== 'Archived')
+  return window.schoolData.students.filter(s => s.status === 'Active')
     .filter(s => numberOrNull(s.disciplinePoints) !== null)
     .sort((a, b) => b.disciplinePoints - a.disciplinePoints)
     .slice(0, 30);
 }
 
 function getNeedsAttention() {
-  return window.schoolData.students.filter(s => s.status !== 'Archived' &&
+  return window.schoolData.students.filter(s => s.status === 'Active' &&
     ((numberOrNull(s.disciplinePoints) !== null && Number(s.disciplinePoints) < 20) ||
     (numberOrNull(s.academicScore) !== null && Number(s.academicScore) < 60)))
     .sort((a, b) => (combinedPerformanceIndex(a) ?? 0) - (combinedPerformanceIndex(b) ?? 0));
@@ -306,7 +306,7 @@ function getClassesBelowTarget() {
 function getClassLeaders() {
   const leaders = [];
   window.schoolData.classes.forEach(cls => {
-    const clsStudents = window.schoolData.students.filter(s => s.class === cls.name && s.status !== 'Archived');
+    const clsStudents = window.schoolData.students.filter(s => s.class === cls.name && s.status === 'Active');
     const rankedStudents = clsStudents.filter(s => combinedPerformanceIndex(s) !== null);
     if (rankedStudents.length > 0) {
       const leader = rankedStudents
@@ -465,7 +465,7 @@ function renderUserTable() {
   if (!tbody) return;
   const includeArchived = document.getElementById('includeArchivedStudents')?.checked;
   const students = window.schoolData.students
-    .filter(s => includeArchived || s.status !== 'Archived')
+    .filter(s => includeArchived || s.status === 'Active')
     .slice(0, 500);
   tbody.innerHTML = students.map(s => {
     const dColor = s.disciplinePoints >= 32 ? 'var(--g)' : s.disciplinePoints >= 20 ? 'var(--w)' : 'var(--r)';
@@ -497,11 +497,11 @@ function escapeHTML(value) {
 // Admin views during a demo always shows the current state.
 function updateDashboardStats() {
   const totalEl = document.getElementById('dashTotalStudents');
-  if (totalEl) totalEl.textContent = window.schoolData.students.filter(student => student.status !== 'Archived').length.toLocaleString();
+  if (totalEl) totalEl.textContent = window.schoolData.students.filter(student => student.status === 'Active').length.toLocaleString();
 
   const { presentPct } = computeSchoolAttendanceToday();
   const attEl = document.getElementById('dashAttendanceToday');
-  if (attEl) attEl.textContent = presentPct + '%';
+  if (attEl) attEl.textContent = presentPct === null ? 'Not recorded' : presentPct + '%';
 
   const pendingCount = getNeedsAttention().length + window.schoolData.justifications.filter(j => j.status === 'Pending').length;
   const pendingEl = document.getElementById('dashPendingIssues');
@@ -518,9 +518,9 @@ function updateStaffDashboardStats() {
   const absentEl = document.getElementById('staffAbsentCount');
   const absentPctEl = document.getElementById('staffAbsentPct');
   if (presentEl) presentEl.textContent = present.toLocaleString();
-  if (presentPctEl) presentPctEl.textContent = presentPct + '% today';
+  if (presentPctEl) presentPctEl.textContent = presentPct === null ? 'Not recorded' : presentPct + '% today';
   if (absentEl) absentEl.textContent = absent.toLocaleString();
-  if (absentPctEl) absentPctEl.textContent = (Math.round((100 - presentPct) * 10) / 10) + '% today';
+  if (absentPctEl) absentPctEl.textContent = presentPct === null ? 'Not recorded' : (Math.round((100 - presentPct) * 10) / 10) + '% today';
 
   const pendingEl = document.getElementById('staffPendingJust');
   if (pendingEl) pendingEl.textContent = window.schoolData.justifications.filter(j => j.status === 'Pending').length;
@@ -536,18 +536,12 @@ function updateStaffDashboardStats() {
 // submitted -- so this always reflects the latest marks, on both
 // dashboards, without a separate daily log to keep in sync.
 function computeSchoolAttendanceToday() {
-  const students = window.schoolData.students.filter(student => student.status !== 'Archived');
-  if (!students.length) return { presentPct: 0, present: 0, absent: 0 };
+  const active = new Set(window.schoolData.students.filter(student => student.status === 'Active').map(s=>s.id));
   const today = getLocalDateString();
-  const records = window.schoolData.attendanceRecords.filter(record => record.date === today && record.status !== 'excused');
-  if (records.length) {
-    const present = records.filter(record => record.status === 'present' || record.status === 'late').length;
-    return { presentPct: Math.round(present / records.length * 1000) / 10, present, absent: records.length - present };
-  }
-  const avg = students.reduce((a, s) => a + s.attendanceRate, 0) / students.length;
-  const presentPct = Math.round(avg * 10) / 10;
-  const present = Math.round(students.length * avg / 100);
-  return { presentPct, present, absent: students.length - present };
+  const records = window.schoolData.attendanceRecords.filter(record => active.has(record.studentId) && record.date === today && record.status !== 'excused' && !(record.period || '').toLowerCase().includes('follow-up'));
+  if (!records.length) return { presentPct: null, present: 0, absent: 0 };
+  const present = records.filter(record => record.status === 'present' || record.status === 'late').length;
+  return { presentPct: Math.round(present / records.length * 1000) / 10, present, absent: records.length-present };
 }
 
 function updateAttendanceOverviewBars() {
@@ -620,7 +614,7 @@ function populateDMStudentDropdown() {
   const sel = document.getElementById('dmstu');
   if (!sel) return;
   const prev = sel.value;
-  const sorted = window.schoolData.students.filter(s => s.status !== 'Archived').sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = window.schoolData.students.filter(s => s.status === 'Active').sort((a, b) => a.name.localeCompare(b.name));
   sel.innerHTML = sorted.map(s => `<option value="${escapeHTML(s.name)} (${escapeHTML(s.id)})">${escapeHTML(s.name)} (${escapeHTML(s.id)})</option>`).join('');
   if (prev && sorted.some(s => (s.name + ' (' + s.id + ')') === prev)) sel.value = prev;
 }
@@ -1037,7 +1031,6 @@ function viewStudent(id) {
   const lines = [
     student.name + ' (' + student.id + ')',
     'Class: ' + student.class + ' | ' + student.level + ' | ' + student.status,
-    'Guardian: ' + (student.guardianName || 'Not recorded') + ' | ' + (student.guardianPhone || 'No phone'),
     'Official discipline total: ' + (student.disciplinePoints ?? 'Not recorded') + '/40',
     'Academic score: ' + (student.academicScore ?? 'Not recorded') + '% | Attendance: ' + (student.attendanceRate ?? 'Not recorded') + '%',
     '', 'Recent discipline events:', ...discipline.map(item => `${item.date}: ${item.reason || 'Score imported'} (${item.change ?? 'total ' + item.total}) by ${item.recordedBy || 'Not recorded'}`),
@@ -1186,128 +1179,12 @@ function updateThemeIcon(theme) {
 }
 initTheme();
 
-// ===== STARFIELD CANVAS =====
-const canvas = document.getElementById('starfield');
-const ctx = canvas.getContext('2d');
-let stars = [], width, height, mouseX = 0, mouseY = 0;
-function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; initStars(); }
-function initStars() {
-  stars = [];
-  const count = Math.min(180, Math.floor((width * height) / 9000));
-  for (let i = 0; i < count; i++) {
-    stars.push({
-      x: Math.random() * width, y: Math.random() * height,
-      r: Math.random() * 1.5 + 0.3,
-      opacity: Math.random() * 0.8 + 0.2,
-      speed: Math.random() * 0.3 + 0.05,
-      twinkleSpeed: Math.random() * 0.02 + 0.005,
-      twinklePhase: Math.random() * Math.PI * 2
-    });
-  }
-}
-function drawStars() {
-  if (document.hidden) return;
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  ctx.clearRect(0, 0, width, height);
-  const time = Date.now() * 0.001;
-  for (let i = 0; i < stars.length; i++) {
-    const s = stars[i];
-    s.y -= s.speed;
-    if (s.y < 0) { s.y = height; s.x = Math.random() * width; }
-    const twinkle = Math.sin(time * s.twinkleSpeed * 100 + s.twinklePhase) * 0.25 + 0.75;
-    const alpha = isDark ? s.opacity * twinkle : Math.min(1, s.opacity * twinkle * 0.95);
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '6,36,20') + ',' + alpha + ')';
-    ctx.fill();
-  }
-  requestAnimationFrame(drawStars);
-}
-document.addEventListener('visibilitychange', () => { if (!document.hidden) drawStars(); });
-window.addEventListener('resize', resize);
-resize(); drawStars();
+// Decorative star/cursor/parallax loops removed for reliable portal performance.
 
-// ===== CURSOR SPOTLIGHT =====
-const spotlight = document.getElementById('cursor-spotlight');
-let spotVisible = false;
-document.addEventListener('mousemove', e => {
-  mouseX = e.clientX; mouseY = e.clientY;
-  spotlight.style.left = e.clientX + 'px';
-  spotlight.style.top = e.clientY + 'px';
-  if (!spotVisible) { spotlight.style.opacity = '1'; spotVisible = true; }
-});
-document.addEventListener('mouseleave', () => { spotlight.style.opacity = '0'; spotVisible = false; });
-
-// ===== HERO PARALLAX =====
-const heroIn = document.getElementById('heroIn');
-if (heroIn) {
-  document.querySelector('.hero').addEventListener('mousemove', e => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 20;
-    const y = (e.clientY / window.innerHeight - 0.5) * 20;
-    heroIn.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-  });
-}
-
-// ===== SCROLL REVEAL =====
-const obs = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) e.target.classList.add('on');
-    else if (e.intersectionRatio === 0) e.target.classList.remove('on');
-  });
-}, { threshold: [0, 0.22], rootMargin: '0px 0px -14% 0px' });
-document.querySelectorAll('.rv').forEach(el => {
-  const siblings = el.parentElement
-    ? [...el.parentElement.children].filter(c => c.classList && c.classList.contains('rv'))
-    : [el];
-  const idx = Math.max(0, siblings.indexOf(el));
-  if (!el.classList.contains('d1') && !el.classList.contains('d2') && !el.classList.contains('d3') && !el.classList.contains('d4')) {
-    el.style.transitionDelay = Math.min(idx, 7) * 0.16 + 's';
-  }
-  obs.observe(el);
-});
-
-(function calmScroll() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (window.matchMedia('(pointer: coarse)').matches) return;
-  const bar = document.getElementById('scroll-glow');
-  let target = window.scrollY;
-  let current = window.scrollY;
-  let gliding = false;
-  function maxY() { return Math.max(0, document.documentElement.scrollHeight - window.innerHeight); }
-  function paint() {
-    if (!bar) return;
-    const max = maxY();
-    bar.style.width = (max ? (window.scrollY / max) * 100 : 0) + '%';
-  }
-  function tick() {
-    current += (target - current) * 0.14;
-    if (Math.abs(target - current) < 0.4) {
-      current = target;
-      window.scrollTo(0, current);
-      gliding = false;
-      paint();
-      return;
-    }
-    window.scrollTo(0, current);
-    paint();
-    requestAnimationFrame(tick);
-  }
-  window.addEventListener('wheel', (e) => {
-    const land = document.getElementById('land');
-    if (!land || getComputedStyle(land).display === 'none') return;
-    if (document.querySelector('.mod.on')) return;
-    if (e.target.closest('textarea, input, select, .port')) return;
-    e.preventDefault();
-    target = Math.max(0, Math.min(maxY(), target + e.deltaY * 0.68));
-    if (!gliding) { gliding = true; requestAnimationFrame(tick); }
-  }, { passive: false });
-  window.addEventListener('scroll', () => { if (!gliding) { current = target = window.scrollY; paint(); } }, { passive: true });
-  paint();
-})();
-
+// Use native browser scrolling. No wheel interception or reveal dependency.
 function sc(id) {
   const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
+  if (el) el.scrollIntoView({ block: 'start' });
 }
 
 // ===== LOGIN =====
@@ -1371,7 +1248,7 @@ function parentChild() {
 }
 function parentRankText(student) {
   if (!student || typeof combinedPerformanceIndex !== 'function') return 'Not ranked';
-  const mates = window.schoolData.students.filter(s => s.class === student.class && s.status !== 'Archived' && combinedPerformanceIndex(s) !== null);
+  const mates = window.schoolData.students.filter(s => s.class === student.class && s.status === 'Active' && combinedPerformanceIndex(s) !== null);
   const ordered = mates.slice().sort((a, b) => combinedPerformanceIndex(b) - combinedPerformanceIndex(a));
   const place = ordered.findIndex(s => s.id === student.id);
   return place < 0 ? 'Not ranked' : '#' + (place + 1) + ' of ' + ordered.length;
@@ -1566,8 +1443,8 @@ function renderStudentPortal() {
   setText('studentDisciplineUpdated', student.disciplineSnapshotDate ? `Imported ${student.disciplineSnapshotDate}` : 'Demo/current roster value');
   setText('studentAttendanceRate', `${student.attendanceRate ?? '--'}%`);
   setText('studentAbsenceCount', String(student.absences ?? 0));
-  const classStudents = window.schoolData.students.filter(item => item.class === student.class && item.status !== 'Archived');
-  const schoolStudents = window.schoolData.students.filter(item => item.status !== 'Archived');
+  const classStudents = window.schoolData.students.filter(item => item.class === student.class && item.status === 'Active');
+  const schoolStudents = window.schoolData.students.filter(item => item.status === 'Active');
   const rank = roster => {
     const ranked = roster.filter(item => combinedPerformanceIndex(item) !== null)
       .sort((a, b) => combinedPerformanceIndex(b) - combinedPerformanceIndex(a));
@@ -1733,7 +1610,7 @@ function loadAtt() {
   document.getElementById('atcname').textContent = cls;
   list.innerHTML = '';
 
-  const classStudents = window.schoolData.students.filter(s => s.class === cls && s.status !== 'Archived').sort((a, b) => a.name.localeCompare(b.name));
+  const classStudents = window.schoolData.students.filter(s => s.class === cls && s.status === 'Active').sort((a, b) => a.name.localeCompare(b.name));
   window._currentAttStudents = classStudents; // so subAtt() can map rows back to real students
   if (classStudents.length === 0) {
     list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3)">No students found in this class. Import students or check demo data.</div>';
@@ -1848,13 +1725,10 @@ function subAtt() {
 }
 
 function recalculateAttendanceStats(student) {
-  if (student.attendanceBaseAbsences === undefined) student.attendanceBaseAbsences = Number(student.absences || 0);
   const records = window.schoolData.attendanceRecords.filter(record => record.studentId === student.id && !(record.period || '').toLowerCase().includes('follow-up'));
-  student.absences = Number(student.attendanceBaseAbsences) + records.filter(record => record.status === 'absent').length;
+  student.absences = records.filter(record => record.status === 'absent').length;
   const counted = records.filter(record => record.status !== 'excused');
-  if (counted.length) {
-    student.attendanceRate = Math.round(counted.filter(record => record.status === 'present' || record.status === 'late').length / counted.length * 1000) / 10;
-  }
+  student.attendanceRate = counted.length ? Math.round(counted.filter(record => record.status === 'present' || record.status === 'late').length / counted.length * 1000) / 10 : null;
 }
 let dmVal = 0;
 function setDM() { toast('Official discipline points cannot be changed on this website.'); }
@@ -2046,52 +1920,8 @@ function filterUsers() {
 }
 
 // ===== MAGIC BENTO EFFECTS =====
-document.querySelectorAll('[data-bento]').forEach(card => {
-  let particles = [], animId;
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    const cx = rect.width / 2, cy = rect.height / 2;
-    const rx = ((y - cy) / cy) * -2.2, ry = ((x - cx) / cx) * 2.2;
-    card.style.transform = 'perspective(1200px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
-    const gx = (x / rect.width) * 100, gy = (y / rect.height) * 100;
-    card.style.setProperty('--glow-x', gx + '%');
-    card.style.setProperty('--glow-y', gy + '%');
-    card.style.setProperty('--glow-intensity', '1');
-  });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1200px) rotateX(0) rotateY(0)';
-    card.style.setProperty('--glow-intensity', '0');
-    particles.forEach(p => p.remove());
-    particles = [];
-    cancelAnimationFrame(animId);
-  });
-  card.addEventListener('mouseenter', () => {
-    const rect = card.getBoundingClientRect();
-    for (let i = 0; i < 8; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.left = Math.random() * rect.width + 'px';
-      p.style.top = Math.random() * rect.height + 'px';
-      card.appendChild(p); particles.push(p);
-      const dx = (Math.random() - 0.5) * 60, dy = (Math.random() - 0.5) * 60;
-      p.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(0.5)', opacity: 0.3 }], { duration: 2000 + Math.random() * 2000, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' });
-    }
-  });
-  card.addEventListener('click', e => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    const ripple = document.createElement('div');
-    ripple.className = 'ripple';
-    const size = Math.max(rect.width, rect.height) * 2;
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = (x - size / 2) + 'px';
-    ripple.style.top = (y - size / 2) + 'px';
-    card.appendChild(ripple);
-    ripple.animate([{ transform: 'scale(0)', opacity: 0.6 }, { transform: 'scale(1)', opacity: 0 }], { duration: 800, easing: 'ease-out' });
-    setTimeout(() => ripple.remove(), 800);
-  });
-});
+// Achievement cards use static borders instead of pointer-following glow.
+
 
 // ===== ACHIEVEMENT COUNTER ANIMATION =====
 const countObs = new IntersectionObserver((entries) => {
@@ -2127,295 +1957,9 @@ document.getElementById('loginM').addEventListener('click', function (e) { if (e
 // Init badge counts
 updateBadgeCounts();
 
-// ===== 3D GLOBE =====
-(function(){
-  const canvas = document.getElementById('globe-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let width, height, rotation = 0, animationId;
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = rect.width;
-    height = rect.height;
-    canvas.width = width * window.devicePixelRatio;
-    canvas.height = height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  const DOT_COUNT = 350;
-  const DOTS = [];
-  const phi = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < DOT_COUNT; i++) {
-    const y = 1 - (i / (DOT_COUNT - 1)) * 2;
-    const radius = Math.sqrt(1 - y * y);
-    const theta = phi * i;
-    DOTS.push({ x: Math.cos(theta) * radius, y: y, z: Math.sin(theta) * radius });
-  }
-  const pulses = [];
-  let lastPulseTime = 0;
-  const PULSE_INTERVAL = 2500;
-  function startPulse() {
-    const fromIndex = Math.floor(Math.random() * DOT_COUNT);
-    let toIndex = Math.floor(Math.random() * DOT_COUNT);
-    while (toIndex === fromIndex) toIndex = Math.floor(Math.random() * DOT_COUNT);
-    pulses.push({ from: fromIndex, to: toIndex, progress: 0, speed: 0.015 + Math.random() * 0.015, life: 1.0 });
-  }
-  function drawGlobe() {
-    const GLOBE_RADIUS = Math.min(width, height) * 0.35;
-    ctx.clearRect(0, 0, width, height);
-    const cx = width / 2;
-    const cy = height / 2;
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const dotColor = isDark ? '255, 255, 255' : '20, 83, 45';
-    const lineColor = isDark ? '255, 255, 255' : '20, 83, 45';
-    ctx.beginPath();
-    ctx.arc(cx, cy, GLOBE_RADIUS, 0, Math.PI * 2);
-    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(20, 83, 45, 0.18)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    const cosR = Math.cos(rotation);
-    const sinR = Math.sin(rotation);
-    const projectedDots = DOTS.map((dot, idx) => {
-      const rx = dot.x * cosR - dot.z * sinR;
-      const rz = dot.x * sinR + dot.z * cosR;
-      const scale = GLOBE_RADIUS;
-      const px = cx + rx * scale;
-      const py = cy + dot.y * scale;
-      const depth = (rz + 1) / 2;
-      return { px, py, depth, rx, ry: dot.y, rz, idx };
-    });
-    projectedDots.sort((a, b) => a.depth - b.depth);
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < projectedDots.length; i++) {
-      for (let j = i + 1; j < projectedDots.length; j++) {
-        const a = projectedDots[i];
-        const b = projectedDots[j];
-        if (a.depth < 0.3 || b.depth < 0.3) continue;
-        const dx = a.px - b.px;
-        const dy = a.py - b.py;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 35) {
-          const lineAlpha = (1 - dist / 35) * 0.12 * Math.min(a.depth, b.depth);
-          ctx.beginPath();
-          ctx.moveTo(a.px, a.py);
-          ctx.lineTo(b.px, b.py);
-          ctx.strokeStyle = `rgba(${lineColor}, ${lineAlpha})`;
-          ctx.stroke();
-        }
-      }
-    }
-    const now = performance.now();
-    if (now - lastPulseTime > PULSE_INTERVAL) { startPulse(); lastPulseTime = now; }
-    for (let p = pulses.length - 1; p >= 0; p--) {
-      const pulse = pulses[p];
-      pulse.progress += pulse.speed;
-      pulse.life -= 0.012;
-      if (pulse.life <= 0 || pulse.progress >= 1) { pulses.splice(p, 1); continue; }
-      const fromDot = projectedDots.find(d => d.idx === pulse.from);
-      const toDot = projectedDots.find(d => d.idx === pulse.to);
-      if (!fromDot || !toDot) continue;
-      if (fromDot.depth < 0.2 || toDot.depth < 0.2) continue;
-      const px = fromDot.px + (toDot.px - fromDot.px) * pulse.progress;
-      const py = fromDot.py + (toDot.py - fromDot.py) * pulse.progress;
-      const pulseSize = 2.5 * pulse.life;
-      const pulseAlpha = 0.7 * pulse.life;
-      ctx.beginPath();
-      ctx.arc(px, py, pulseSize, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${dotColor}, ${pulseAlpha})`;
-      ctx.fill();
-      const glowSize = 6 * pulse.life;
-      const glowGrad = ctx.createRadialGradient(px, py, 0, px, py, glowSize);
-      glowGrad.addColorStop(0, `rgba(${dotColor}, ${pulseAlpha * 0.4})`);
-      glowGrad.addColorStop(1, 'transparent');
-      ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.arc(px, py, glowSize, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    projectedDots.forEach(dot => {
-      const size = 1.2 + dot.depth * 1.2;
-      const alpha = 0.12 + dot.depth * 0.55;
-      ctx.beginPath();
-      ctx.arc(dot.px, dot.py, size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${dotColor}, ${alpha})`;
-      ctx.fill();
-    });
-    const gridLines = 5;
-    for (let i = 0; i < gridLines; i++) {
-      const lat = -90 + (180 / (gridLines - 1)) * i;
-      ctx.beginPath();
-      let first = true;
-      for (let lon = 0; lon <= 360; lon += 6) {
-        const latRad = lat * Math.PI / 180;
-        const lonRad = (lon + rotation * 180 / Math.PI) * Math.PI / 180;
-        const px = cx + GLOBE_RADIUS * Math.cos(latRad) * Math.cos(lonRad);
-        const py = cy - GLOBE_RADIUS * Math.sin(latRad);
-        if (first) { ctx.moveTo(px, py); first = false; }
-        else { ctx.lineTo(px, py); }
-      }
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 83, 45, 0.1)';
-      ctx.stroke();
-    }
-    for (let i = 0; i < gridLines; i++) {
-      const lon = -180 + (360 / (gridLines - 1)) * i;
-      ctx.beginPath();
-      let first = true;
-      for (let lat = -90; lat <= 90; lat += 6) {
-        const latRad = lat * Math.PI / 180;
-        const lonRad = (lon + rotation * 180 / Math.PI) * Math.PI / 180;
-        const px = cx + GLOBE_RADIUS * Math.cos(latRad) * Math.cos(lonRad);
-        const py = cy - GLOBE_RADIUS * Math.sin(latRad);
-        if (first) { ctx.moveTo(px, py); first = false; }
-        else { ctx.lineTo(px, py); }
-      }
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 83, 45, 0.1)';
-      ctx.stroke();
-    }
-    rotation += 0.0025;
-    animationId = requestAnimationFrame(drawGlobe);
-  }
-  const globeObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) { if (!animationId) drawGlobe(); }
-      else { if (animationId) { cancelAnimationFrame(animationId); animationId = null; } }
-    });
-  });
-  globeObserver.observe(canvas);
-})();
+// Lightweight SVG illustrations render without a canvas or JavaScript animation.
 
-// ===== FOREGROUND STARS =====
-(function(){
-  const canvas = document.getElementById('starfield-fg');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let width, height, stars = [];
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = canvas.width = rect.width;
-    height = canvas.height = rect.height;
-    initStars();
-  }
-  function initStars() {
-    stars = [];
-    const count = Math.min(110, Math.floor((width * height) / 10000));
-    for (let i = 0; i < count; i++) {
-      stars.push({
-        x: Math.random() * width, y: Math.random() * height,
-        r: Math.random() * 1.2 + 0.2,
-        opacity: Math.random() * 0.5 + 0.1,
-        speed: Math.random() * 0.15 + 0.02,
-        twinkleSpeed: Math.random() * 0.015 + 0.003,
-        twinklePhase: Math.random() * Math.PI * 2
-      });
-    }
-  }
-  function draw() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    ctx.clearRect(0, 0, width, height);
-    const time = Date.now() * 0.001;
-    stars.forEach(s => {
-      s.y -= s.speed;
-      if (s.y < 0) { s.y = height; s.x = Math.random() * width; }
-      const twinkle = Math.sin(time * s.twinkleSpeed * 100 + s.twinklePhase) * 0.4 + 0.6;
-      const alpha = isDark ? s.opacity * twinkle * 0.9 : Math.min(1, (s.opacity + 0.35) * twinkle);
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r + (isDark ? 0 : 0.35), 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + (isDark ? '255,255,255' : '8,32,18') + ',' + alpha + ')';
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  window.addEventListener('resize', resize);
-  resize();
-  draw();
-})();
-
-// ===== CLICKSPARK =====
-(function(){
-  const canvas = document.getElementById('clickspark-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let width, height;
-  const sparks = [];
-  const sparkColor = '#15803d';
-  const sparkSize = 10;
-  const sparkRadius = 15;
-  const sparkCount = 8;
-  const duration = 400;
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width * window.devicePixelRatio;
-    canvas.height = height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  function createSparks(x, y) {
-    const now = performance.now();
-    for (let i = 0; i < sparkCount; i++) {
-      sparks.push({ x, y, angle: (2 * Math.PI * i) / sparkCount, startTime: now });
-    }
-  }
-  document.addEventListener('click', (e) => {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    const target = e.target;
-    if (target.closest('a') || target.closest('button') || target.closest('input') || target.closest('textarea') || target.closest('select')) return;
-    createSparks(e.clientX, e.clientY);
-  });
-  function easeOut(t) { return t * (2 - t); }
-  function drawSparks() {
-    if (!sparks.length) { requestAnimationFrame(drawSparks); return; }
-    ctx.clearRect(0, 0, width, height);
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const spark = sparks[i];
-      const elapsed = performance.now() - spark.startTime;
-      if (elapsed >= duration) { sparks.splice(i, 1); continue; }
-      const progress = elapsed / duration;
-      const eased = easeOut(progress);
-      const distance = eased * sparkRadius;
-      const lineLength = sparkSize * (1 - eased);
-      const x1 = spark.x + distance * Math.cos(spark.angle);
-      const y1 = spark.y + distance * Math.sin(spark.angle);
-      const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
-      const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
-      ctx.strokeStyle = sparkColor;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-    requestAnimationFrame(drawSparks);
-  }
-  drawSparks();
-})();
-
-// ===== CARD 3D TILT =====
-(function(){
-  function applyTilt(el) {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    el.addEventListener('mousemove', (e) => {
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const cx = rect.width / 2;
-      const cy = rect.height / 2;
-      const isRank = el.classList.contains('rank-card-tilt');
-      const mult = isRank ? 0.35 : 1.1;
-      const rx = ((y - cy) / cy) * -mult;
-      const ry = ((x - cx) / cx) * mult;
-      const z = isRank ? 2 : 6;
-      el.style.transform = 'perspective(800px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateZ(' + z + 'px)';
-    });
-    el.addEventListener('mouseleave', () => {
-      el.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateZ(0)';
-    });
-  }
-  document.querySelectorAll('.card-tilt, .str-tilt, .ach-card-tilt, .rank-card-tilt, .stf-tilt, .notif-item-tilt, .at-r-tilt, .compose-card-tilt').forEach(applyTilt);
-})();
-
+// Foreground stars, click sparks and card tilt listeners removed.
 
 // Chat UI lives in chat.js.
 
@@ -2449,9 +1993,9 @@ function downloadReport(btn) {
   toast(title + ' downloaded');
 }
 function generateStudentCSV() {
-  const headers = ['ID', 'Name', 'Gender', 'Class', 'Level', 'Guardian Name', 'Guardian Phone', 'Guardian Email', 'Discipline Points', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'];
+  const headers = ['ID', 'Name', 'Gender', 'Class', 'Level', 'Discipline Points', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'];
   const rows = window.schoolData.students.map(s => [
-    s.id, s.name, s.gender, s.class, s.level, s.guardianName, s.guardianPhone, s.guardianEmail,
+    s.id, s.name, s.gender, s.class, s.level,
     s.disciplinePoints, s.academicScore + '%', s.attendanceRate + '%', s.absences, s.status
   ]);
   return [headers, ...rows].map(r => r.map(csvCell).join(',')).join('\n');
@@ -2512,8 +2056,8 @@ function downloadAcademicReport() {
   downloadCSVFile('ldk-academic-report', ['Date', 'Student ID', 'Student Name', 'Class', 'Term', 'Subject', 'Score', 'Maximum Score'], rows);
 }
 function downloadStudentReport() {
-  const rows = window.schoolData.students.map(student => [student.id, student.name, student.gender, student.class, student.level, student.guardianName, student.guardianPhone, student.guardianEmail, student.disciplinePoints, student.academicScore, student.attendanceRate, student.absences, student.status]);
-  downloadCSVFile('ldk-student-roster', ['Student ID', 'Name', 'Gender', 'Class', 'Level', 'Guardian Name', 'Guardian Phone', 'Guardian Email', 'Discipline Total', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'], rows);
+  const rows = window.schoolData.students.map(student => [student.id, student.name, student.gender, student.class, student.level, student.disciplinePoints, student.academicScore, student.attendanceRate, student.absences, student.status]);
+  downloadCSVFile('ldk-student-roster', ['Student ID', 'Name', 'Gender', 'Class', 'Level', 'Discipline Total', 'Academic Score', 'Attendance Rate', 'Absences', 'Status'], rows);
 }
 
 // ===== INIT =====
