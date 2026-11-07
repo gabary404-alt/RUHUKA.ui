@@ -4,7 +4,7 @@ Active project: RUHUKA system (jsqiqxflgokfdooogcst). Production website remains
 
 ## Recorded migration history
 
-All 51 applied versions are represented in MIGRATION_INVENTORY.json (path and SHA-256). The eight 12 October scripts depended on an earlier database structure; their exact recorded statements are retained under history/, not presented as a runnable fresh-database migration chain. The 20 October reset/schema script is recovered under migrations/ as the historical post-reset starting point. It includes destructive DROP statements and must never be manually rerun on the active project. Later files correspond to the applied additive migrations.
+All 58 applied versions are represented in MIGRATION_INVENTORY.json (path and SHA-256). The eight 12 October scripts depended on an earlier database structure; their exact recorded statements are retained under history/, not presented as a runnable fresh-database migration chain. The 20 October reset/schema script is recovered under migrations/ as the historical post-reset starting point. It includes destructive DROP statements and must never be manually rerun on the active project. Later files correspond to the applied additive migrations.
 
 This reconciles recorded history and source files; it does not prove a clean-database rebuild. A07/I08 remain open until an isolated fresh-database replay/current schema comparison and recovery exercise are completed. Historical checksums represent the retrieved statement text with a trailing semicolon/newline, not a claim that formatting matches the original development machine.
 
@@ -39,3 +39,9 @@ Six additive versions follow the academic/permission increment. Officer-only pre
 Read-only report RPCs enforce roles/class/date/release and return only whitelisted fields. CSV/native print use one loaded snapshot; source IDs and version remain visible. No assumption of expected school days or mixed ranking. Append-only private enrolment history has explicit deny RLS/no client grants and limited administrator read RPC; baseline does not invent older dates. Headmaster year changes check expected year and record reason; no automatic promotion.
 
 134 Node tests and six rollback suites pass. Actual browser role/device, physical print/PDF/Excel locale and genuine parallel-session acceptance remain open. Source examples pending. See verification/DISCIPLINE_REPORTS_SESSION_2026-11-07.md.
+
+## Class letter, manual review and public projection increment
+
+Seven additive versions implement private RPC-only letter snapshots and explicit human progression policy/decisions, audited named public editors and public content versions. Letter sources whitelist main status aggregates, academic aggregates and official discipline evidence; private reasons/contacts/medical evidence are not copied. Letter save uses server-built source hash and locks, immutable parent/version, actor/request retry and Headmaster notice. Later changes flag saved snapshots rather than replacing them. Manual review retains before/destination/year/results/policy/reason, rejects stale decisions and supports linked correction; no automatic promotion.
+
+Anonymous public text comes from a dedicated SELECT-only public table with RLS, not private-schema usage; editor/state/version tables remain private, explicitly denied and RPC checked. Revoking disabled editors is supported. Canonical review year prevents whitespace duplicate roots. All 58 applied versions are inventoried. Security advisor remains the existing leaked-password warning only. 148 Node tests and the new integrated rollback suite pass; earlier six suite evidence retained. See verification/LETTERS_PUBLIC_REVIEW_SESSION_2026-11-07.md.

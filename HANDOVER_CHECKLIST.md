@@ -6,9 +6,9 @@ This is the delivery tracker. A checked item means the specifically stated outco
 
 ## Current position
 
-Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains discipline/report/enrolment code 6ad4fbce3c11a873ef527836688ed77178ff420e and a READY preview. The visitor-facing website remains separate from the real role-based workspace. Neither this release nor the earlier pilot updates are merged into production.
+Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains class-letter/manual-review/public-editor code 4ac3181e2263b295f3bb0d61696a3ffe5b733ad8 and a READY preview. The visitor-facing website remains separate from the real role-based workspace. Neither this release nor the earlier pilot updates are merged into production.
 
-RUHUKA system (jsqiqxflgokfdooogcst) has 51 applied migration versions, now inventoried in the repository. Named academic releases, official discipline snapshots, separate filtered reports, Dean/officer publication/correction, enrolment history, own-student results and one-use officer roster permissions are connected. Email invitation/reset requests remain deliberately disabled until production callback/mail acceptance. Old notes/records are disposable development tests; targeted cleanup is allowed, not a wholesale project reset.
+RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inventoried in the repository. Named academic releases, official discipline snapshots, separate filtered reports, Dean/officer publication/correction, enrolment history, own-student results and one-use officer roster permissions are connected. Email invitation/reset requests remain deliberately disabled until production callback/mail acceptance. Old notes/records are disposable development tests; targeted cleanup is allowed, not a wholesale project reset.
 
 ### Agreed first-handover scope — 5 November 2026
 
@@ -18,12 +18,12 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 51 applied migration versions, now inve
 - Defer the personal Notebook in both Academic/Discipline Staff and every Admin role. Visible entry points are removed. Existing test notes need not be retained; targeted cleanup may remove them while keeping account security and database structure.
 - Keep the Student Portal's other approved views unless separately changed. Staff daily work must function without every student owning a phone/computer or submitting something online. Removing absence justification alone does not solve device access for every remaining student-facing feature.
 - Parent portal/messaging, SMS, automatic promotion decisions, advanced charts/school-wide leaderboards and elaborate 3D remain deferred. Existing lightweight illustrations may remain only if they meet the performance/readability target; do not add new decorative complexity.
-- Preserve attractive visual character with the existing lightweight book illustration and a small original LDK/RUHUKA helper face in the existing chat launcher/header. No new floating widget, copied third-party mascot, canvas scene or animation library. The helper asset is 971 bytes and remains static; typography, colour and simple borders provide the rest of the character.
+- Preserve attractive visual character with the existing lightweight book illustration and a small original LDK/RUHUKA helper face in the existing chat launcher/header. The 7 November approved addition is six stationary CSS star points on the public hero, with no animation. No new floating widget, copied third-party mascot, canvas scene or animation library. The helper asset is 971 bytes and remains static; typography, colour and simple borders provide the rest of the character.
 - A universal guarantee for every device/browser is not a valid acceptance criterion. Test an explicit matrix of common supported devices/browsers, with simple static/readable fallbacks and slow-network behaviour.
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (62 verified, 54 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (72 verified, 44 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -56,7 +56,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] A01 Create this complete delivery tracker and record current state/accepted scope.
 - [x] A06 Reconcile requirements, historical handoff and pilot help with the 5 November scope: lighter UI, concise AI, deferred student absence submissions and Staff/Admin notebooks.
 - [ ] A07 Reconcile applied database migrations, repository files and old draft PR #4; document reproducible baseline without resetting the live project.
-- [ ] A08 Reconcile PR #4/#9/#10 against the revised first-handover scope; exclude notebook/student-explanation feature exposure, preserve historical data/migrations, resolve conflicts and prepare a reviewed release increment.
+- [x] A08 Reconcile PR #4/#9/#10 against the revised first-handover scope; exclude notebook/student-explanation feature exposure, preserve historical data/migrations, resolve conflicts and prepare a reviewed release increment.
 
 ## B. Identity and access
 
@@ -72,7 +72,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] B10 Build Headmaster-only staff creation, role assignment and disabling.
 - [x] B11 Build Headmaster/Dean teacher-class assignments and verify revocation.
 - [x] B12 Enforce all agreed roles server-side; remove legacy broad admin loopholes.
-- [ ] B13 Test Student, teacher, patron/matron, officer, Dean and Headmaster allow/deny cases.
+- [x] B13 Test Student, teacher, patron/matron, officer, Dean and Headmaster allow/deny cases.
 - [ ] B14 Review auth security settings including existing leaked-password warning, email configuration and rate limits.
 
 ## C. Roster, calendar and historical records
@@ -134,7 +134,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] F10 Officer applies validated discipline imports without reviewer; notify Headmaster/fellow officers.
 - [x] F11 Reconcile old discipline-review constraints/functions and enforce authority at database level.
 - [x] F12 Preserve source evidence/import history; handle corrected imports and omitted fields safely.
-- [ ] F13 Retain year/enrolment history and support explicit manual promote/repeat decisions if needed for handover; automatic promotion suggestions/decisions deferred.
+- [x] F13 Retain year/enrolment history and support explicit manual promote/repeat decisions if needed for handover; automatic promotion suggestions/decisions deferred.
 
 ## G. Daily work, notifications and reporting
 
@@ -159,7 +159,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] H08 Make illustrations useful without animation; reduce motion and loading failures handled.
 - [x] H09 Remove repetitive/generic promotional copy and unnecessary spacing; retain useful school information, readable text/touch targets and RUHUKA identity. Replace unverified school claims/details only with approved information.
 - [x] H10 Keep Privacy, Terms and Support links working; revise their content for the deferred notebook/student-explanation scope, honest storage/AI limitations and practical staff help; recheck public navigation.
-- [ ] H11 Restrict public editing to Headmaster/named school-authorised editors; audit edits.
+- [x] H11 Restrict public editing to Headmaster/named school-authorised editors; audit edits.
 
 ## I. Release verification and operational readiness
 
@@ -183,7 +183,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] J04 Obtain school-approved roster/content/contact data and verify first import totals.
 - [ ] J05 Create school-owned Headmaster account and service ownership/access; verify recovery before removing temporary access.
 - [ ] J06 Retain historical actors/audit attribution during ownership transfer.
-- [ ] J07 Provide short role guides, in-page help, admin setup/recovery instructions and walkthrough.
+- [x] J07 Provide short role guides, in-page help, admin setup/recovery instructions and walkthrough.
 - [ ] J08 Remove demo role/password shortcuts, test users and sample claims from production.
 - [ ] J09 Confirm staff can take/correct attendance, review follow-up concerns, publish results and recover access independently, without student-device dependence.
 - [ ] J10 Director/school approve final acceptance evidence; deploy signed-off release and record version/date.
@@ -194,11 +194,11 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 ## K. Class letter (added 4 November; after reliable source records/reports)
 
 - [ ] K01 Confirm school weekly/term class-summary practice and define class/date/year/release selection.
-- [ ] K02 Build deterministic attendance summary with unique-student/absence-day distinction, returns and missing-register coverage.
-- [ ] K03 Add separate selected academic release and dated official discipline details; preserve Not recorded and source attribution.
-- [ ] K04 Keep editable narrative separate from generated metrics and enforce author/Headmaster permissions and explanation privacy.
-- [ ] K05 Save reproducible versioned letter snapshots with source IDs, author and timestamp; later corrections create a new version.
-- [ ] K06 Print school-branded letter with Strive to Excel, correct totals and unclipped supporting detail; no automatic external sending.
+- [x] K02 Build deterministic attendance summary with unique-student/absence-day distinction, returns and missing-register coverage.
+- [x] K03 Add separate selected academic release and dated official discipline details; preserve Not recorded and source attribution.
+- [x] K04 Keep editable narrative separate from generated metrics and enforce author/Headmaster permissions and explanation privacy.
+- [x] K05 Save reproducible versioned letter snapshots with source IDs, author and timestamp; later corrections create a new version.
+- [x] K06 Print school-branded letter with Strive to Excel, correct totals and unclipped supporting detail; no automatic external sending.
 - [ ] K07 Run school acceptance examples and confirm the letter reduces retyping in practice; retain Today dashboard.
 
 ## Deferred feature records — retained for later, excluded from first handover
@@ -322,3 +322,9 @@ Class refresh follow-up: results refresh reloads available classes; attendance n
 C03/D18/F06/F09/F10/F11/F12/G08/G09/H09 completed technically. 134 Node tests and six rollback SQL suites pass. Official discipline import/correction/history, officer/no-reviewer permissions, Headmaster/fellow-officer notices/Today, separate filtered reports with CSV/native print, reviewed year changes and enrolment history are connected. Attendance checks roster again before saving and preserves remaining marks while requiring review after membership changes. Public copy/gaps shortened without removing the local art or green identity.
 
 **62 verified + 54 open + 12 deferred = 128.** See verification/DISCIPLINE_REPORTS_SESSION_2026-11-07.md for outcome boundaries. Parsed source evidence/reference is retained; original file binaries and school-specific formats are not implemented. Native print DOM/actions verified; physical PDF/print and signed-in device acceptance remain I01/I03/I10. True concurrent independent-session proof remains C11/D16. History starts at the labelled baseline and never invents older enrolment dates. Six migrations applied; 51 source versions inventoried. Temporary test fixtures roll back; no real school data/account invitation was created. Production unchanged; PR #10 draft. Director's results file can arrive later; F02/C07 stay open.
+
+### 7 November — class letters, manual review, public editors and release reconciliation
+
+K02/K03/K04/K05/K06/F13/H11/B13/J07/A08 verified technically; 72 verified + 44 open + 12 deferred = 128. Code 4ac3181e2263b295f3bb0d61696a3ffe5b733ad8 in draft PR #10; READY preview reviewed for stationary stars/public layout and role guides. Class letters use recorded source snapshots, separate explanation, reviewed saves/versions, Headmaster notice/read and portrait print. Manual promote/repeat is one explicit human decision at a time; threshold only highlights review. Public school text is Headmaster/named-editor controlled, with review/audit and anonymous approved-text-only projection.
+
+148 Node tests and the new integrated rollback suite pass. The earlier six suites retain recorded evidence; they were not all rerun in this session. 58 migration sources inventoried; no actual school data, public facts, editor grant, progression decision or email remains from testing. See verification/LETTERS_PUBLIC_REVIEW_SESSION_2026-11-07.md, RELEASE_PLAN.md, connected/guide.html and OPERATIONS_AND_HANDOVER.md. K01/K07 school usefulness, actual private-role/device/print and production handover acceptance remain open. PR #4 superseded/#9 deferred/#10 draft; do not merge separately or promote yet. No report card is required for these completed technical tasks; C07/F02 still await approved examples.

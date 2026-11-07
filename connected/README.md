@@ -46,3 +46,9 @@ Discipline records: Officer uploads discipline-totals-template.csv and optional 
 Reports: Main attendance or one academic/discipline release, class/date filters, CSV for Excel and native Print/save-as-PDF. Loaded snapshot is the export source; changed filters invalidate it. Missing is not zero, private fields are absent. Wide academic printing uses subject rows. Physical print/phone and real-role acceptance remain open.
 
 School desk: Administrator class/year history shows latest 500 immutable states. Headmaster can review/confirm a class-year change using expected current year and reason; no student promotion. Attendance confirmation rechecks membership and keeps remaining marks when reopening a changed roster.
+
+## Class letters, manual year-end review and school text
+
+Class letters appears for Headmaster/Dean/Officer; it loads on demand. Dean/Officer generates from explicit source releases, reviews separate explanation and saves immutable school snapshot/version; Headmaster reads/notified. Native portrait print retains source evidence; actual school/device/print acceptance remains open. Year-end promote/repeat and named public editing sit in expandable School desk sections and load only when opened. Manual threshold highlights review only. Public editing is Headmaster/named-active-staff only, school-approval-confirmed, stale-safe and audited; anonymous readers receive only the approved-text projection. No real public facts were added.
+
+Role walkthrough: guide.html. Operational setup/recovery and release gates: ../OPERATIONS_AND_HANDOVER.md and ../RELEASE_PLAN.md. Invitations/reset requests remain gated; no student-device dependency is introduced.
