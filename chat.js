@@ -4,9 +4,9 @@
   'use strict';
   const HELP = {
     attendance: 'Sign in, open Attendance and choose your class and date. Mark each student, review the totals, then confirm. Only a Discipline Officer can correct a submitted main register.',
-    results: 'Students can open My records for the information already recorded by the school. Missing results mean Not recorded. Full result uploads and ranking views are still being completed.',
+    results: 'Students can open My records for the information already recorded by the school. Missing results mean Not recorded. Published results show the school’s recorded subject marks and position.',
     absence: 'Contact the Discipline Office about an absence. Online student absence submissions are postponed. A Discipline Officer can correct the main attendance record with a reason.',
-    account: 'Use your assigned school email to sign in. Complete school-managed account setup and recovery are still being built; contact the school administrator if you cannot sign in. Never share passwords or setup codes here.',
+    account: 'Staff use their school email. Students use their assigned ID and can request a private setup or reset code from the school. Never share passwords or setup codes here.',
     general: 'I can explain Ruhuka and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
   };
   function localHelp(message) {
@@ -149,15 +149,24 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: run.controller.signal,
           body: JSON.stringify({messages:(()=>{const messages=[...history,{role:'user',content:message}];while(messages.length>1&&(messages.length>13||messages.reduce((n,m)=>n+m.content.length,0)>24000))messages.splice(0,2);return messages;})()})
         });
-        if (!response.ok) throw new Error('AI unavailable');
-        reply = extractReply(await response.json());
+        const data = await response.json();
+        if (!response.ok) {
+          const error = new Error(response.status === 429 ? 'Usage limit' : 'AI unavailable');
+          if (typeof data.reference === 'string' && /^[a-f0-9-]{36}$/i.test(data.reference)) error.reference = data.reference;
+          throw error;
+        }
+        reply = extractReply(data);
         clearTimeout(run.timeout);
         online = true;
       }
     } catch (error) {
       if (active !== run) return;
       clearTimeout(run.timeout);
-      reply = (run.timedOut ? 'The AI took too long to respond. ' : 'The AI service is unavailable right now. ') + 'Here is local help instead:\n\n' + localHelp(message);
+      const reason = run.timedOut ? 'The AI took too long to respond.' :
+        error?.message === 'Usage limit' ? 'The assistant has reached its usage limit. Try again later.' :
+        'The AI service is unavailable right now.';
+      reply = reason + (error?.reference ? ' Support reference: ' + error.reference + '.' : '') +
+        '\n\nHere is local help.\n\n' + localHelp(message);
       byId('ai-retry').hidden = false;
     }
     if (active !== run) return;

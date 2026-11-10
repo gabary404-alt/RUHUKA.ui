@@ -303,5 +303,10 @@
     "version": "20261107194133",
     "path": "supabase/migrations/20261107194133_least_privilege_anonymous_and_maintenance_table_grants.sql",
     "sha256": "02618d79d57deab610e862d1d59951b0be30181193649736b4b13c26dba8e577"
+  },
+  {
+    "version": "20261110173624",
+    "path": "supabase/migrations/20261110173624_durable_private_chat_request_budget.sql",
+    "sha256": "66b6bad101be411cd116d13928a8a85fca74a864c254f8aa12ae8b02ff800681"
   }
 ]
