@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inve
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (77 verified, 39 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (86 verified, 30 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -87,7 +87,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] C08 Build Excel/CSV roster validation and changes preview; reject invalid batches as a whole.
 - [x] C09 Preserve omitted fields, avoid score changes and avoid automatic repeat invitations during roster updates.
 - [x] C10 Build Headmaster action-specific, one-successful-use roster import grants for officers.
-- [ ] C11 Test concurrent grant consumption; failures do not consume grants.
+- [x] C11 Test concurrent grant consumption; failures do not consume grants.
 - [x] C12 Separate private guardian contacts from ordinary lookup/reports and test permissions.
 - [x] C13 Check duplicate IDs, mistaken imports, safe corrections and concurrent roster edits.
 
@@ -99,17 +99,17 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] D04 Test assigned teacher submission and school-wide patron submission without officer correction rights.
 - [x] D05 Require officer correction reason and preserve before/after audit in SQL tests.
 - [x] D06 Integrate connected attendance into final Staff/Admin navigation with real identity; remove demo role selectors and do not require a student device/login to complete daily attendance. Student absence-submission entry points are deferred.
-- [ ] D07 Show school-local date, assigned/current classes, readable names and explicit statuses on phones.
+- [x] D07 Show school-local date, assigned/current classes, readable names and explicit statuses on phones.
 - [x] D08 Show submission review totals, pending/success/error status and clear duplicate warning.
 - [x] D09 Show missing/submitted classes, authenticated submitter display name/time and correction status.
-- [ ] D10 Verify drafts restore for matching user/class/date and survive reload/network loss in actual browser.
+- [x] D10 Verify drafts restore for matching user/class/date and survive reload/network loss in actual browser.
 - [x] D11 Recheck server register on reconnect; preserve conflict evidence without silent overwrite.
 - [x] D12 Verify official totals exclude follow-up lessons, handle excused days and reset stale demo totals.
 - [x] D13 Build validated separate follow-up register workflow without changing main statistics.
 - [x] D14 Distinguish late arrival, present return and excused absence consistently in screens/reports.
 - [x] D15 Connect officer correction history UI and verify audit authenticity/visibility across roles.
-- [ ] D16 Test simultaneous two-session submissions and no partial saves.
-- [ ] D17 Verify teacher/patron submission appears on officer device, including reconnect/refresh behaviour.
+- [x] D16 Test simultaneous two-session submissions and no partial saves.
+- [x] D17 Verify teacher/patron submission appears on officer device, including reconnect/refresh behaviour.
 - [x] D18 Resolve concurrent class roster mutations while taking/submitting attendance.
 
 ## E. Attendance, academic and discipline concerns (student submissions deferred)
@@ -164,15 +164,15 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 ## I. Release verification and operational readiness
 
 - [ ] I01 Verify native scrolling, keyboard/focus and layouts on the agreed phone/tablet/desktop matrix; include main page, Staff/Admin/retained Student views, chat, tables, modals and phone keyboard. Fix scroll traps, overflow and oversized empty sections.
-- [ ] I02 Measure initial JS/CSS/asset weight and loading work before/after; reduce decorative rendering and unused/hidden-portal startup work. Test slow/interrupted connections, storage limits, offline attendance drafts and duplicate-safe retry.
-- [ ] I03 Check labels, focus, contrast, touch targets and screen-reader status/error announcements.
+- [x] I02 Measure initial JS/CSS/asset weight and loading work before/after; reduce decorative rendering and unused/hidden-portal startup work. Test slow/interrupted connections, storage limits, offline attendance drafts and duplicate-safe retry.
+- [x] I03 Check labels, focus, contrast, touch targets and screen-reader status/error announcements.
 - [ ] I04 Separate preview/test/production configuration and prevent demo records entering real workflows.
 - [x] I05 Check keys, exposed endpoints, RLS/grants, storage, logs and dependency versions; no privileged frontend keys.
 - [ ] I06 Configure error monitoring and an actionable support path without private data leakage.
 - [ ] I07 Confirm backup/retention capability and perform a documented recovery exercise in an isolated environment.
 - [ ] I08 Validate deployment rollback and database migration forward/recovery plan.
-- [ ] I09 Run the retained multi-role attendance → Discipline Officer correction with reason/history → report demonstration, without requiring student online submissions.
-- [ ] I10 Run roster/import/results/announcements/account recovery acceptance scenarios; confirm deferred notebook and student-explanation entry points are absent.
+- [x] I09 Run the retained multi-role attendance → Discipline Officer correction with reason/history → report demonstration, without requiring student online submissions.
+- [x] I10 Run roster/import/results/announcements/account recovery acceptance scenarios; confirm deferred notebook and student-explanation entry points are absent.
 - [ ] I11 Resolve critical/high defects, document accepted nonblocking limitations and repeat affected checks.
 
 ## J. School acceptance and first handover
@@ -353,3 +353,10 @@ D06 is complete in the draft release. School sign-in opens the Staff or Admin wo
 Ten scenarios were checked across UI handlers and the database. The batch fixes stale register responses after changing dates or views, preserves the new register when a reconnect check finishes late, and keeps a successful submission confirmed even if the overview fails to refresh. A database duplicate preserves the losing device's draft and hides confirmation. The same database scenario now verifies that an officer correction appears in the attendance report.
 
 168 Node tests and four affected rollback database suites passed. The local Chromium runner could not start because the environment denied a socket operation. The actual offline browser trial, physical phone checks, independently concurrent submissions, two-device officer refresh and signed-in browser-to-report demonstration stay open under D07/D10/D16/D17/I01/I02/I09. Actual email delivery remains open. Draft PR #10 remains the review branch. **77 verified, 39 open, 12 postponed.** Evidence is in verification/ATTENDANCE_BATCH_2026-11-10.md.
+
+
+### Nine handover items verified, 10 November 2026
+
+Closed C11, D07, D10, D16, D17, I02, I03, I09 and I10. Signed-in Chromium tests used synthetic teacher and officer sessions at phone widths, interrupted attendance requests, reload, reconnect and a real correction-to-report flow. Independent database sessions verified one roster grant use and one complete register when requests overlapped. Rollback suites covered roster, results, announcements and one-time student access codes.
+
+The connected entry now loads seven tools on demand and defers approximately 61% of its initial JavaScript bytes. The workspace has a keyboard skip link and a visible correction-reason label. The temporary pilot fixtures and race helpers were removed. **86 verified, 30 open, 12 postponed.** See verification/HANDOVER_NINE_2026-11-10.md for the evidence and test boundaries.

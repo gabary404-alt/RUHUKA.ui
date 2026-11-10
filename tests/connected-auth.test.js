@@ -1,9 +1,10 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const path=require('node:path');
 function setup(replies){
  const nodes={},events={},intervals=[],storage=new Map();let todayNavigation;const focused=[];const create=()=>({dataset:{},value:'',hidden:false,disabled:false,textContent:'',children:[],classList:{toggle(){}},append(x){this.children.push(x)},replaceChildren(...children){this.children=children},setAttribute(){},querySelectorAll(){return []}});
- const document={hidden:false,getElementById(id){return nodes[id]||(nodes[id]=create())},createElement:create};const calls=[];
+ const scripts=[];
+ const document={hidden:false,body:{append(script){scripts.push(script)}},getElementById(id){return nodes[id]||(nodes[id]=create())},createElement(tag){const element=create();if(tag==='script')element.remove=()=>{};return element;}};const calls=[];
  const context={localStorage:{getItem(k){return storage.get(k)||null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},document,window:{mountStudentRecords(){return {ready:Promise.resolve(),dispose(){}};},mountToday(host,api,roles,current,navigate){todayNavigation=navigate;return {refresh(){},dispose(){}};},mountSchoolDesk(){return {ready:Promise.resolve(),focusSection(title){focused.push(title)},dispose(){}};},addEventListener(name,handler){events[name]=handler;},rosterState:require('../connected/roster-state'),attendanceState:require('../connected/attendance-state'),createAttendanceDrafts:require('../connected/drafts.js').createAttendanceDrafts,RUHUKA_CONFIG:{url:'https://test.invalid',key:'publishable'}},Intl,Date,AbortSignal,setInterval(fn,ms){intervals.push({fn,ms})},fetch:async(url,options)=>{calls.push({url,options});const r=await replies.shift();if(!r)throw Error('Unexpected request');return {ok:r.ok!==false,status:r.status||200,json:async()=>r.data}}};
- vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../connected/attendance.js'),'utf8'),context);document.getElementById('email').value='staff@example.test';document.getElementById('password').value='test-password';return {nodes,calls,events,intervals,navigate:task=>todayNavigation(task),focused};
+ vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../connected/attendance.js'),'utf8'),context);document.getElementById('email').value='staff@example.test';document.getElementById('password').value='test-password';return {nodes,calls,events,intervals,scripts,window:context.window,navigate:task=>todayNavigation(task),focused};
 }
 test('failed login keeps real workspace closed and clears password',async()=>{
  const {nodes,calls}=setup([{ok:false,status:400,data:{msg:'Invalid login credentials'}}]);const button={};await nodes['login-form'].onsubmit({preventDefault(){},submitter:button});assert.equal(nodes.workspace.hidden,true);assert.equal(nodes.password.value,'');assert.match(nodes.notice.textContent,/Invalid login/);assert.equal(calls.length,1);assert.equal(button.disabled,false);
@@ -128,4 +129,31 @@ test('the losing submission shows a duplicate warning and keeps the existing dra
  assert.equal(mark.value,'absent');
  assert.equal(nodes.submit.hidden,true);
  assert.equal(calls.filter(c=>c.url.endsWith('/rpc/submit_main_attendance')).length,1);
+});
+
+
+test('a slow on-demand tool does not mount after navigation and can retry a failed load',async()=>{
+ const s=setup(teacherReplies([]));
+ await s.nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});
+ assert.equal(s.scripts.length,0);
+ const opening=s.nodes['open-reports'].onclick();
+ assert.equal(s.scripts[0].src,'reports.js');
+ s.nodes['open-today'].onclick();
+ let mounts=0;
+ s.window.mountReports=()=>{mounts++;return {ready:Promise.resolve(),dispose(){}};};
+ s.scripts[0].onload();
+ await opening;
+ assert.equal(mounts,0);
+ await s.nodes['open-reports'].onclick();
+ assert.equal(mounts,1);
+ const academics=s.nodes['open-academics'].onclick();
+ s.scripts[1].onerror();
+ await academics;
+ assert.match(s.nodes.notice.textContent,/Check your connection and try again/);
+ const retry=s.nodes['open-academics'].onclick();
+ assert.equal(s.scripts[2].src,'academics.js');
+ s.window.mountAcademics=()=>({ready:Promise.resolve(),dispose(){}});
+ s.scripts[2].onload();
+ await retry;
+ assert.equal(s.nodes.academics.hidden,false);
 });

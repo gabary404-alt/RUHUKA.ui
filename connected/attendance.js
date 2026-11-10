@@ -29,23 +29,85 @@ $('login-form').onsubmit=async event=>{event.preventDefault();const version=++ep
  const title=studentOnly?'Student Portal':roles.some(r=>['headmaster','dean','discipline_officer'].includes(r))?'Admin Portal':'Staff Portal';$('portal-label').textContent=title;$('portal-title').textContent=title;document.title=title+' · RUHUKA';$('open-attendance').hidden=studentOnly;$('open-my-records').hidden=!studentOnly;
  
  $('overview-panel').hidden=studentOnly;$('refresh').hidden=studentOnly;
- if(studentOnly){await $('open-my-records').onclick();notify('Signed in. Your own recorded information is available here.');return;}showView('today-desk');
+ if(studentOnly){notify('Signed in. Open My records to view your school information.');await $('open-my-records').onclick();return;}showView('today-desk');
  await refreshClassChoices();if(version!==epoch)return;$('official-summary').hidden=false;$('summary-from').value=$('day').value;$('summary-to').value=$('day').value;await overview();notify('Signed in. Records are loaded from the school database.');
  }catch(error){if(version===epoch){clear();notify(error.message,true);}}finally{button.disabled=false;}};
 $('signout').onclick=async()=>{const old=token;clear();notify('Signed out.');if(old)try{await request('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+old}});}catch{notify('Signed out on this page. Server session revocation could not be confirmed.',true);}};
 function showView(id){if(id!=='attendance-view')detailRequest++;if(id!=='school-desk')schoolDesk?.hideSensitive?.();document.getElementById('ruhuka-report-print')?.remove?.();for(const name of ['today-desk','attendance-view','school-desk','student-records','staff-accounts','roster-import','academics','discipline','reports','class-letters'])$(name).hidden=name!==id;for(const [button,panel]of [['open-today','today-desk'],['open-attendance','attendance-view'],['open-school','school-desk'],['open-my-records','student-records'],['open-accounts','staff-accounts'],['open-roster-import','roster-import'],['open-academics','academics'],['open-discipline','discipline'],['open-reports','reports'],['open-letters','class-letters']])$(button).setAttribute('aria-current',id===panel?'page':'false');}
-const schoolToolLoads=new Map();window.loadSchoolTool=function(src){if(!['class-letters.js','progression.js','public-editor.js','student-access.js','student-report.js'].includes(src))return Promise.reject(Error('Unknown school tool'));if(!schoolToolLoads.has(src)){schoolToolLoads.set(src,new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>{s.remove();schoolToolLoads.delete(src);reject(Error('This tool could not load. Check your connection and try again.'));};document.body.append(s);}));}return schoolToolLoads.get(src);};
-$('open-letters').onclick=async()=>{if(!user||!roles.some(r=>['headmaster','dean','discipline_officer'].includes(r)))return;const version=epoch;try{showView('class-letters');await window.loadSchoolTool('class-letters.js');if(version!==epoch)return;if(!letterDesk)letterDesk=window.mountClassLetters($('class-letters'),request,roles,()=>epoch===version);await letterDesk.ready;}catch(e){if(version===epoch)notify(e.message,true);}};
-$('open-discipline').onclick=async()=>{if(!user||!roles.some(r=>['headmaster','discipline_officer'].includes(r)))return;showView('discipline');if(!disciplineDesk){const version=epoch;disciplineDesk=window.mountDiscipline($('discipline'),request,roles,()=>epoch===version);}await disciplineDesk.ready;};
-$('open-reports').onclick=async()=>{if(!user||studentOnly)return;showView('reports');if(!reportsDesk){const version=epoch;reportsDesk=window.mountReports($('reports'),request,roles,()=>epoch===version);}await reportsDesk.ready;};
-$('open-academics').onclick=async()=>{if(!user||!roles.some(r=>['headmaster','dean','teacher'].includes(r)))return;showView('academics');if(!academicsDesk){const version=epoch;academicsDesk=window.mountAcademics($('academics'),request,roles,()=>epoch===version);}await academicsDesk.ready;};
-$('open-accounts').onclick=async()=>{if(!user||!roles.includes('headmaster'))return;showView('staff-accounts');if(!accountsDesk){const version=epoch;accountsDesk=window.mountStaffAccounts($('staff-accounts'),request,()=>epoch===version);}await accountsDesk.ready;};
-$('open-roster-import').onclick=()=>{if(!user||!roles.some(r=>['headmaster','discipline_officer'].includes(r)))return;showView('roster-import');if(!rosterDesk){const version=epoch;rosterDesk=window.mountRosterImport($('roster-import'),request,()=>epoch===version);}};
+const schoolToolLoads=new Map();window.loadSchoolTool=function(src){if(!['class-letters.js','progression.js','public-editor.js','student-access.js','student-report.js','school-desk.js','student-records.js','staff-accounts.js','roster-import.js','academics.js','discipline.js','reports.js'].includes(src))return Promise.reject(Error('Unknown school tool'));if(!schoolToolLoads.has(src)){schoolToolLoads.set(src,new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>{s.remove();schoolToolLoads.delete(src);reject(Error('This tool could not load. Check your connection and try again.'));};document.body.append(s);}));}return schoolToolLoads.get(src);};
+async function openSchoolTool(view, scripts, mount) {
+ const version=epoch;
+ showView(view);
+ try {
+  for (const [file, exported] of scripts) {
+   if (!window[exported]) await window.loadSchoolTool(file);
+   if (version!==epoch||$(view).hidden) return;
+  }
+  await mount(version);
+ } catch(error) {
+  if (version===epoch&&!$(view).hidden) notify(error.message,true);
+ }
+}
+$('open-letters').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','dean','discipline_officer'].includes(r))) return;
+ return openSchoolTool('class-letters',[['class-letters.js','mountClassLetters']],version=>{
+  if (!letterDesk) letterDesk=window.mountClassLetters($('class-letters'),request,roles,()=>epoch===version);
+  return letterDesk.ready;
+ });
+};
+$('open-discipline').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','discipline_officer'].includes(r))) return;
+ return openSchoolTool('discipline',[['academics.js','RUHUKACSV'],['discipline.js','mountDiscipline']],version=>{
+  if (!disciplineDesk) disciplineDesk=window.mountDiscipline($('discipline'),request,roles,()=>epoch===version);
+  return disciplineDesk.ready;
+ });
+};
+$('open-reports').onclick=()=>{
+ if (!user||studentOnly) return;
+ return openSchoolTool('reports',[['reports.js','mountReports']],version=>{
+  if (!reportsDesk) reportsDesk=window.mountReports($('reports'),request,roles,()=>epoch===version);
+  return reportsDesk.ready;
+ });
+};
+$('open-academics').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','dean','teacher'].includes(r))) return;
+ return openSchoolTool('academics',[['academics.js','mountAcademics']],version=>{
+  if (!academicsDesk) academicsDesk=window.mountAcademics($('academics'),request,roles,()=>epoch===version);
+  return academicsDesk.ready;
+ });
+};
+$('open-accounts').onclick=()=>{
+ if (!user||!roles.includes('headmaster')) return;
+ return openSchoolTool('staff-accounts',[['staff-accounts.js','mountStaffAccounts']],version=>{
+  if (!accountsDesk) accountsDesk=window.mountStaffAccounts($('staff-accounts'),request,()=>epoch===version);
+  return accountsDesk.ready;
+ });
+};
+$('open-roster-import').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','discipline_officer'].includes(r))) return;
+ return openSchoolTool('roster-import',[['roster-import.js','mountRosterImport']],version=>{
+  if (!rosterDesk) rosterDesk=window.mountRosterImport($('roster-import'),request,()=>epoch===version);
+ });
+};
 async function refreshClassChoices(){const version=epoch,previous=$('class').value,summary=$('summary-class').value;const classes=await request('/rest/v1/school_classes?select=class_name&order=class_name');if(version!==epoch)return;for(const id of ['class','summary-class']){$(id).replaceChildren();classes.forEach(c=>{const o=document.createElement('option');o.value=c.class_name;o.textContent=c.class_name;$(id).append(o);});}const chosen=classes.some(c=>c.class_name===previous)?previous:classes[0]?.class_name||'';$('class').value=chosen;$('summary-class').value=classes.some(c=>c.class_name===summary)?summary:classes[0]?.class_name||'';$('load').disabled=!classes.length;$('load-summary').disabled=!classes.length;$('load-followups').disabled=!classes.length;if(loaded&&loaded.cls!==chosen){loaded=null;reviewedSignature=null;$('submit').hidden=true;$('students').replaceChildren();notify('Your available classes changed. Device drafts are kept; open an available class.');}}
 $('open-attendance').onclick=async()=>{if(!user||studentOnly)return;showView('attendance-view');try{await refreshClassChoices();await overview();}catch(e){notify('Could not refresh available classes. '+e.message,true);}};
-$('open-my-records').onclick=async()=>{if(!user||!studentOnly)return;showView('student-records');if(!studentRecords){const version=epoch;studentRecords=window.mountStudentRecords($('student-records'),request,()=>epoch===version);}await studentRecords.ready;};
+$('open-my-records').onclick=()=>{
+ if (!user||!studentOnly) return;
+ return openSchoolTool('student-records',[['student-records.js','mountStudentRecords']],version=>{
+  if (!studentRecords) studentRecords=window.mountStudentRecords($('student-records'),request,()=>epoch===version);
+  return studentRecords.ready;
+ });
+};
 $('open-today').onclick=()=>{showView('today-desk');const host=$('today-desk');host.hidden=false;todayDesk?.refresh();host.scrollIntoView?.({block:'start'});};
-$('open-school').onclick=async()=>{if(!user)return;const host=$('school-desk');showView('school-desk');if(!schoolDesk){const current=epoch;schoolDesk=window.mountSchoolDesk(host,request,roles,()=>epoch===current,openTodayTask);}await schoolDesk.ready;host.scrollIntoView?.({block:'start'});};
+$('open-school').onclick=()=>{
+ if (!user) return;
+ return openSchoolTool('school-desk',[['school-desk.js','mountSchoolDesk']],async version=>{
+  const host=$('school-desk');
+  if (!schoolDesk) schoolDesk=window.mountSchoolDesk(host,request,roles,()=>epoch===version,openTodayTask);
+  await schoolDesk.ready;
+  if (version===epoch&&!host.hidden) host.scrollIntoView?.({block:'start'});
+ });
+};
 
 async function openTodayTask(task){
  if(task.action==='class_letter'){await $('open-letters').onclick();if(letterDesk)await letterDesk.openLetter(task.letter_id);}
@@ -55,7 +117,7 @@ async function openTodayTask(task){
   if(!$('submit-panel').hidden){await refreshClassChoices();$('class').value=task.class_name;$('attendance-kind').value='main';$('lesson-label').hidden=true;await $('load').onclick();$('submit-panel').scrollIntoView?.({block:'start'});}
   else{await overview();$('overview-panel').scrollIntoView?.({block:'start'});notify(task.class_name+' has no main register for this date. A teacher or patron/matron submits it.');}
  }
- else if(['roster','notices'].includes(task.action)){await $('open-school').onclick();schoolDesk.focusSection(task.action==='roster'?'Requested student corrections':'Your notifications (latest 100)');}
+ else if(['roster','notices'].includes(task.action)){await $('open-school').onclick();schoolDesk?.focusSection(task.action==='roster'?'Requested student corrections':'Your notifications (latest 100)');}
 }
 $('attendance-kind').onchange=()=>{$('lesson-label').hidden=$('attendance-kind').value!=='followup';loaded=null;$('submit').hidden=true;$('students').replaceChildren();};$('lesson').oninput=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
 function dateChanged(){detailRequest++;$('overview').replaceChildren();$('followup-list').replaceChildren();todayDesk?.refresh();reviewedSignature=null;$('review-totals').textContent='';$('submit').textContent='Review attendance';loaded=null;$('submit').hidden=true;$('students').replaceChildren();$('details').replaceChildren();overview().catch(e=>notify(e.message,true));}
@@ -122,11 +184,12 @@ async function details(session, day) {
     const reason=document.createElement('input');
     reason.required=true;
     reason.maxLength=1000;
-    reason.placeholder='Reason for correction';
-    reason.setAttribute('aria-label',reason.placeholder);
+    const reasonLabel=document.createElement('label');
+    reasonLabel.textContent='Reason for correction';
+    reasonLabel.append(reason);
     const save=document.createElement('button');
     save.textContent='Save correction';
-    form.append(select,reason,save);
+    form.append(select,reasonLabel,save);
     form.onsubmit=async event=>{
      event.preventDefault();
      if (!current()||save.disabled) return;
