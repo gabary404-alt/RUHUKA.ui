@@ -56,3 +56,19 @@ A network/Auth failure after code consumption can leave a partial outcome: the i
 Student results print is a single published release, with recorded maxima, missing marks, supplied overall and saved rank. It is explicitly unofficial. Annual aggregation, grading bands, school logos/QR/signatures and official report acceptance await a readable school sample and confirmed rules.
 
 Shared devices: leaving/hiding the account page clears unfinished password and code inputs. Return and re-enter them to continue. An already-submitted request may still complete; follow its final status or try sign-in before requesting another code. Signing out removes temporary browser print copies; documents already downloaded or printed cannot be withdrawn by sign-out.
+
+## New roster and chatbot operating notes
+
+Roster import accepts a CSV or one visible Excel .xlsx worksheet of up to 500 KB and 1,000 student rows. Use the CSV template header names and text-formatted IDs to preserve leading zeros. The workbook is read in the browser. Review each before/after row before confirming. Unsupported files, formulas and invalid rows stop the entire batch. This is the template format. The school-specific source review remains C07/F02.
+
+Chat support logs only the fixed event name, failure class, HTTP status and random support reference. Ask for the reference and Kigali time. In Vercel Runtime Logs, select the appropriate deployment and search the reference in a short recent window. A preview 503 was traced this way. Preview has no live provider key. A configured live provider answered a harmless production test using the existing integration.
+
+The database chat budget limits the preview to 8 requests a minute and 80 a UTC day, shared across users. Budget exhaustion and configuration failures fall back to local help. Use a distinct production budget key and separate approved cap before promoting this code. Configure RUHUKA_CHAT_BUDGET_SECRET and RUHUKA_PUBLIC_SUPABASE_KEY as server environment values, and keep LDK_AI_API_KEY server-only. Store only the budget key digest in the database. A deploy without these settings does not send paid provider requests.
+
+## Ownership and release recovery rehearsal
+
+First verify the successor's independent Headmaster sign-in and recovery. Disable the former profile and expire its sessions once the school approves retirement. Retain its Auth identity, profile, author IDs and audit references. Do not rename old events or reuse the same account for the successor. The rollback fixture verifies this sequence against an old announcement and its audit entry. Actual school ownership and sign-off remain J05/J10.
+
+The preview branch alias was moved to the preceding ready deployment and then restored to the current deployment. The production alias was checked separately. For a release incident, first record the live deployment ID, current migration version, symptoms and the last known compatible build. Route traffic back only to an approved compatible build. Compare a read-only public entry, sign-in, and access boundaries before resuming ordinary writes.
+
+Database changes recover separately from website routing. The new chat budget migration is additive and the prior build can coexist with it. To stop paid preview calls, retire the scope's server key and leave the default fallback in place. To restore, provision a replacement preview key and digest, verify a bounded request, then enable the provider. Never replay the historical reset on the pilot or delete a database to match a website rollback. A real backup restore exercise remains I07.

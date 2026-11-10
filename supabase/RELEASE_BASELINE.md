@@ -53,3 +53,17 @@ Two additive migrations add private hashed one-time codes and audited Headmaster
 
 ## Least-privilege security review
 Migration 20261107194133 removes anonymous table/sequence grants except SELECT on approved school_public_text, and removes TRUNCATE/REFERENCES/TRIGGER from authenticated public/private tables. New postgres-owned public tables/sequences receive no implicit anon/authenticated grant. Existing authenticated row-level operations and service-role grants are retained. Future creators other than postgres still require explicit grant/RLS review. Existing leaked-password warning remains B14; security review is not certification or production readiness. See verification/SECURITY_REVIEW_2026-11-07.md.
+
+## Reproducible application schema baseline, 10 November 2026
+
+The applied list contains 62 migrations. The three migration paths from draft PR #4 are present in the checked inventory and the integration branch. Its old UI files are superseded by the connected workspace in PR #10. The eight pre-reset entries remain historical evidence only.
+
+For a clean replay use build_schema_replay.py. It verifies SHA-256 source checksums, starts at the recovered October 20 reset, maps application objects to scratch schemas, stubs managed Auth objects and keeps test tables outside the Realtime publication. A reconstructed bridge adds the two legacy text contact columns expected by the October 26 migration. That migration copies and drops those columns. The recorded migration files were retained unchanged.
+
+Run the generated SQL only in an isolated test environment. The independent in-memory PGlite 0.3.14 verification is reproducible with verify_schema_replay.cjs and recreated 322 application columns and 141 functions. The sorted column fingerprint matched the active Supabase metadata exactly:
+
+```
+12b8b9d65d7101ff6e6cba5a3f1090012ddd64789a8211b9d4525814e60bcf98
+```
+
+To repeat it, generate the SQL with `python3 supabase/operations/build_schema_replay.py > replay.sql`. In a disposable folder, install the pinned PGlite package, copy verify_schema_replay.cjs there, and run `node verify_schema_replay.cjs /absolute/path/to/replay.sql`. The isolated harness omits pgcrypto setup because the replayed application schema uses built-in SHA-256 and UUID functions. The managed platform extension, Auth settings, backups, and live data restore are separate verification work. Do not run the historical reset against the pilot.

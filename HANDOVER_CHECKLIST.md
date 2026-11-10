@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inve
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (86 verified, 30 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (96 verified, 20 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -55,7 +55,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 
 - [x] A01 Create this complete delivery tracker and record current state/accepted scope.
 - [x] A06 Reconcile requirements, historical handoff and pilot help with the 5 November scope: lighter UI, concise AI, deferred student absence submissions and Staff/Admin notebooks.
-- [ ] A07 Reconcile applied database migrations, repository files and old draft PR #4; document reproducible baseline without resetting the live project.
+- [x] A07 Reconcile applied database migrations, repository files and old draft PR #4; document reproducible baseline without resetting the live project.
 - [x] A08 Reconcile PR #4/#9/#10 against the revised first-handover scope; exclude notebook/student-explanation feature exposure, preserve historical data/migrations, resolve conflicts and prepare a reviewed release increment.
 
 ## B. Identity and access
@@ -73,7 +73,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] B11 Build Headmaster/Dean teacher-class assignments and verify revocation.
 - [x] B12 Enforce all agreed roles server-side; remove legacy broad admin loopholes.
 - [x] B13 Test Student, teacher, patron/matron, officer, Dean and Headmaster allow/deny cases.
-- [ ] B14 Review auth security settings including existing leaked-password warning, email configuration and rate limits.
+- [x] B14 Review auth security settings including existing leaked-password warning, email configuration and rate limits.
 
 ## C. Roster, calendar and historical records
 
@@ -84,7 +84,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] C05 Restrict name/class/status edits to Headmaster; officer correction requests recorded.
 - [x] C06 Implement archived/transferred/graduated statuses with current-roster exclusions and historical access.
 - [ ] C07 Obtain synthetic/redacted school roster, academic and discipline source examples.
-- [ ] C08 Build Excel/CSV roster validation and changes preview; reject invalid batches as a whole.
+- [x] C08 Build Excel/CSV roster validation and changes preview; reject invalid batches as a whole.
 - [x] C09 Preserve omitted fields, avoid score changes and avoid automatic repeat invitations during roster updates.
 - [x] C10 Build Headmaster action-specific, one-successful-use roster import grants for officers.
 - [x] C11 Test concurrent grant consumption; failures do not consume grants.
@@ -149,10 +149,10 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 
 ## H. AI, public website and visual polish
 
-- [ ] H01 Make chatbot replies direct and concise by default (normally 2–4 short sentences or up to 3 short bullets; answer first, no filler); allow more detail only when requested/needed. Verify configured live provider, failure, retry, stop and accessible progressive display.
-- [ ] H02 Enforce trusted server instructions and concise response/output limits; finish durable rate/cost controls, timeouts and safe diagnostics without exposing private records.
+- [x] H01 Make chatbot replies direct and concise by default (normally 2–4 short sentences or up to 3 short bullets; answer first, no filler); allow more detail only when requested/needed. Verify configured live provider, failure, retry, stop and accessible progressive display.
+- [x] H02 Enforce trusted server instructions and concise response/output limits; finish durable rate/cost controls, timeouts and safe diagnostics without exposing private records.
 - [x] H03 Keep private records/actions out of AI; test prompt abuse and accidental data transmission.
-- [ ] H04 Use school-approved knowledge; disclose lack of live lookup, no fabricated freshness/citations.
+- [x] H04 Use school-approved knowledge; disclose lack of live lookup, no fabricated freshness/citations.
 - [x] H05 Verify keyboard/screen-reader/reduced-motion chat behaviour.
 - [x] H06 Remove click sparks/cursor effects and unnecessary portal animation loops safely.
 - [x] H07 Create two approved lightweight original 3D-looking illustrations and show owner preview.
@@ -168,9 +168,9 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] I03 Check labels, focus, contrast, touch targets and screen-reader status/error announcements.
 - [ ] I04 Separate preview/test/production configuration and prevent demo records entering real workflows.
 - [x] I05 Check keys, exposed endpoints, RLS/grants, storage, logs and dependency versions; no privileged frontend keys.
-- [ ] I06 Configure error monitoring and an actionable support path without private data leakage.
+- [x] I06 Configure error monitoring and an actionable support path without private data leakage.
 - [ ] I07 Confirm backup/retention capability and perform a documented recovery exercise in an isolated environment.
-- [ ] I08 Validate deployment rollback and database migration forward/recovery plan.
+- [x] I08 Validate deployment rollback and database migration forward/recovery plan.
 - [x] I09 Run the retained multi-role attendance → Discipline Officer correction with reason/history → report demonstration, without requiring student online submissions.
 - [x] I10 Run roster/import/results/announcements/account recovery acceptance scenarios; confirm deferred notebook and student-explanation entry points are absent.
 - [ ] I11 Resolve critical/high defects, document accepted nonblocking limitations and repeat affected checks.
@@ -182,13 +182,13 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] J03 Pilot with a small authorised group; collect task-completion time, mistakes and usability feedback.
 - [ ] J04 Obtain school-approved roster/content/contact data and verify first import totals.
 - [ ] J05 Create school-owned Headmaster account and service ownership/access; verify recovery before removing temporary access.
-- [ ] J06 Retain historical actors/audit attribution during ownership transfer.
+- [x] J06 Retain historical actors/audit attribution during ownership transfer.
 - [x] J07 Provide short role guides, in-page help, admin setup/recovery instructions and walkthrough.
 - [ ] J08 Remove demo role/password shortcuts, test users and sample claims from production.
 - [ ] J09 Confirm staff can take/correct attendance, review follow-up concerns, publish results and recover access independently, without student-device dependence.
 - [ ] J10 Director/school approve final acceptance evidence; deploy signed-off release and record version/date.
 - [ ] J11 Agree post-handover support/contact, monitoring and update responsibility.
-- [ ] J12 Deliver access inventory, costs, known limitations, deferred backlog and first-week follow-up arrangement.
+- [x] J12 Deliver access inventory, costs, known limitations, deferred backlog and first-week follow-up arrangement.
 
 
 ## K. Class letter (added 4 November; after reliable source records/reports)
@@ -360,3 +360,10 @@ Ten scenarios were checked across UI handlers and the database. The batch fixes 
 Closed C11, D07, D10, D16, D17, I02, I03, I09 and I10. Signed-in Chromium tests used synthetic teacher and officer sessions at phone widths, interrupted attendance requests, reload, reconnect and a real correction-to-report flow. Independent database sessions verified one roster grant use and one complete register when requests overlapped. Rollback suites covered roster, results, announcements and one-time student access codes.
 
 The connected entry now loads seven tools on demand and defers approximately 61% of its initial JavaScript bytes. The workspace has a keyboard skip link and a visible correction-reason label. The temporary pilot fixtures and race helpers were removed. **86 verified, 30 open, 12 postponed.** See verification/HANDOVER_NINE_2026-11-10.md for the evidence and test boundaries.
+
+
+### Ten handover items verified, 10 November 2026
+
+Closed A07, B14, C08, H01, H02, H04, I06, I08, J06 and J12. Independent application schema replay matched the pilot column fingerprint. The roster importer accepts the strict Excel template and existing CSV path. Chat gained bounded provider requests, approved public answers and privacy-safe support references. The previous draft deployment was restored and moved forward again without changing the production alias. A synthetic ownership transition retained the original actor history. The handover pack records access, costs, known limits and first-week checkpoints.
+
+**96 verified, 20 open, 12 postponed.** See verification/HANDOVER_TEN_2026-11-10.md for the test evidence and scope of each closure. Actual school data, school ownership and sign-off, production email, physical-device and backup recovery gates remain open.
