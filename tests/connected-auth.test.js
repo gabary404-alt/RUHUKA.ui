@@ -1,8 +1,8 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const path=require('node:path');
 function setup(replies){
- const nodes={},events={},intervals=[],storage=new Map();let todayNavigation;const focused=[];const create=()=>({dataset:{},value:'',hidden:false,disabled:false,textContent:'',children:[],classList:{toggle(){}},append(x){this.children.push(x)},replaceChildren(){this.children=[]},setAttribute(){},querySelectorAll(){return []}});
+ const nodes={},events={},intervals=[],storage=new Map();let todayNavigation;const focused=[];const create=()=>({dataset:{},value:'',hidden:false,disabled:false,textContent:'',children:[],classList:{toggle(){}},append(x){this.children.push(x)},replaceChildren(...children){this.children=children},setAttribute(){},querySelectorAll(){return []}});
  const document={hidden:false,getElementById(id){return nodes[id]||(nodes[id]=create())},createElement:create};const calls=[];
- const context={localStorage:{getItem(k){return storage.get(k)||null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},document,window:{mountStudentRecords(){return {ready:Promise.resolve(),dispose(){}};},mountToday(host,api,roles,current,navigate){todayNavigation=navigate;return {refresh(){},dispose(){}};},mountSchoolDesk(){return {ready:Promise.resolve(),focusSection(title){focused.push(title)},dispose(){}};},addEventListener(name,handler){events[name]=handler;},rosterState:require('../connected/roster-state'),attendanceState:require('../connected/attendance-state'),createAttendanceDrafts:require('../connected/drafts.js').createAttendanceDrafts,RUHUKA_CONFIG:{url:'https://test.invalid',key:'publishable'}},Intl,Date,AbortSignal,setInterval(fn,ms){intervals.push({fn,ms})},fetch:async(url,options)=>{calls.push({url,options});const r=replies.shift();if(!r)throw Error('Unexpected request');return {ok:r.ok!==false,status:r.status||200,json:async()=>r.data}}};
+ const context={localStorage:{getItem(k){return storage.get(k)||null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},document,window:{mountStudentRecords(){return {ready:Promise.resolve(),dispose(){}};},mountToday(host,api,roles,current,navigate){todayNavigation=navigate;return {refresh(){},dispose(){}};},mountSchoolDesk(){return {ready:Promise.resolve(),focusSection(title){focused.push(title)},dispose(){}};},addEventListener(name,handler){events[name]=handler;},rosterState:require('../connected/roster-state'),attendanceState:require('../connected/attendance-state'),createAttendanceDrafts:require('../connected/drafts.js').createAttendanceDrafts,RUHUKA_CONFIG:{url:'https://test.invalid',key:'publishable'}},Intl,Date,AbortSignal,setInterval(fn,ms){intervals.push({fn,ms})},fetch:async(url,options)=>{calls.push({url,options});const r=await replies.shift();if(!r)throw Error('Unexpected request');return {ok:r.ok!==false,status:r.status||200,json:async()=>r.data}}};
  vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../connected/attendance.js'),'utf8'),context);document.getElementById('email').value='staff@example.test';document.getElementById('password').value='test-password';return {nodes,calls,events,intervals,navigate:task=>todayNavigation(task),focused};
 }
 test('failed login keeps real workspace closed and clears password',async()=>{
@@ -66,3 +66,66 @@ test('changed roster at confirmation keeps existing marks, adds an unmarked stud
 });
 
 test('sign-out removes temporary print copies even when server logout fails',async()=>{const s=setup([{data:{access_token:'session',user:{id:'u'}}},{data:[{is_active:true}]},{data:[{role:'discipline_officer'}]},{data:[]},{data:[]},{ok:false,status:503,data:{}}]);await s.nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});let removed=0;s.nodes['ruhuka-report-print'].remove=()=>removed++;await s.nodes.signout.onclick();assert.equal(removed,1);assert.equal(s.nodes.workspace.hidden,true);assert.match(s.nodes.notice.textContent,/revocation could not be confirmed/);});
+
+
+test('a delayed register response cannot put yesterday’s records under today’s date', async()=>{
+ let finish;
+ const pending=new Promise(resolve=>{finish=resolve;});
+ const {nodes}=setup([
+  {data:{access_token:'session',user:{id:'u'}}},
+  {data:[{is_active:true}]},
+  {data:[{role:'discipline_officer'}]},
+  {data:[]},
+  {data:[{class_name:'S1',session_id:'old-register'}]},
+  pending,
+  {data:[]}
+ ]);
+ await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});
+ const oldButton=nodes.overview.children[0].children[2];
+ const opening=oldButton.onclick();
+ nodes.day.value='2026-10-01';
+ nodes.day.onchange();
+ finish({data:[{id:'old-record',student_id:'old-student',status:'absent'}]});
+ await opening;
+ assert.equal(nodes.details.children.length,0);
+ await oldButton.onclick();
+ assert.equal(nodes.details.children.length,0);
+});
+
+test('a successful attendance save stays confirmed when overview refresh fails', async()=>{
+ const roster=[{student_id:'s1',full_name:'One'}];
+ const {nodes,calls}=setup(teacherReplies([
+  {data:roster},{data:[]},{data:roster},{data:'saved-id'},
+  {ok:false,status:503,data:{message:'Overview unavailable'}}
+ ]));
+ await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});
+ await nodes.load.onclick();
+ nodes.students.querySelectorAll=()=>[{dataset:{student:'s1'},value:'present'}];
+ await nodes.register.onsubmit({preventDefault(){}});
+ await nodes.register.onsubmit({preventDefault(){}});
+ assert.match(nodes.notice.textContent,/Attendance was submitted/);
+ assert.equal(nodes['draft-status'].textContent,'Submitted to the school.');
+ assert.equal(nodes.submit.hidden,true);
+ assert.equal(calls.filter(c=>c.url.endsWith('/rpc/submit_main_attendance')).length,1);
+});
+
+test('the losing submission shows a duplicate warning and keeps the existing draft', async()=>{
+ const roster=[{student_id:'s1',full_name:'One'}];
+ const {nodes,calls}=setup(teacherReplies([
+  {data:roster},{data:[]},{data:roster},
+  {ok:false,status:409,data:{code:'23505',message:'Duplicate'}}
+ ]));
+ await nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});
+ await nodes.load.onclick();
+ const mark=nodes.students.children[0].children[0];
+ mark.value='absent';
+ nodes.students.querySelectorAll=()=>[mark];
+ mark.onchange();
+ await nodes.register.onsubmit({preventDefault(){}});
+ await nodes.register.onsubmit({preventDefault(){}});
+ assert.match(nodes.notice.textContent,/already been submitted/);
+ assert.match(nodes['draft-status'].textContent,/draft is preserved/);
+ assert.equal(mark.value,'absent');
+ assert.equal(nodes.submit.hidden,true);
+ assert.equal(calls.filter(c=>c.url.endsWith('/rpc/submit_main_attendance')).length,1);
+});

@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inve
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (76 verified, 40 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (77 verified, 39 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
 
@@ -98,7 +98,7 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [x] D03 Block direct authenticated main-register insert bypasses in SQL tests.
 - [x] D04 Test assigned teacher submission and school-wide patron submission without officer correction rights.
 - [x] D05 Require officer correction reason and preserve before/after audit in SQL tests.
-- [ ] D06 Integrate connected attendance into final Staff/Admin navigation with real identity; remove demo role selectors and do not require a student device/login to complete daily attendance. Student absence-submission entry points are deferred.
+- [x] D06 Integrate connected attendance into final Staff/Admin navigation with real identity; remove demo role selectors and do not require a student device/login to complete daily attendance. Student absence-submission entry points are deferred.
 - [ ] D07 Show school-local date, assigned/current classes, readable names and explicit statuses on phones.
 - [x] D08 Show submission review totals, pending/success/error status and clear duplicate warning.
 - [x] D09 Show missing/submitted classes, authenticated submitter display name/time and correction status.
@@ -344,3 +344,12 @@ Roster validation discards a previous file's delayed read/preview after file sel
 
 ### Security review completed — 7 November 2026
 I05 technically verified: current source key/dependency/endpoints review, database RLS/grants/views/definer configuration, storage state, secret-free diagnostics and bounded recent-log scan. Removed anonymous legacy table grants and client maintenance privileges; new postgres-owned public tables require explicit grants. Public approved text remains readable. 61 migrations inventoried. New least_privilege rollback checks and student_access/class_letters_public_progression suites pass. Existing leaked-password warning remains tracked in B14; AI durable cost/rate protection H02, environment separation I04, monitoring I06 and release/real-device acceptance remain open. **76 verified + 40 open + 12 deferred = 128**. Details: verification/SECURITY_REVIEW_2026-11-07.md.
+
+
+### Attendance and recovery verification, 10 November 2026
+
+D06 is complete in the draft release. School sign-in opens the Staff or Admin workspace using account roles. Attendance runs from those workspaces without a student login. Teacher, patron, officer and student entry permissions are covered by the automated checks.
+
+Ten scenarios were checked across UI handlers and the database. The batch fixes stale register responses after changing dates or views, preserves the new register when a reconnect check finishes late, and keeps a successful submission confirmed even if the overview fails to refresh. A database duplicate preserves the losing device's draft and hides confirmation. The same database scenario now verifies that an officer correction appears in the attendance report.
+
+168 Node tests and four affected rollback database suites passed. The local Chromium runner could not start because the environment denied a socket operation. The actual offline browser trial, physical phone checks, independently concurrent submissions, two-device officer refresh and signed-in browser-to-report demonstration stay open under D07/D10/D16/D17/I01/I02/I09. Actual email delivery remains open. Draft PR #10 remains the review branch. **77 verified, 39 open, 12 postponed.** Evidence is in verification/ATTENDANCE_BATCH_2026-11-10.md.

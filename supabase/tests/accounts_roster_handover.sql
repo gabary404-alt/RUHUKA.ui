@@ -46,12 +46,19 @@ end $$;
 reset role;
 select set_config('request.jwt.claim.sub','14000000-0000-4000-8000-000000000003',true);
 set local role authenticated;
-do $$declare rec uuid;begin
+do $$declare rec uuid; report jsonb; school_day date := (now() at time zone 'Africa/Kigali')::date;begin
  if not exists(select 1 from public.main_attendance_overview_v2((now()at time zone'Africa/Kigali')::date)where class_name='__ACCOUNT_CLASS__'and absent=1 and submitter_name='Test teacher')then raise exception 'FAIL officer visibility';end if;
  select r.id into rec from public.attendance_records r join public.attendance_sessions s on s.id=r.session_id where s.class_name='__ACCOUNT_CLASS__'and r.student_id='__ACCOUNT_EXISTING__';
  perform public.correct_main_attendance(rec,'present','Synthetic late-return review');
  if not exists(select 1 from public.audit_events where entity_id=rec::text and actor_user_id=auth.uid()and details->'before'->>'status'='absent'and details->'after'->>'status'='present')then raise exception 'FAIL correction audit';end if;
- if not exists(select 1 from public.class_main_attendance_summary('__ACCOUNT_CLASS__',current_date,current_date)where present_marks=2 and absent_marks=0)then raise exception 'FAIL corrected summary';end if;
+ if not exists(select 1 from public.class_main_attendance_summary('__ACCOUNT_CLASS__',school_day,school_day)where present_marks=2 and absent_marks=0)then raise exception 'FAIL corrected summary';end if;
+ report := public.school_report('attendance','__ACCOUNT_CLASS__',school_day,school_day);
+ if not exists (
+  select 1 from jsonb_array_elements(report->'rows') student
+  where student->>'student_id'='__ACCOUNT_EXISTING__'
+    and (student->>'present')::int=1 and (student->>'absent')::int=0
+ ) then raise exception 'FAIL correction missing from attendance report';end if;
+
 end $$;
 reset role;
 select set_config('request.jwt.claim.sub','14000000-0000-4000-8000-000000000004',true);
