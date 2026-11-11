@@ -3,7 +3,7 @@ const { schoolBackend } = require('../server/school-environment.js');
 
 function schoolConfig(env) {
   const backend = schoolBackend(env);
-  return backend && { ...backend, emailRecoveryEnabled: false, staffInvitesEnabled: false };
+  return backend && { ...backend, testWorkspace: env.VERCEL_ENV === 'preview', emailRecoveryEnabled: false, staffInvitesEnabled: false };
 }
 
 module.exports = function handler(req, res) {

@@ -23,7 +23,7 @@ test('preview school configuration is disabled unless both isolated settings are
   ]) assert.equal(schoolConfig({ ...env, ...overrides }), null);
   assert.equal(schoolConfig({ VERCEL_ENV: 'preview' }), null);
   assert.deepEqual(schoolConfig(env), {
-    url: testUrl, key: testKey, emailRecoveryEnabled: false, staffInvitesEnabled: false
+    url: testUrl, key: testKey, testWorkspace: true, emailRecoveryEnabled: false, staffInvitesEnabled: false
   });
   assert.deepEqual(schoolConfig({ ...env, VERCEL_ENV: 'production' }), production);
 });

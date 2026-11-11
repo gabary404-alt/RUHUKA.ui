@@ -27,3 +27,11 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
 @media (max-width: 600px), (max-height: 520px) {
   .workspace-nav { position: static; }
 }
+
+.test-workspace-banner {
+  padding: 10px 12px;
+  border: 1px solid #a47422;
+  border-radius: 8px;
+  background: #fff4d4;
+  color: #573b07;
+}

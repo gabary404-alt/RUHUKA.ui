@@ -7,8 +7,44 @@ if (!config?.url || !config?.key) {
   say('Account setup is unavailable here. If you are using a preview, use a dedicated test workspace. If you are on the school website, reload or contact the administrator.');
   return;
 }
+if (config.testWorkspace) $('test-workspace-banner').hidden = false;
 async function auth(path,body,token){const r=await fetch(config.url+'/auth/v1/'+path,{method:body===undefined?'GET':'POST',signal:AbortSignal.timeout(20000),headers:{apikey:config.key,...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)})});let data;try{data=await r.json()}catch{data={}}return {ok:r.ok,status:r.status,data};}
-async function initialise(){if(fragment.has('error')||fragment.has('error_description')){say('This setup or reset link is invalid or expired. Request a new link below.');return;}if(!fragment.has('access_token'))return;if(!['recovery','invite'].includes(fragment.get('type'))){say('Use a fresh school invitation or password-reset link.');return;}const value=fragment.get('access_token');try{const r=await auth('user',undefined,value);if(!r.ok)throw Error();access=value;$('student-code-panel').hidden=true;$('request-panel').hidden=true;$('password-panel').hidden=false;$('verified-account').textContent='Account: '+r.data.email;say('Choose your own password. Staff and administrators cannot see it.');$('new-password').focus();}catch{say('This setup or reset link is invalid or expired. Request a new link below.');}finally{fragment.delete('access_token');fragment.delete('refresh_token');}}
+async function initialise() {
+  const invalidLink = 'This setup or reset link is invalid or expired. Request a new link or contact the school.';
+  try {
+    if (fragment.has('error') || fragment.has('error_description')) {
+      say(invalidLink);
+      return;
+    }
+    const type = fragment.get('type');
+    const tokenHash = fragment.get('token_hash');
+    let value = fragment.get('access_token');
+    if (!tokenHash && !value) return;
+    if (!['recovery', 'invite'].includes(type) || (tokenHash && value)) {
+      say('Use a fresh school invitation or password-reset link.');
+      return;
+    }
+    if (tokenHash) {
+      if (!/^[a-z0-9_-]{16,200}$/i.test(tokenHash)) throw Error();
+      const verified = await auth('verify', { token_hash: tokenHash, type });
+      if (!verified.ok || !verified.data.access_token) throw Error();
+      value = verified.data.access_token;
+    }
+    const identity = await auth('user', undefined, value);
+    if (!identity.ok || typeof identity.data.email !== 'string') throw Error();
+    access = value;
+    $('student-code-panel').hidden = true;
+    $('request-panel').hidden = true;
+    $('password-panel').hidden = false;
+    $('verified-account').textContent = 'Account: ' + identity.data.email;
+    say('Choose your own password. Staff and administrators cannot see it.');
+    $('new-password').focus();
+  } catch {
+    say(invalidLink);
+  } finally {
+    for (const field of ['token_hash', 'access_token', 'refresh_token']) fragment.delete(field);
+  }
+}
 $('recovery-send').disabled=config.emailRecoveryEnabled!==true;
 $('recovery-request').onsubmit=async e=>{e.preventDefault();if(config.emailRecoveryEnabled!==true){say('Email recovery is not enabled yet. Contact the school administrator.');return;}if(working)return;working=true;$('recovery-send').disabled=true;try{const redirect=new URL('account.html',location.href);const r=await auth('recover?redirect_to='+encodeURIComponent(redirect.href),{email:$('recovery-email').value.trim()});if(r.status===429)say('Too many requests. Wait before requesting another link.');else if(!r.ok&&r.status>=500)say('The email request could not be completed. Try again later or contact the administrator.');else say('If this email has an account and delivery is configured, a reset link will arrive. Check your inbox and spam folder.');}catch{say('The request could not be confirmed. Check your inbox before trying again.');}finally{working=false;$('recovery-send').disabled=false;}};
 $('password-form').onsubmit=async e=>{e.preventDefault();if(working||!access)return;const password=$('new-password').value;if(password.length<12||password.length>128){say('Use 12–128 characters.');return;}if(password!==$('repeat-password').value){say('The two passwords do not match.');return;}working=true;$('password-save').disabled=true;try{const r=await fetch(config.url+'/auth/v1/user',{method:'PUT',signal:AbortSignal.timeout(20000),headers:{apikey:config.key,Authorization:'Bearer '+access,'Content-Type':'application/json'},body:JSON.stringify({password})});if(!r.ok){say(r.status===401?'This link has expired. Request a new one.':'The password could not be saved. Choose a stronger password or request a new link.');return;}const savedAccess = access;

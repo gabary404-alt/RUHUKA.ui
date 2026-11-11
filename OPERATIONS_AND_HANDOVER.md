@@ -1,6 +1,6 @@
 # RUHUKA setup and first-handover runbook
 
-Status: preview, not a production handover. Read HANDOVER_CHECKLIST.md and the latest verification report. The school-facing walkthrough is connected/guide.html; it links to account status and practical help. School ownership, email delivery, recovery, device acceptance and isolated restore/rebuild remain unfinished.
+Status: preview, not a production handover. Read HANDOVER_CHECKLIST.md and the latest verification report. The school-facing walkthrough is connected/guide.html; it links to account status and practical help. School ownership, email delivery and device acceptance remain unfinished. The isolated rehearsal and synthetic backup drill are documented in verification/ISOLATED_WORKSPACE_2026-11-11.md.
 
 ## Daily roles
 
@@ -40,7 +40,7 @@ If access fails today, use the account status page and contact the authorised ad
 
 PR #10 is the integration draft. PR #4 is superseded database-source work; #9 is a postponed notebook UI. Keep them unmerged separately. See RELEASE_PLAN.md for the reviewed increment and gates. Preview acceptance is not production release approval.
 
-Before production: complete account/device/role/file/AI and school acceptance, verify secret scopes and monitoring, confirm actual backup/retention capability, and perform isolated restore/rebuild and deployment rollback exercises. I07 and J10 remain open. Existing historical reset/schema scripts must never be rerun on the live project. A website rollback does not reverse a database migration; use the reviewed forward/recovery plan, not a project reset.
+Before production: complete account/device/role/file/AI and school acceptance, verify secret scopes and monitoring, confirm school-controlled managed backup/retention and verify the exact staged release. J10 remains open. Existing historical reset/schema scripts must never be rerun on the live project. A website rollback does not reverse a database migration; use the reviewed forward/recovery plan, not a project reset.
 
 ## Support and handover evidence
 
@@ -63,7 +63,7 @@ Roster import accepts a CSV or one visible Excel .xlsx worksheet of up to 500 KB
 
 Chat support logs only the fixed event name, failure class, HTTP status and random support reference. Ask for the reference and Kigali time. In Vercel Runtime Logs, select the appropriate deployment and search the reference in a short recent window. A preview 503 was traced this way. Preview has no live provider key. A configured live provider answered a harmless production test using the existing integration.
 
-The database chat budget limits the preview to 8 requests a minute and 80 a UTC day, shared across users. Budget exhaustion and configuration failures fall back to local help. Use a distinct production budget key and separate approved cap before promoting this code. Configure RUHUKA_CHAT_BUDGET_SECRET and RUHUKA_PUBLIC_SUPABASE_KEY as server environment values, and keep LDK_AI_API_KEY server-only. Store only the budget key digest in the database. A deploy without these settings does not send paid provider requests.
+The preview does not call the paid provider. Before promotion, configure a production budget key and approved cap. Budget exhaustion and configuration failures fall back to local help. Configure RUHUKA_CHAT_BUDGET_SECRET and LDK_AI_API_KEY as production server environment values. Store only the budget key digest in the database. A deploy without these settings does not send paid provider requests.
 
 ## Ownership and release recovery rehearsal
 
@@ -71,13 +71,13 @@ First verify the successor's independent Headmaster sign-in and recovery. Disabl
 
 The preview branch alias was moved to the preceding ready deployment and then restored to the current deployment. The production alias was checked separately. For a release incident, first record the live deployment ID, current migration version, symptoms and the last known compatible build. Route traffic back only to an approved compatible build. Compare a read-only public entry, sign-in, and access boundaries before resuming ordinary writes.
 
-Database changes recover separately from website routing. The new chat budget migration is additive and the prior build can coexist with it. To stop paid preview calls, retire the scope's server key and leave the default fallback in place. To restore, provision a replacement preview key and digest, verify a bounded request, then enable the provider. Never replay the historical reset on the pilot or delete a database to match a website rollback. A real backup restore exercise remains I07.
+Database changes recover separately from website routing. The new chat budget migration is additive and the prior build can coexist with it. Retire the former preview budget scope when clearing old staging configuration. The current preview cannot call the paid provider. Never replay the historical reset on the pilot or delete a database to match a website rollback. The synthetic recovery drill passed. Keep the complete managed backup and restore validation in the production release procedure.
 
 ## Preview and test configuration
 
-On Vercel, `/connected/config.js` is served by the school configuration function. Enable **Automatically expose System Environment Variables** so the function can identify the environment. A normal preview serves the public page with its built-in content and keeps school sign-in and account setup closed. To enable connected pilot testing, set `RUHUKA_TEST_SUPABASE_URL` and `RUHUKA_TEST_SUPABASE_PUBLISHABLE_KEY` for that preview branch only, using a separate active Supabase project seeded with synthetic data. The function refuses the production URL and publishable key in a preview. School email gates stay closed. Older immutable previews predate the guard and should remain protected and retired from testing.
+On Vercel, `/connected/config.js` is served by the school configuration function. Enable **Automatically expose System Environment Variables** so the function can identify the environment. A normal preview serves the public page with its built-in content and keeps school sign-in and account setup closed. To enable connected pilot testing, set `RUHUKA_TEST_SUPABASE_URL` and `RUHUKA_TEST_SUPABASE_PUBLISHABLE_KEY` for that preview branch only, using a separate active Supabase project seeded with synthetic data. The function refuses the production URL and publishable key in a preview. School email gates stay closed. Use the newest PR #10 preview and verify the Test workspace banner. Older immutable previews predate the guard and should remain protected and retired from testing.
 
-Before releasing, verify the school configuration route on the exact staged production build and confirm it uses the intended database. Verify the protected test preview can create a synthetic attendance register and that the live database counts are unaffected. Check the chatbot budget separately: it is a server-only service, and its preview scope is isolated logically but currently shares the managed database.
+Before releasing, verify the school configuration route on the exact staged production build and confirm it uses the intended database. Verify the protected test preview can create a synthetic attendance register and that the live database counts are unaffected. Preview school-content queries use the same isolated project. Preview never invokes the paid chatbot provider. Production requires its own server-only chatbot budget secret.
 
 ## Recovery exercise
 
@@ -86,4 +86,8 @@ The current Supabase Free plan requires an owner-managed backup routine. The rep
 1. Choose an isolated restore project. Record source and destination project references, backup time, PostgreSQL major version, and the school owner's chosen backup frequency and retention.
 2. In a secure operator environment, use the [Supabase CLI export and restore procedure](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore) to export roles, schema and data. Keep connection strings and exports in school-controlled restricted storage. Record checksums and keep secrets out of logs and the repository.
 3. Restore to the isolated project. Use a restricted test URL, keep email disabled, and restore any required Storage objects separately. Verify migration history, role restrictions, a synthetic sign-in and attendance/report totals. Include Auth configuration, Edge Functions, and required secrets in the recovery inventory.
-4. Record elapsed restore time, any data loss, the verification results and the clean-up owner. Leave I07 open until the exercise succeeds.
+4. Record elapsed restore time, any data loss, the verification results and the clean-up owner. Record this as managed release evidence. The synthetic application drill already verified I07.
+
+To rebuild a fresh managed test project, generate SQL with `python supabase/operations/build_schema_replay.py --hosted-test`. Apply it only to an empty isolated project. The SQL refuses a destination with application tables or Auth users. Deploy the student-access and staff-accounts functions separately, and leave mail off during synthetic rehearsal.
+
+For the future Auth email rollout, test a template link to the exact approved account page with a URL fragment of `#token_hash={{ .TokenHash }}&type=recovery` or `type=invite`, as appropriate. The page removes the fragment before making requests and exchanges the hash with Auth before opening the password form. Keep the previous callback compatible while switching templates. Verify an actual received email, expired link and reused link before enabling production recovery or invitations.

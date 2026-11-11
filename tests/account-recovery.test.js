@@ -24,3 +24,30 @@ test('an unconfigured preview clears a callback fragment and hides account actio
  assert.match(s.nodes['account-status'].textContent,/Account setup is unavailable/);
  assert.equal(s.calls.length,0);
 });
+
+test('a single-use Auth link is exchanged before showing the password form',async()=>{
+ const tokenHash='synthetic-recovery-hash-112233';
+ const s=setup('#type=recovery&token_hash='+tokenHash,[{data:{access_token:'new-session'}},{data:{email:'staff@example.test'}}]);
+ assert.equal(s.replaced,'/connected/account.html');
+ await s.settle();
+ assert.equal(s.nodes['password-panel'].hidden,false);
+ assert.ok(s.calls[0].url.endsWith('/verify'));
+ assert.deepEqual(JSON.parse(s.calls[0].options.body),{token_hash:tokenHash,type:'recovery'});
+ assert.equal(s.calls[1].options.headers.Authorization,'Bearer new-session');
+ assert.ok(s.calls.every(c=>!c.url.includes(tokenHash)));
+});
+
+test('expired or used Auth links leave the password form closed',async()=>{
+ const s=setup('#type=invite&token_hash=synthetic-used-invite-112233',[{ok:false,status:403}]);
+ await s.settle();
+ assert.equal(s.nodes['password-panel'].hidden,true);
+ assert.equal(s.calls.length,1);
+ assert.match(s.nodes['account-status'].textContent,/invalid or expired/);
+});
+
+test('ambiguous links with both session and one-time credentials make no Auth request',async()=>{
+ const s=setup('#type=recovery&token_hash=synthetic-used-invite-112233&access_token=ignored');
+ await s.settle();
+ assert.equal(s.nodes['password-panel'].hidden,true);
+ assert.equal(s.calls.length,0);
+});

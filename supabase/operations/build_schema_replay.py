@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 
 root = Path(__file__).resolve().parents[2]
 db = root / "supabase"
@@ -19,6 +20,35 @@ for entry in inventory:
     if path.parent.name == "migrations":
         paths.append(path)
 assert paths and paths[0].name.startswith("20261020165638_")
+if sys.argv[1:] == ["--hosted-test"]:
+    # Fresh managed Auth/Realtime objects already exist. Refuse any project
+    # containing application tables or accounts before applying the baseline.
+    print("""do $$ begin
+    if exists(select 1 from pg_tables where schemaname in ('public','private'))
+       or exists(select 1 from auth.users) then
+      raise exception 'Expected an empty isolated test project';
+    end if;
+    end $$;""")
+    for index, path in enumerate(paths):
+        sql = path.read_text()
+        if index == 0:
+            sql = re.sub(r"(?im)^drop table if exists public\.[a-z_]+ cascade;\n", "", sql)
+        if path.name.startswith("20261026190220_"):
+            print("alter table public.students add column student_email text, add column student_phone text;")
+            sql = sql.replace(
+                "revoke all on function public.rls_auto_enable() from public, anon, authenticated;",
+                """do $$ begin
+                if to_regprocedure('public.rls_auto_enable()') is not null then
+                  revoke all on function public.rls_auto_enable() from public, anon, authenticated;
+                end if;
+                end $$;""",
+            )
+        print(f"\n-- {path.name}\n{sql}")
+    print("notify pgrst, 'reload schema';")
+    sys.exit(0)
+if len(sys.argv) != 1:
+    raise SystemExit("Use no arguments for schema replay or --hosted-test for a fresh test project.")
+
 names = {schema: f"ruhuka_replay_{schema}" for schema in ("public", "private", "auth")}
 
 print("""begin;

@@ -23,7 +23,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 62 applied migration versions reconcile
 
 ### Revised tracker accounting
 
-The original **128 IDs are preserved**: **116 active first-handover checks (96 verified, 20 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
+The original **128 IDs are preserved**: **116 active first-handover checks (98 verified, 18 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
 A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. I01 remains open for the complete physical device and browser matrix. See the latest session evidence for the separate role and network checks.
 
@@ -166,10 +166,10 @@ A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their te
 - [ ] I01 Verify native scrolling, keyboard/focus and layouts on the agreed phone/tablet/desktop matrix; include main page, Staff/Admin/retained Student views, chat, tables, modals and phone keyboard. Fix scroll traps, overflow and oversized empty sections.
 - [x] I02 Measure initial JS/CSS/asset weight and loading work before/after; reduce decorative rendering and unused/hidden-portal startup work. Test slow/interrupted connections, storage limits, offline attendance drafts and duplicate-safe retry.
 - [x] I03 Check labels, focus, contrast, touch targets and screen-reader status/error announcements.
-- [ ] I04 Separate preview/test/production configuration and prevent demo records entering real workflows.
+- [x] I04 Separate preview/test/production configuration and prevent demo records entering real workflows. Verified the isolated managed test project, preview config, hosted role writes and unchanged production counts.
 - [x] I05 Check keys, exposed endpoints, RLS/grants, storage, logs and dependency versions; no privileged frontend keys.
 - [x] I06 Configure error monitoring and an actionable support path without private data leakage.
-- [ ] I07 Confirm backup/retention capability and perform a documented recovery exercise in an isolated environment.
+- [x] I07 Confirm backup/retention capability and perform a documented recovery exercise in an isolated environment. Verified a fresh restore of a representative synthetic archive. School-controlled managed backups and retention remain release requirements.
 - [x] I08 Validate deployment rollback and database migration forward/recovery plan.
 - [x] I09 Run the retained multi-role attendance → Discipline Officer correction with reason/history → report demonstration, without requiring student online submissions.
 - [x] I10 Run roster/import/results/announcements/account recovery acceptance scenarios; confirm deferred notebook and student-explanation entry points are absent.
@@ -371,3 +371,8 @@ Closed A07, B14, C08, H01, H02, H04, I06, I08, J06 and J12. Independent applicat
 ### 11 November — release-readiness work
 
 Progress on B10/B06/B09/I01/I04/I07/J08/F02/I11/J09 is recorded in verification/HANDOVER_READINESS_2026-11-11.md. The draft now gates connected previews on a separate test database, handles confirmed password saves separately from sign-out failures, and adjusts the short-screen and mobile layout. Full acceptance requirements remain open. **96 verified, 20 open, 12 postponed.**
+
+
+### 11 November — isolated school rehearsal and backup drill
+
+Closed I04 and I07. The current PR #10 preview points to a separate Supabase project. Real hosted Auth sessions exercised synthetic attendance, officer correction, results publication and student setup. A fresh isolated restore matched all 29 application rows and retained role restrictions. The release bundle excludes the old demo code, and the account page now handles one-time Auth token-hash callbacks. The live deployment remains unchanged. See verification/ISOLATED_WORKSPACE_2026-11-11.md. **98 verified, 18 open, 12 postponed.**
