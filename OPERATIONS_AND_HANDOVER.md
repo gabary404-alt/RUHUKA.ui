@@ -25,7 +25,7 @@ Only the Headmaster and named active staff editors can publish public school tex
 
 Client config has staffInvitesEnabled=false and emailRecoveryEnabled=false. Supabase staff-accounts v3 also requires its server invitation flag; changing only the UI does not enable invitations. Do not turn these on merely because a preview build succeeds.
 
-Before enabling: deploy the reviewed production account page, verify approved production Auth redirect/callback settings, configure an authorised sender/delivery service, and agree an actual recipient test. Verify first-password setup, reset, expired link, reused link and wrong/disabled account behaviour through actual email. Only then enable the corresponding client/server gates and run the invitation/recovery acceptance steps. Do not paste SMTP credentials, service-role keys, passwords or reset links into repository files, screenshots or support tickets. B06/B09/B10/B14 remain open where their full stated outcome is not met.
+Before enabling: deploy the reviewed production account page, verify approved production Auth redirect/callback settings, configure an authorised sender/delivery service, and agree an actual recipient test. Verify first-password setup, reset, expired link, reused link and wrong/disabled account behaviour through actual email. Only then enable the corresponding client/server gates and run the invitation/recovery acceptance steps. Do not paste SMTP credentials, service-role keys, passwords or reset links into repository files, screenshots or support tickets. B06/B09/B10 remain open where their full stated outcome is not met.
 
 If access fails today, use the account status page and contact the authorised administrator through the school's usual channel. Do not create a second account to bypass a missing role. Staff disabling revokes access server-side; changed/re-enabled roles require a fresh sign-in. If email is unavailable, do not promise that reset requests work.
 
@@ -40,7 +40,7 @@ If access fails today, use the account status page and contact the authorised ad
 
 PR #10 is the integration draft. PR #4 is superseded database-source work; #9 is a postponed notebook UI. Keep them unmerged separately. See RELEASE_PLAN.md for the reviewed increment and gates. Preview acceptance is not production release approval.
 
-Before production: complete account/device/role/file/AI and school acceptance, verify secret scopes and monitoring, confirm actual backup/retention capability, and perform isolated restore/rebuild and deployment rollback exercises. A07/I05–I10/J10 remain open as applicable. Existing historical reset/schema scripts must never be rerun on the live project. A website rollback does not reverse a database migration; use the reviewed forward/recovery plan, not a project reset.
+Before production: complete account/device/role/file/AI and school acceptance, verify secret scopes and monitoring, confirm actual backup/retention capability, and perform isolated restore/rebuild and deployment rollback exercises. I07 and J10 remain open. Existing historical reset/schema scripts must never be rerun on the live project. A website rollback does not reverse a database migration; use the reviewed forward/recovery plan, not a project reset.
 
 ## Support and handover evidence
 

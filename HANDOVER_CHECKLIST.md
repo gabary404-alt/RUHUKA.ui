@@ -1,14 +1,14 @@
 # RUHUKA first handover checklist
 
-Updated: 7 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
+Updated: 11 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
 
 This is the delivery tracker. A checked item means the specifically stated outcome was verified, not that its whole feature is production-ready. Open items may already have partial code. Each working session picks the next dependency-ready item, records evidence and reports completed IDs, blockers and any owner action. Reopen a checked item when later changes invalidate its evidence. No calendar promise overrides acceptance checks.
 
 ## Current position
 
-Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 now contains class-letter/manual-review/public-editor code 4ac3181e2263b295f3bb0d61696a3ffe5b733ad8 and a READY preview. The visitor-facing website remains separate from the real role-based workspace. Neither this release nor the earlier pilot updates are merged into production.
+Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 is the integration branch. Its preview for commit 47d25acb25888c89f9618a4ef29d314e7d8c3a77 built successfully and served the isolated configuration route. The visitor-facing website remains separate from the real role-based workspace. Neither this release nor the earlier pilot updates are merged into production.
 
-RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inventoried in the repository. Named academic releases, official discipline snapshots, separate filtered reports, Dean/officer publication/correction, enrolment history, own-student results and one-use officer roster permissions are connected. Email invitation/reset requests remain deliberately disabled until production callback/mail acceptance. Old notes/records are disposable development tests; targeted cleanup is allowed, not a wholesale project reset.
+RUHUKA system (jsqiqxflgokfdooogcst) has 62 applied migration versions reconciled in the repository. Named academic releases, official discipline snapshots, separate filtered reports, Dean/officer publication/correction, enrolment history, own-student results and one-use officer roster permissions are connected. Email invitation/reset requests remain deliberately disabled until production callback/mail acceptance. Old notes/records are disposable development tests; targeted cleanup is allowed, not a wholesale project reset.
 
 ### Agreed first-handover scope — 5 November 2026
 
@@ -25,7 +25,7 @@ RUHUKA system (jsqiqxflgokfdooogcst) has 58 applied migration versions, now inve
 
 The original **128 IDs are preserved**: **116 active first-handover checks (96 verified, 20 open)** plus **12 deferred feature records**. Seven of the deferred records were previously technically verified; that work is retained as history, not counted as required first-handover delivery.
 
-A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. D06 remains open until the integrated workspace is demonstrated with real signed-in roles. I01/I02 remain open for the complete device/network matrix.
+A06, G01, G02, G10 and H10 have been revalidated for the reduced scope. Their technical checks pass; full signed-in device acceptance remains separate. I01 remains open for the complete physical device and browser matrix. See the latest session evidence for the separate role and network checks.
 
 ### Implementation order (remaining acceptance mapped to existing IDs)
 
