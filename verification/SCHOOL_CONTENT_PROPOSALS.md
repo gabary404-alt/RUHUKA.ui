@@ -12,4 +12,10 @@
 | History and school introduction | Broad promotional description | Obtain short approved school description/history. |
 | Numbers and testimonials | 1,400 students, 50 teachers, 19 clubs; testimonial names are placeholders | Do not copy; require dated verification and genuine consented testimonials. |
 
-The preview currently publishes only the established school name/motto, visitor navigation and clearly marked pending-information sections. It does not assert current combinations/clubs/contacts/staff totals. No stock/generated image is presented as a real photograph of this school. School data-handling/privacy/support promises must reflect RUHUKA operations and school approval, not old marketing copy.
+## Visitor preview update — 11 November 2026
+
+The director asked to restore useful public information from the live homepage. The draft visitor pages include the school introduction and motto, Ordinary and Advanced Levels, the previously published subject combinations, published examples of sports and clubs, and the school office address, email and two main phone numbers. The programme and activity pages describe the published examples and direct visitors to the school office for current availability. The office details match both the old RUHUKA landing page and the school's published general contacts.
+
+The live demo's claimed statistics, rankings, admissions percentages, named staff and testimonials were left out. Staff-approved public text can still update the landing and relevant detail pages. The contact update supersedes older static office links. Two original person-free illustrations depict imagined scenes, not campus photographs.
+
+Sources checked: the public RUHUKA landing page, https://www.lyceedekigali.ac.rw/ and https://lyceedekigali.ac.rw/about.html. Confirm current programme availability, club schedules and official school contact details as part of release acceptance.

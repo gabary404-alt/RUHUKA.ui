@@ -8,4 +8,30 @@ test('active workspace has no notebook or online absence submission controls',()
 
 test('public stars are a small static decoration with no canvas, filter or animation',()=>{const css=fs.readFileSync('public.css','utf8'),stars=css.slice(css.indexOf('/* A few stationary'));assert.equal((stars.match(/radial-gradient/g)||[]).length,6);assert.ok(stars.includes('pointer-events:none'));assert.ok(!/animation:|filter:|@keyframes|url\(/.test(stars));assert.ok(!/requestAnimationFrame|setInterval|canvas/.test(fs.readFileSync('public.js','utf8')));});
 
-test('approved public text is plain text only; absent content keeps usable placeholders',()=>{const {applyPublicText}=require('../public-content');const nodes={};const doc={getElementById(id){return nodes[id]||(nodes[id]={textContent:'Placeholder'})}};assert.equal(applyPublicText(doc,{revision:0,content:{}}),false);assert.equal(applyPublicText(doc,{revision:1,content:{introduction:'<img src=x onerror=bad()>'}}),true);assert.equal(nodes['public-introduction'].textContent,'<img src=x onerror=bad()>');assert.equal(nodes['public-details-status'].hidden,false);});
+test('approved public text stays plain, reveals news and supersedes older contact links',()=>{
+ const {applyPublicText}=require('../public-content');
+ const news={hidden:true},oldContact={hidden:false};
+ const nodes={'public-introduction':{textContent:'School introduction'},'public-news':{closest:()=>news},'public-contact':{textContent:'School office'}};
+ const doc={getElementById:id=>nodes[id],querySelectorAll:selector=>selector.includes('"contact"')?[oldContact]:[]};
+ assert.equal(applyPublicText(doc,{revision:0,content:{}}),false);
+ assert.equal(news.hidden,true);
+ assert.equal(oldContact.hidden,false);
+ assert.equal(applyPublicText(doc,{revision:1,content:{introduction:'<img src=x onerror=bad()>',news:'New notice',contact:'School office update'}}),true);
+ assert.equal(nodes['public-introduction'].textContent,'<img src=x onerror=bad()>');
+ assert.equal(nodes['public-news'].textContent,'New notice');
+ assert.equal(news.hidden,false);
+ assert.equal(oldContact.hidden,true);
+});
+
+test('visitor navigation scrolls to four distinct sections and opens real detail pages',()=>{
+ const home=fs.readFileSync('index.html','utf8');
+ for(const [section,page] of [['about','our-school'],['academics','academics'],['school-life','school-life'],['contact','contact']]){
+  assert.ok(home.includes('href="#'+section+'"'));
+  assert.ok(home.includes('id="'+section+'"'));
+  assert.ok(home.includes('href="'+page+'.html" target="_blank" rel="noopener"'));
+  const detail=fs.readFileSync(page+'.html','utf8');
+  assert.ok(detail.includes('href="index.html#'+section+'"'));
+  assert.ok(detail.includes('href="connected/"'));
+  assert.ok(!detail.includes('id="ai-fab"'));
+ }
+});
