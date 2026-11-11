@@ -105,3 +105,14 @@ radial-gradient(circle at 9% 92%,var(--star) 0 1px,transparent 4px)}
 @media (max-width: 510px) {
   .visitor-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+.theme-button::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
