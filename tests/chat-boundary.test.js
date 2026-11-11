@@ -71,3 +71,19 @@ test('support references contain safe classifications rather than questions or p
  assert.deepEqual(JSON.parse(lines[0]),{event:'ruhuka_chat',reason:'provider_timeout',status:502,reference:ref});
  assert.deepEqual(response,{error:'Try again.',reference:ref});
 });
+
+test('preview chat only reads its test project and cannot spend the production AI budget',async()=>{
+ const {handleConfiguredChat}=require('../server/chat-services');
+ const url='https://abcdefghijklmnopqrst.supabase.co';
+ const env={VERCEL_ENV:'preview',RUHUKA_TEST_SUPABASE_URL:url,RUHUKA_TEST_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',RUHUKA_CHAT_BUDGET_SECRET:'synthetic',LDK_AI_API_KEY:'synthetic'};
+ const calls=[];
+ const request=async(endpoint)=>{calls.push(endpoint);return {ok:true,json:async()=>({revision:0})}};
+ const general=await handleConfiguredChat('POST',user('Explain fractions'),env,request);
+ assert.equal(general.status,503);
+ assert.deepEqual(calls,[]);
+ await handleConfiguredChat('POST',user('How do I contact the school?'),env,request);
+ assert.deepEqual(calls,[url+'/rest/v1/rpc/school_public_content']);
+ calls.length=0;
+ await handleConfiguredChat('POST',user('How do I contact the school?'),{...env,RUHUKA_TEST_SUPABASE_URL:'https://jsqiqxflgokfdooogcst.supabase.co'},request);
+ assert.deepEqual(calls,[]);
+});

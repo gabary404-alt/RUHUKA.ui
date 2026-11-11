@@ -1,14 +1,14 @@
 'use strict';
 const {handleChat}=require('./chat-policy.js');
 
-const publicUrl='https://jsqiqxflgokfdooogcst.supabase.co/rest/v1/rpc/';
+const {schoolBackend}=require('./school-environment.js');
 function services(env,fetchImpl=fetch){
- const key=env.RUHUKA_PUBLIC_SUPABASE_KEY;
+ const backend=schoolBackend(env);
  const call=async (name,body)=>{
-  if(!key)throw Error('Public API configuration unavailable');
-  const response=await fetchImpl(publicUrl+name,{
+  if(!backend)throw Error('Public API configuration unavailable');
+  const response=await fetchImpl(backend.url+'/rest/v1/rpc/'+name,{
    method:'POST',
-   headers:{apikey:key,'Content-Type':'application/json'},
+   headers:{apikey:backend.key,'Content-Type':'application/json'},
    body:JSON.stringify(body),
    signal:AbortSignal.timeout(3500),
    cache:'no-store'
@@ -28,7 +28,8 @@ function services(env,fetchImpl=fetch){
 }
 
 async function handleConfiguredChat(method,body,env,fetchImpl=fetch){
- return handleChat(method,body,env.LDK_AI_API_KEY,fetchImpl,services(env,fetchImpl));
+ const providerKey=env.VERCEL_ENV==='production'?env.LDK_AI_API_KEY:undefined;
+ return handleChat(method,body,providerKey,fetchImpl,services(env,fetchImpl));
 }
 
 function diagnostic(result,reference,write){

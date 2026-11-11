@@ -1,18 +1,9 @@
 // This endpoint exposes only browser-safe Supabase settings.
-const productionUrl = 'https://jsqiqxflgokfdooogcst.supabase.co';
-const productionKey = 'sb_publishable_CUCKjIg3vkVLk2qKQsjcKQ_Bs0MlfSf';
+const { schoolBackend } = require('../server/school-environment.js');
 
 function schoolConfig(env) {
-  if (env.VERCEL_ENV === 'production') {
-    return { url: productionUrl, key: productionKey, emailRecoveryEnabled: false, staffInvitesEnabled: false };
-  }
-  if (env.VERCEL_ENV !== 'preview') return null;
-
-  const url = env.RUHUKA_TEST_SUPABASE_URL;
-  const key = env.RUHUKA_TEST_SUPABASE_PUBLISHABLE_KEY;
-  if (!/^https:\/\/[a-z0-9]{20}\.supabase\.co$/.test(url || '') || url === productionUrl) return null;
-  if (!/^sb_publishable_[A-Za-z0-9_-]+$/.test(key || '') || key === productionKey) return null;
-  return { url, key, emailRecoveryEnabled: false, staffInvitesEnabled: false };
+  const backend = schoolBackend(env);
+  return backend && { ...backend, emailRecoveryEnabled: false, staffInvitesEnabled: false };
 }
 
 module.exports = function handler(req, res) {
