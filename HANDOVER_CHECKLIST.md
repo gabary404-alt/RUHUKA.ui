@@ -376,3 +376,7 @@ Progress on B10/B06/B09/I01/I04/I07/J08/F02/I11/J09 is recorded in verification/
 ### 11 November — isolated school rehearsal and backup drill
 
 Closed I04 and I07. The current PR #10 preview points to a separate Supabase project. Real hosted Auth sessions exercised synthetic attendance, officer correction, results publication and student setup. A fresh isolated restore matched all 29 application rows and retained role restrictions. The release bundle excludes the old demo code, and the account page now handles one-time Auth token-hash callbacks. The live deployment remains unchanged. See verification/ISOLATED_WORKSPACE_2026-11-11.md. **98 verified, 18 open, 12 postponed.**
+
+### 11 November — review of all 18 remaining checks
+
+Reviewed all open items and added student-facing discipline details, a worked discipline import example, and the revised student results printout. Recorded the Headmaster as designated owner and expanded the full staff trial route. See verification/REMAINING_HANDOVER_CHECKS_2026-11-11.md for each closure condition. **98 verified, 18 open, 12 postponed.**

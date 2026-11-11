@@ -54,3 +54,9 @@ Use the protected preview with the **Test workspace** banner. It has a separate 
 | School administrator | Use the agreed reset procedure on a test account, then check sign-in again. | Recovery time and whether the staff member needed outside help. |
 
 Use one agreed phone/browser, one tablet and one desktop for the core tasks. Include a short-screen chat, phone keyboard, horizontal report tables, Tab/Shift+Tab and printing. Record device/browser versions, task time, mistakes, whether assistance was needed and a pass/fail result. Use role labels in the pilot notes instead of student names or credentials. Confirm with the school before treating the device matrix or timings as accepted.
+
+### Headmaster ownership and first staff session
+
+The Headmaster is the designated owner after handover. At the handover, confirm whether school notices should go to the Headmaster’s personal email or the school email, and separately confirm the authorised sending address for invitations and resets. Verify recovery and service access before retiring temporary access.
+
+For the first staff trial, test the complete workflow in the protected test workspace. Include a visitor opening Help, staff signing in on their own phones, the teacher or patron submitting a register, the Discipline Officer correcting it and uploading a discipline snapshot, the Dean publishing a named academic release, the Headmaster opening Today and printing a class letter, and a student seeing their own records and printing a results summary. Finish with account setup, recovery and a sign-out check. Use synthetic records and record which steps needed assistance.

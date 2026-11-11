@@ -9,12 +9,33 @@ function mountStudentRecords(host,api,current){
   if(!data.student){content.append(el('p','Your account is not linked to a student record yet. Ask the school administrator.'));return;}
   content.append(el('h3',data.student.full_name),el('p',data.student.student_id+' · '+(data.student.class_name||'Class not recorded')));
   content.append(el('h3','Academic results'));
-  const releases=data.releases||[];releases.forEach(r=>{const card=el('article');card.className='row';card.append(el('h4',r.release_name+(r.superseded_by?' · Older version':'')),el('p',r.class_name+' · '+r.academic_year+' · '+r.recorded_on),el('p','Overall: '+(r.overall===null?'Not recorded':r.overall+'%')+' · Rank when published: '+(r.rank===null?'Not recorded':r.rank)));r.subjects.forEach(s=>card.append(el('p',s.name+': '+(r.marks[s.name]===null?'Not recorded':r.marks[s.name]+' / '+s.maximum))));const print=document.createElement('button');print.type='button';print.textContent='Print '+r.release_name+' summary';print.onclick=async()=>{try{await root.loadSchoolTool('student-report.js');if(valid())root.printStudentReport(data.student,r);}catch(e){if(valid())status.textContent=e.message;}};card.append(print);content.append(card);});
+  const releases=data.releases||[];releases.forEach(r=>{const card=el('article');card.className='row';card.append(el('h4',r.release_name+(r.superseded_by?' · Older version':'')),el('p',r.class_name+' · '+r.academic_year+' · '+r.recorded_on),el('p','Overall: '+(r.overall===null?'Not recorded':r.overall+'%')+' · Rank when published: '+(r.rank===null?'Not recorded':r.rank)));r.subjects.forEach(s=>card.append(el('p',s.name+': '+(r.marks[s.name]==null?'Not recorded':r.marks[s.name]+' / '+s.maximum))));const print=document.createElement('button');print.type='button';print.textContent='Print '+r.release_name+' summary';print.onclick=async()=>{try{await root.loadSchoolTool('student-report.js');if(valid())root.printStudentReport(data.student,r);}catch(e){if(valid())status.textContent=e.message;}};card.append(print);content.append(card);});
   if(data.academic.length)content.append(el('p','Earlier recorded subject rows:'));
   if(!data.academic.length&&!releases.length)content.append(el('p','Not recorded.'));
   data.academic.forEach(r=>{const row=el('article');row.className='row';row.append(el('strong',r.term+' · '+r.subject),el('p',r.score===null?'Not recorded':r.score+' / '+r.maximum_score),el('small',r.recorded_on));content.append(row);});
-  content.append(el('h3','Official discipline total'),el('p',data.discipline?data.discipline.official_total+' / 40 · '+data.discipline.snapshot_date:'Not recorded.'));
-  data.discipline_events.forEach(r=>content.append(el('p',r.event_date+' · '+r.reason+(r.source_recorded_by?' · '+r.source_recorded_by:''))));
+  const discipline=el('section');
+  discipline.className='student-discipline';
+  discipline.append(el('h3','Discipline records'));
+  if(data.discipline?.official_total!=null){
+   discipline.append(el('p','Official total: '+data.discipline.official_total+' / 40'),
+    el('p','As of '+data.discipline.snapshot_date));
+  }else{
+   discipline.append(el('p','Official total: Not recorded.'));
+  }
+  discipline.append(el('h4','Recorded events'));
+  const events=data.discipline_events||[];
+  if(!events.length)discipline.append(el('p','No event details recorded.'));
+  for(const event of events){
+   const entry=el('article');
+   entry.className='row';
+   const change=event.reported_change;
+   entry.append(el('h5',event.event_date+' · '+event.reason),
+    el('p','Reported points change: '+(change==null?'Not recorded':(change>0?'+':'')+change)),
+    el('p','Original recorder: '+(event.source_recorded_by||'Not recorded')));
+   discipline.append(entry);
+  }
+  if(events.length)discipline.append(el('p','The school supplies the official total separately from the event list.'));
+  content.append(discipline);
   content.append(el('h3','Main attendance'),el('p','Latest 100 recorded main marks. Follow-up lessons are excluded.'));
   if(!data.attendance.length)content.append(el('p','Not recorded.'));
   data.attendance.forEach(r=>content.append(el('p',r.attendance_date+' · '+({present:'Present',late:'Late (counts as attended)',absent:'Absent',excused:'Excused'})[r.status])));

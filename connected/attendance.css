@@ -35,3 +35,13 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
   background: #fff4d4;
   color: #573b07;
 }
+
+.student-discipline { overflow-wrap: anywhere; }
+.student-discipline h5 { margin: 0; font: inherit; font-weight: 700; }
+.student-discipline .row p { margin: .35rem 0 0; }
+
+@media print {
+  .student-report-heading { text-align: center; border-bottom: 1px solid #17382b; }
+  .student-report-heading p { margin: 0; }
+  .student-report-print caption { text-align: left; font-weight: bold; padding-bottom: 4px; }
+}
