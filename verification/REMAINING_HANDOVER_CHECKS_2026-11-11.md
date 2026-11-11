@@ -24,3 +24,11 @@ Reviewed every open item against the current release candidate. Production relea
 | K07 | School comparison is part of the full pilot plan. | Verify with staff that the letter is usable and saves retyping. |
 
 The report screenshot and its student details are not stored in the source repository.
+
+## Staff pilot preflight
+
+Re-ran the 183 Node tests and checked relative links and assets across all seven pages in the 40-file website build. The test preview was READY and the live Vercel deployment was still on the original production commit. Eight isolated database regression suites passed in the previous review of this same application build.
+
+Ran real Chromium against the current website files with a simulated school API and synthetic records. The teacher (320px), patron/matron (360px), Discipline Officer (390px), Dean (768px), Headmaster (1280px) and Student (320px) could reach their main screens and sign out. Checked width fit on every role, register controls on the narrow Staff screens, short-screen chat input and Escape focus return, and Student discipline and results print isolation. This evidence covers I01/J09 technical preparation. Real staff devices, the on-screen keyboard, delivery of real email, real school imports, and timed acceptance still need their respective trials.
+
+The isolated school database contains two synthetic learners and the previous sample register and results release. Earlier disposable user accounts remain disabled. For a hands-on pilot, issue fresh isolated role accounts to the confirmed testers. A screen-share demonstration can begin from the protected preview. Production sign-off remains a separate step.
