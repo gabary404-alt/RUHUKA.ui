@@ -6,6 +6,11 @@ let draftReadFailed=false;let reviewedSignature=null;let studentRecords=null;let
 const config=window.RUHUKA_CONFIG;
 let detailRequest=0;
 function notify(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error);}
+if (!config?.url || !config?.key) {
+  $('login-form').hidden = true;
+  notify('School sign-in is unavailable here. If you are using a preview, use a dedicated test workspace. If you are on the school website, reload or contact the administrator.', true);
+  return;
+}
 async function renewSession(){
  if(!refreshToken)throw Error('Your session expired. Sign in again.');
  if(!refreshing){const version=epoch;const value=refreshToken;

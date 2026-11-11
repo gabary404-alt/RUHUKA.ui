@@ -367,3 +367,7 @@ The connected entry now loads seven tools on demand and defers approximately 61%
 Closed A07, B14, C08, H01, H02, H04, I06, I08, J06 and J12. Independent application schema replay matched the pilot column fingerprint. The roster importer accepts the strict Excel template and existing CSV path. Chat gained bounded provider requests, approved public answers and privacy-safe support references. The previous draft deployment was restored and moved forward again without changing the production alias. A synthetic ownership transition retained the original actor history. The handover pack records access, costs, known limits and first-week checkpoints.
 
 **96 verified, 20 open, 12 postponed.** See verification/HANDOVER_TEN_2026-11-10.md for the test evidence and scope of each closure. Actual school data, school ownership and sign-off, production email, physical-device and backup recovery gates remain open.
+
+### 11 November — release-readiness work
+
+Progress on B10/B06/B09/I01/I04/I07/J08/F02/I11/J09 is recorded in verification/HANDOVER_READINESS_2026-11-11.md. The draft now gates connected previews on a separate test database, handles confirmed password saves separately from sign-out failures, and adjusts the short-screen and mobile layout. Full acceptance requirements remain open. **96 verified, 20 open, 12 postponed.**

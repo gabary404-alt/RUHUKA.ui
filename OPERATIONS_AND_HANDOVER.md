@@ -72,3 +72,18 @@ First verify the successor's independent Headmaster sign-in and recovery. Disabl
 The preview branch alias was moved to the preceding ready deployment and then restored to the current deployment. The production alias was checked separately. For a release incident, first record the live deployment ID, current migration version, symptoms and the last known compatible build. Route traffic back only to an approved compatible build. Compare a read-only public entry, sign-in, and access boundaries before resuming ordinary writes.
 
 Database changes recover separately from website routing. The new chat budget migration is additive and the prior build can coexist with it. To stop paid preview calls, retire the scope's server key and leave the default fallback in place. To restore, provision a replacement preview key and digest, verify a bounded request, then enable the provider. Never replay the historical reset on the pilot or delete a database to match a website rollback. A real backup restore exercise remains I07.
+
+## Preview and test configuration
+
+On Vercel, `/connected/config.js` is served by the school configuration function. Enable **Automatically expose System Environment Variables** so the function can identify the environment. A normal preview serves the public page with its built-in content and keeps school sign-in and account setup closed. To enable connected pilot testing, set `RUHUKA_TEST_SUPABASE_URL` and `RUHUKA_TEST_SUPABASE_PUBLISHABLE_KEY` for that preview branch only, using a separate active Supabase project seeded with synthetic data. The function refuses the production URL and publishable key in a preview. School email gates stay closed. Older immutable previews predate the guard and should remain protected and retired from testing.
+
+Before releasing, verify the school configuration route on the exact staged production build and confirm it uses the intended database. Verify the protected test preview can create a synthetic attendance register and that the live database counts are unaffected. Check the chatbot budget separately: it is a server-only service, and its preview scope is isolated logically but currently shares the managed database.
+
+## Recovery exercise
+
+The current Supabase Free plan requires an owner-managed backup routine. The repository's schema replay verifies migration history and schema shape. An actual recovery exercise also needs exported data, Auth, and any separately managed Storage objects.
+
+1. Choose an isolated restore project. Record source and destination project references, backup time, PostgreSQL major version, and the school owner's chosen backup frequency and retention.
+2. In a secure operator environment, use the [Supabase CLI export and restore procedure](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore) to export roles, schema and data. Keep connection strings and exports in school-controlled restricted storage. Record checksums and keep secrets out of logs and the repository.
+3. Restore to the isolated project. Use a restricted test URL, keep email disabled, and restore any required Storage objects separately. Verify migration history, role restrictions, a synthetic sign-in and attendance/report totals. Include Auth configuration, Edge Functions, and required secrets in the recovery inventory.
+4. Record elapsed restore time, any data loss, the verification results and the clean-up owner. Leave I07 open until the exercise succeeds.

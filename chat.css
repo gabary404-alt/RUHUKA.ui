@@ -33,3 +33,10 @@
 #ai-messages:focus-visible{outline:3px solid var(--a);outline-offset:-4px}#ai-assistant button:focus-visible{outline:3px solid var(--t);outline-offset:2px;box-shadow:0 0 0 5px var(--s1)}
 
 #ai-fab{padding:4px 16px 4px 6px;gap:6px}#ai-fab img,.ai-avatar img{display:block;flex-shrink:0;object-fit:contain}.ai-avatar{background:transparent;border-radius:0}
+
+@media (max-height: 500px) {
+  .ai-header { padding: 6px 12px; }
+  #ai-messages { min-height: 0; padding: 8px 12px; }
+  .ai-suggestions { display: none; }
+  .ai-disclaimer { margin: 4px 12px 6px; }
+}

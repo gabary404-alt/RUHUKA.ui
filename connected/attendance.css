@@ -22,3 +22,8 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
 
 @page student-results{size:A4 portrait;margin:14mm}
 @media print{body>.student-report-print{page:student-results;font:11pt/1.5 Arial,sans-serif}.student-report-print h1{font-size:20pt;color:#14532d}.student-report-print table{font-size:10pt;margin:20px 0}.student-report-print th{background:#e7f3eb;color:#17382b}.student-report-print th:first-child,.student-report-print td:first-child{width:46%}.student-report-print p{overflow-wrap:anywhere}}
+
+/* Keep the workspace navigation from covering focused fields on small screens. */
+@media (max-width: 600px), (max-height: 520px) {
+  .workspace-nav { position: static; }
+}

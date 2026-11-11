@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/connected/config.js", "destination": "/api/school-config" }
+  ]
+}

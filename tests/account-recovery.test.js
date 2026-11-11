@@ -5,3 +5,14 @@ test('expired invitation keeps password form hidden and removes URL fragment',as
 test('verified setup validates passwords and ends sessions after saving',async()=>{const s=setup('#type=recovery&access_token=private-token',[{data:{email:'staff@example.test'}},{},{status:204}]);await s.settle();assert.equal(s.nodes['password-panel'].hidden,false);assert.match(s.nodes['verified-account'].textContent,/staff@example.test/);s.nodes['new-password'].value='a-strong-long-password';s.nodes['repeat-password'].value='different';await s.nodes['password-form'].onsubmit({preventDefault(){}});assert.equal(s.calls.length,1);s.nodes['repeat-password'].value=s.nodes['new-password'].value;await s.nodes['password-form'].onsubmit({preventDefault(){}});assert.equal(s.calls[1].options.method,'PUT');assert.ok(s.calls[2].url.endsWith('/logout?scope=global'));assert.equal(s.nodes['new-password'].value,'');assert.equal(s.nodes['password-panel'].hidden,true);assert.match(s.nodes['account-status'].textContent,/Password saved/);assert.ok(s.calls.every(c=>!c.url.includes('private-token')));});
 
 test('leaving or restoring account setup clears unfinished credentials without a network request',()=>{const s=setup();const fields=['school-code','code-password','code-repeat','new-password','repeat-password'];for(const event of ['hidden','pagehide','restore']){for(const id of fields)s.nodes[id].value='SYNTHETIC_SECRET';if(event==='hidden'){s.document.hidden=true;s.docEvents.visibilitychange();}else if(event==='restore')s.events.pageshow({persisted:true});else s.events.pagehide();for(const id of fields)assert.equal(s.nodes[id].value,'');assert.match(s.nodes['account-status'].textContent,/For privacy/);assert.equal(s.calls.length,0);}});
+
+test('a confirmed password change is not reported as failed when sign-out times out',async()=>{
+ const s=setup('#type=recovery&access_token=synthetic',[{data:{email:'staff@example.test'}},{status:200}]);
+ await s.settle();
+ s.nodes['new-password'].value=s.nodes['repeat-password'].value='a-strong-long-password';
+ await s.nodes['password-form'].onsubmit({preventDefault(){}});
+ assert.match(s.nodes['account-status'].textContent,/^Password saved.*sign-out could not be confirmed/);
+ assert.equal(s.nodes['password-panel'].hidden,true);
+ await s.nodes['password-form'].onsubmit({preventDefault(){}});
+ assert.equal(s.calls.length,3);
+});
