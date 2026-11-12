@@ -1,6 +1,6 @@
 # RUHUKA first handover checklist
 
-Updated: 11 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
+Updated: 12 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
 
 This is the delivery tracker. A checked item means the specifically stated outcome was verified, not that its whole feature is production-ready. Open items may already have partial code. Each working session picks the next dependency-ready item, records evidence and reports completed IDs, blockers and any owner action. Reopen a checked item when later changes invalidate its evidence. No calendar promise overrides acceptance checks.
 
@@ -380,3 +380,20 @@ Closed I04 and I07. The current PR #10 preview points to a separate Supabase pro
 ### 11 November — review of all 18 remaining checks
 
 Reviewed all open items and added student-facing discipline details, a worked discipline import example, and the revised student results printout. Recorded the Headmaster as designated owner and expanded the full staff trial route. See verification/REMAINING_HANDOVER_CHECKS_2026-11-11.md for each closure condition. **98 verified, 18 open, 12 postponed.**
+
+
+### 12 November — LDK identity and public website research
+
+The school is **Lycée de Kigali (LDK)**. **RUHUKA is the developer company**, not the school or the chatbot. This corrects earlier references to preserving RUHUKA public identity. The chatbot must be called **LDK’s AI assistant**; audit visible text, greetings, accessibility labels and server instructions, not just the button. Company credit belongs only in an agreed discreet footer/legal context; internal technical names need not be renamed indiscriminately.
+
+Research and pending director choices are recorded in [LDK design research](verification/LDK_DESIGN_RESEARCH_2026-11-12.md). Sixteen institutional public sites were reviewed for content/navigation; visual browser spot checks supplemented this, not a complete all-site audit. Ten person-free art directions were generated for selection, not installed. Google share link resolves to ldkedu.com, distinct from the older lyceedekigali.ac.rw site; confirm their respective authority. The old official logo was located and inspected, but the current version and a clearer source still need confirmation.
+
+Pending implementation/acceptance under H07/H09/H10 and I01/I11/J09:
+- [ ] Choose an institutional visual direction: coherent school colours/type, fewer decorative cards, selective lightweight art, school-first header/logo, secondary sign-in.
+- [ ] Approve researched history and sports stories; confirm current combinations, clubs, school contacts and logo before publishing.
+- [ ] Replace public/workspace/chat school branding with LDK, keeping RUHUKA only in agreed developer attribution.
+- [ ] Remove demo credentials and developer-only explanations from the production build when the corresponding demo paths are disabled; keep test banners on test previews and essential real saving/privacy/error disclosures.
+- [ ] Confirm same-tab detail-page navigation versus earlier requested new tabs; then test every distinct visitor destination.
+- [ ] Revalidate redesigned mobile/desktop layout, keyboard, contrast, asset loading and useful content before public release.
+
+These are scoped acceptance subtasks, not six additional original IDs. **98 verified / 18 open / 12 postponed** remains the historical technical tally; research does not close any of the remaining checks or certify the proposed redesign. No new school facts, logo or artwork were published to production in this session.
