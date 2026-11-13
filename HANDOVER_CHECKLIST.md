@@ -413,3 +413,13 @@ Director approved red/green school identity, supplied newcomer emblem, bolder bo
 - [ ] Complete remaining launch gates and developer/demo-copy cleanup before production release.
 
 These are redesign subtasks, not new original IDs. **98 verified / 18 open / 12 postponed** remains the workflow tally. See verification/LDK_REDESIGN_2026-11-13.md for sources, files and verification limits. Production has not been merged or promoted.
+
+
+### Visitor follow-up, 13 November 2026
+
+- [x] Removed the crest from Ask LDK, kept it in the chat panel and made Close visible with theme contrast and keyboard focus return.
+- [x] Removed the folded-paper art and unconfirmed current club list. Retained dated sports milestones and the existing book illustration. Added sticky history and contact content for larger screens.
+- [x] Embedded the school’s existing Google Maps pin on Visit & contact with directions and lazy loading. Added the map connection to the privacy page.
+- [ ] Confirm current School Life activities and select school-approved campus photography. Discuss the final placement of the book illustration, a Rwanda section and any leadership content with the director before publishing those items.
+
+All 184 automated tests passed. Hosted Chromium checked the visitor pages at 320, 390, 768 and 1280 pixels, including chat dismissal, focus, sticky history and map markup. The third-party map itself was outside the isolated browser fixture. Handover tally remains 98 verified, 18 open and 12 postponed.
