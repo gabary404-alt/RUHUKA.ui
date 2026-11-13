@@ -1,3 +1,19 @@
+# Current release decision — 13 November 2026
+
+PR #10 is the integration candidate for director testing. Once its latest Vercel build and release checks pass, it may be merged for the director to inspect the live public site and sign in with the existing production Headmaster account. This is not school handover approval. The director requested this testing release; earlier draft-only guidance below is historical.
+
+Do not merge #4 (superseded foundation) or #9 (deferred notebooks). Keep their history.
+
+Before merge: confirm the exact head is mergeable; Vercel is READY; Node and release-bundle checks pass. Production AI configuration now has its own matching budget key. Email invitations and reset requests stay disabled. No new schema migration is introduced by this increment.
+
+After merge: confirm Vercel deployed the merge commit to ruhukaui.vercel.app; check public pages, map, chat opening/closing, production config, sign-in and exclusion of old demo/development files. The director signs in using their own password. Use the isolated test workspace and separate accounts for synthetic end-to-end trials. Do not share Headmaster credentials or add a role switch that bypasses permissions.
+
+The school can accept handover only after the remaining 18 checks meet their actual conditions. See DIRECTOR_TESTING.md. If production verification fails, use the reviewed rollback procedure and preserve database history.
+
+---
+
+## Historical release reviews
+
 # Reviewed first-handover integration plan — 7 November 2026
 
 This records A08's source/scope reconciliation and reviewable release increment. It does not authorise a production merge or close account/device/school acceptance gates.

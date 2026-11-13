@@ -6,9 +6,11 @@ This is the delivery tracker. A checked item means the specifically stated outco
 
 ## Current position
 
-Production remains on main commit 82bc3a2a39b6ed490a8b72097518721918e46a33. Draft PR #10 is the integration branch. Its preview for commit 47d25acb25888c89f9618a4ef29d314e7d8c3a77 built successfully and served the isolated configuration route. The visitor-facing website remains separate from the real role-based workspace. Neither this release nor the earlier pilot updates are merged into production.
+PR #10 is being prepared for director testing on the live domain, not school handover. Production is still main commit 82bc3a2a39b6ed490a8b72097518721918e46a33 until the director merges. The reviewed starting preview is ff824630edc542dbd3b42ac11673b5bce858bb42. The 13 November public design, real campus map, visible chat Close button and same-tab navigation are included.
 
-RUHUKA system (jsqiqxflgokfdooogcst) has 62 applied migration versions reconciled in the repository. Named academic releases, official discipline snapshots, separate filtered reports, Dean/officer publication/correction, enrolment history, own-student results and one-use officer roster permissions are connected. Email invitation/reset requests remain deliberately disabled until production callback/mail acceptance. Old notes/records are disposable development tests; targeted cleanup is allowed, not a wholesale project reset.
+The production Headmaster account is active and email-confirmed. Production has zero classes and students. Preview uses a separate isolated test database; accounts and records do not carry between them. Email invitation and recovery gates remain disabled pending delivered-email verification. The production AI budget is now configured separately: 8 provider reservations per minute and 80 per UTC day. This is a request ceiling, not a monetary budget or provider billing guarantee.
+
+**98 verified / 18 open / 12 deferred.** None of the school-dependent acceptance items is closed by a build or merge. See DIRECTOR_TESTING.md for the test sequence and verification/DIRECTOR_RELEASE_2026-11-13.md for this session. Production smoke checks must follow the merge; final school acceptance, ownership and support are separate.
 
 ### Agreed first-handover scope — 5 November 2026
 
@@ -423,3 +425,12 @@ These are redesign subtasks, not new original IDs. **98 verified / 18 open / 12 
 - [ ] Confirm current School Life activities and select school-approved campus photography. Discuss the final placement of the book illustration, a Rwanda section and any leadership content with the director before publishing those items.
 
 All 184 automated tests passed. Hosted Chromium checked the visitor pages at 320, 390, 768 and 1280 pixels, including chat dismissal, focus, sticky history and map markup. The third-party map itself was outside the isolated browser fixture. Handover tally remains 98 verified, 18 open and 12 postponed.
+
+## Director testing preparation — 13 November 2026
+
+- Production account state confirmed without reading or changing its password. No school records were imported.
+- Production AI budget credential added to Vercel and matched against the database. Rollback probe accepted the configured key and rejected a wrong key without retaining a request counter. Provider response still needs verification on the production build.
+- Added first-login setup instructions; replaced internal development milestones in sign-in/AI wording with practical account guidance. Disabled email paths remain honestly described.
+- Added repeatable build/link/exclusion checks and a GitHub Actions workflow for the Node suite and release bundle.
+- Photo/content decisions recorded in DIRECTOR_TESTING.md. No invented school activity, leader, annual marks formula or Rwanda section added.
+- Remaining count is unchanged: 98 verified, 18 open, 12 deferred. Director testing is the next acceptance activity, not a reason to wait for school sign-off before reviewing the site.
