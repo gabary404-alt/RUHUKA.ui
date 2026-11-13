@@ -4,9 +4,10 @@ const { copyFileSync, mkdirSync, rmSync } = require('node:fs');
 const { dirname, resolve } = require('node:path');
 
 const files = [
-  'index.html', 'our-school.html', 'academics.html', 'school-life.html', 'contact.html',
+  'index.html', 'our-school.html', 'academics.html', 'school-life.html', 'contact.html', 'news.html',
   'privacy.html', 'support.html', 'terms.html',
   'public.css', 'info.css', 'chat.css', 'public.js', 'public-content.js', 'chat.js',
+  'assets/ldk-crest.png', 'assets/learning-sketch.webp', 'assets/learning-sketch-small.webp', 'assets/paper-hills.webp',
   'assets/kigali-hills.webp', 'assets/kigali-hills-small.webp', 'assets/school-court.webp',
   'assets/learning-orbit.svg', 'assets/ruhuka-helper.svg', 'assets/school-day.svg',
   ...[

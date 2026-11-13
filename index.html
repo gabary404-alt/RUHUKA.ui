@@ -1,90 +1,19 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,interactive-widget=resizes-content">
-  <meta name="description" content="Explore Lycée de Kigali, its academic programmes, school life and visitor information.">
-  <title>Lycée de Kigali · Strive to Excel</title>
-  <link rel="stylesheet" href="public.css"><link rel="stylesheet" href="chat.css">
-  <script src="connected/config.js" defer></script>
-  <script src="public-content.js" defer></script>
-  <script src="public.js" defer></script>
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="site-header">
-  <div class="site-nav">
-    <a class="brand" href="index.html"><span class="brand-mark">LDK</span><span>Lycée de Kigali<small>Strive to Excel</small></span></a>
-    <nav class="desktop-links" aria-label="Main navigation"><a href="#about">Our school</a><a href="#academics">Academics</a><a href="#school-life">School life</a><a href="#contact">Contact</a><a class="button primary" href="connected/">School sign in</a></nav>
-    <button id="themeBtn" class="theme-button" aria-label="Use light theme" type="button"></button>
-    <button id="menu-button" class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-menu">Menu</button>
-    <nav id="site-menu" class="site-menu" aria-label="Phone navigation" hidden><a href="#about">Our school</a><a href="#academics">Academics</a><a href="#school-life">School life</a><a href="#contact">Contact</a><a href="connected/">School sign in</a></nav>
-  </div>
-</header>
-<main id="main" tabindex="-1">
-  <section class="hero visitor-hero" aria-labelledby="welcome-title">
-    <div class="visitor-hero-copy">
-      <span class="eyebrow">Lycée de Kigali · Rwanda</span>
-      <h1 id="welcome-title">Strive to <span class="gradient-text">Excel</span></h1>
-      <p class="hero-sub">Discover our secondary school in Kigali, from the subjects students study to the activities they take part in beyond the classroom.</p>
-      <div class="actions"><a class="button primary" href="#about">Explore our school</a><a class="button" href="#contact">Plan a visit</a></div>
-    </div>
-    <figure class="visitor-image hero-landscape"><img src="assets/kigali-hills.webp" srcset="assets/kigali-hills-small.webp 640w, assets/kigali-hills.webp 1280w" sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1160px) 55vw, 620px" width="1280" height="427" alt="Illustration of layered hills and acacia trees at dusk" fetchpriority="high"></figure>
-  </section>
-
-  <section class="section visitor-section" id="about">
-    <div class="visitor-split">
-      <div><span class="eyebrow">Our school</span><h2>Learning with purpose</h2>
-      <p id="public-introduction">Lycée de Kigali is a secondary school in Kigali, Rwanda. The school brings academic study and practical learning together, with an emphasis on teamwork and personal development.</p>
-      <a class="visitor-link" href="our-school.html" target="_blank" rel="noopener">Learn about Lycée de Kigali <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a></div>
-      <div class="motto-card"><span aria-hidden="true">LDK</span><p>Strive to Excel</p></div>
-    </div>
-  </section>
-
-  <section class="section visitor-section" id="academics">
-    <div class="visitor-section-heading"><h2>Academics</h2><a class="visitor-link" href="academics.html" target="_blank" rel="noopener">Explore academic programmes <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a></div>
-    <p class="section-intro" id="public-academics">From the broad foundations of Ordinary Level to focused subject combinations at Advanced Level.</p>
-    <div class="visitor-grid visitor-grid-two"><article class="card"><h3>Ordinary Level</h3><p>Senior 1 to Senior 3. Students build foundations in mathematics, sciences, languages and humanities.</p></article><article class="card"><h3>Advanced Level</h3><p>Senior 4 to Senior 6. Subject combinations bring related disciplines together for more focused study.</p></article></div>
-  </section>
-
-  <section class="section visitor-section" id="school-life">
-    <div class="visitor-split visitor-story">
-      <figure class="visitor-image life-landscape"><img src="assets/school-court.webp" width="960" height="640" alt="Illustration of an empty basketball court framed by trees and hills" loading="lazy" decoding="async"></figure>
-      <div><h2>School life</h2>
-      <p id="public-activities">Explore a side of school beyond the timetable. Lycée de Kigali’s published activities have included basketball, robotics and student media.</p>
-      <a class="visitor-link" href="school-life.html" target="_blank" rel="noopener">Discover school life <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a>
-      <div class="visitor-update" data-public-update hidden><h3>School updates</h3><p id="public-news"></p></div></div>
-    </div>
-  </section>
-
-  <section class="section visitor-section" id="contact">
-    <div class="support-strip">
-      <div><h2>Visit or contact the school</h2><p id="public-contact">Find us on KK 2 Avenue, Kigali. Contact the school office to plan a visit or ask about enrolment.</p></div>
-      <a class="visitor-link" href="contact.html" target="_blank" rel="noopener">Get directions and contact details <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a>
-    </div>
-  </section>
-
-  <section class="section" id="school-workspace">
-    <div class="workspace-strip">
-      <div><h2>Part of the school?</h2><p>Use your assigned account to open the RUHUKA workspace.</p></div>
-      <div class="actions"><a class="button primary" href="connected/">School sign in</a><a class="button" href="support.html">Workspace help</a></div>
-    </div>
-  </section>
-</main>
-<footer class="site-footer">
-  <p>Lycée de Kigali · Strive to Excel</p>
-  <nav aria-label="Information pages"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a></nav>
-</footer>
-<p id="public-status" class="public-status" role="status"></p>
-<!-- AI ASSISTANT -->
+<html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,interactive-widget=resizes-content"><meta name="description" content="Discover Lycée de Kigali: our history, learning, school life, achievements and visitor information."><meta name="theme-color" content="#174b37"><title>Strive to Excel · Lycée de Kigali</title><link rel="icon" href="assets/ldk-crest.png" type="image/png"><link rel="stylesheet" href="public.css"><link rel="stylesheet" href="chat.css"><script src="connected/config.js" defer></script><script src="public-content.js" defer></script><script src="public.js" defer></script></head><body class="institution"><a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="site-nav"><a class="brand" href="index.html"><img class="school-crest" src="assets/ldk-crest.png" width="57" height="58" alt="Lycée de Kigali emblem"><span>Lycée de Kigali<small>Strive to Excel</small></span></a><nav class="desktop-links" aria-label="Main navigation"><a href="our-school.html">Our school</a><a href="academics.html">Academics</a><a href="school-life.html">School life</a><a href="news.html">News & achievements</a><a href="contact.html">Visit & contact</a></nav><a class="school-login" href="connected/">School sign in <span aria-hidden="true">↗</span></a><button id="themeBtn" class="theme-button" aria-label="Use dark theme" type="button"></button><button id="menu-button" class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-menu">Menu</button><nav id="site-menu" class="site-menu" aria-label="Phone navigation" hidden><a href="our-school.html">Our school</a><a href="academics.html">Academics</a><a href="school-life.html">School life</a><a href="news.html">News & achievements</a><a href="contact.html">Visit & contact</a><a href="connected/">School sign in</a></nav></div></header><main id="main" tabindex="-1"><section class="hero editorial-hero" aria-labelledby="welcome-title"><div class="hero-copy"><p class="eyebrow">Lycée de Kigali · Rwanda</p><h1 id="welcome-title">A tradition of learning.<br><em>A future of possibility.</em></h1><p class="hero-sub">Since 1974, a school community shaped by learning, character and the ambition to excel.</p><div class="actions"><a class="button primary" href="our-school.html">Discover LDK <span aria-hidden="true">→</span></a><a class="text-link" href="#academics">Explore learning ↓</a></div></div><figure class="hero-art"><img src="assets/learning-sketch.webp" srcset="assets/learning-sketch-small.webp 600w, assets/learning-sketch.webp 1200w" sizes="(max-width: 760px) calc(100vw - 40px), 55vw" width="1200" height="800" alt="Ink illustration of an open book, drawing compass and geometric forms" fetchpriority="high"><figcaption>Knowledge. Curiosity. Possibility.</figcaption></figure></section>
+<div class="heritage-band"><div><strong>1974</strong><span>Year established</span></div><div><strong>6,000+</strong><span>Alumni · approximate community size</span></div><div><strong>Strive to Excel</strong><span>Our school motto</span></div></div>
+<section class="section editorial-section" id="about"><div class="section-label"><span class="eyebrow">01 / Our school</span><h2>Rooted in Kigali.<br>Looking ahead.</h2></div><div class="section-copy"><p class="lead" id="public-introduction">Lycée de Kigali brings academic study, practical learning and personal development together. Our community extends beyond the classroom, across generations of students and alumni.</p><p>Established in 1974 and welcoming its first students in 1975, LDK celebrated its golden jubilee in June 2024. That history is a foundation for the next generation.</p><a class="text-link" href="our-school.html">Our story & values →</a></div></section>
+<section class="section academic-section" id="academics"><div class="section-top"><div><p class="eyebrow">02 / Academics</p><h2>Build knowledge.<br>Learn to use it.</h2></div><a class="text-link" href="academics.html">Explore academics →</a></div><p class="section-intro" id="public-academics">A broad foundation at Ordinary Level, followed by focused learning at Advanced Level.</p><div class="programme-rows"><a href="academics.html#ordinary"><span class="programme-no">O Level</span><div><h3>A strong foundation</h3><p>Senior 1–3 · Develop understanding across subjects.</p></div><span aria-hidden="true">↗</span></a><a href="academics.html#advanced"><span class="programme-no">A Level</span><div><h3>A clearer direction</h3><p>Senior 4–6 · Deepen knowledge and prepare for further study.</p></div><span aria-hidden="true">↗</span></a></div></section>
+<section class="life-panel" id="school-life"><div class="section life-inner"><div><p class="eyebrow">03 / Life at LDK</p><h2>More than<br>the classroom.</h2><p id="public-activities">From debate and robotics to sport, media and community service, school life creates opportunities to discover interests and contribute to something shared.</p><a class="button" href="school-life.html">Discover school life →</a></div><figure><img src="assets/paper-hills.webp" width="1000" height="667" alt="Illustration of folded book pages flowing into green hills" loading="lazy" decoding="async"><figcaption>Ideas grow through learning and shared experience.</figcaption></figure></div></section>
+<section class="section news-section" id="news"><div class="section-top"><div><p class="eyebrow">04 / Stories & milestones</p><h2>A school with a story.</h2></div><a class="text-link" href="news.html">All news & achievements →</a></div><div class="story-grid"><article><p class="story-meta">Sport · June 2026</p><h3><a href="news.html#basketball">LDK girls win the memorial 3×3 tournament</a></h3><p>A basketball achievement built on teamwork and determination.</p><a class="text-link" href="news.html#basketball" aria-label="Read about the girls’ basketball achievement">Read the story →</a></article><article><p class="story-meta">Heritage · June 2024</p><h3><a href="news.html#jubilee">Fifty years of Lycée de Kigali</a></h3><p>A golden jubilee bringing generations of the school community together.</p><a class="text-link" href="news.html#jubilee" aria-label="Read about the golden jubilee">Read the story →</a></article><article><p class="story-meta">Academic archive · March 2018</p><h3><a href="news.html#mathematics">First and third in the Pi Day mathematics challenge</a></h3><p>An academic milestone documented by the University of Rwanda.</p><a class="text-link" href="news.html#mathematics" aria-label="Read about the mathematics achievement">Read the story →</a></article></div><div class="school-update" data-public-update hidden><h3>From the school</h3><p id="public-news"></p></div></section>
+<section class="contact-band" id="contact"><div class="section"><div><p class="eyebrow">Visit & contact</p><h2>Get to know Lycée de Kigali.</h2><p id="public-contact">Have a question about the school, enrolment or a visit? Start with our school office.</p></div><a class="button primary" href="contact.html">Contact the school →</a></div></section></main><footer class="site-footer"><div><a class="footer-name" href="index.html">Lycée de Kigali</a><p>Strive to Excel<br>Kigali, Rwanda</p></div><nav aria-label="Explore the school"><a href="our-school.html">Our school</a><a href="academics.html">Academics</a><a href="school-life.html">School life</a><a href="news.html">News & achievements</a><a href="contact.html">Visit & contact</a></nav><nav aria-label="Information pages"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Workspace help</a><a href="connected/">School sign in</a></nav><p class="credit">Website by RUHUKA</p></footer><p id="public-status" class="public-status" role="status"></p><!-- AI ASSISTANT -->
 <div id="ai-assistant" >
   <section id="ai-chat-panel" hidden role="region" aria-labelledby="ai-title">
     <header class="ai-header">
-      <div class="ai-avatar" aria-hidden="true"><img src="assets/ruhuka-helper.svg" width="38" height="38" alt=""></div>
-      <div class="ai-heading"><h2 id="ai-title">Ruhuka Assistant</h2><p>School help &amp; everyday learning</p></div>
+      <div class="ai-avatar" aria-hidden="true"><img src="assets/ldk-crest.png" width="38" height="38" alt=""></div>
+      <div class="ai-heading"><h2 id="ai-title">LDK’s AI assistant</h2><p>School help &amp; everyday learning</p></div>
       <button class="ai-icon-button" onclick="toggleAI()" aria-label="Close assistant">×</button>
     </header>
-    <div class="ai-toolbar"><span>Ask. Learn. Keep moving.</span><button onclick="clearAIConversation()">New chat</button></div>
+    <div class="ai-toolbar"><span>School help & learning</span><button onclick="clearAIConversation()">New chat</button></div>
     <div id="ai-messages" role="log" aria-label="Chat messages" aria-live="off" aria-busy="false" tabindex="0"></div>
     <p id="ai-announcement" class="ai-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
     <div class="ai-suggestions" aria-label="Suggested questions">
@@ -100,8 +29,7 @@
     </div>
     <p id="ai-privacy-note" class="ai-disclaimer">Only your conversation text is sent to the AI provider. No access to private school records. Live web lookup is not connected. Don’t share passwords or private details.</p>
   </section>
-  <button id="ai-fab" onclick="openAssistant()" aria-label="Open Ruhuka assistant" aria-controls="ai-chat-panel" aria-expanded="false"><img src="assets/ruhuka-helper.svg" width="38" height="38" alt="" aria-hidden="true">Ask Ruhuka</button>
+  <button id="ai-fab" onclick="openAssistant()" aria-label="Open LDK’s AI assistant" aria-controls="ai-chat-panel" aria-expanded="false"><img src="assets/ldk-crest.png" width="38" height="38" alt="" aria-hidden="true">Ask LDK</button>
 </div>
 
-</body>
-</html>
+</body></html>

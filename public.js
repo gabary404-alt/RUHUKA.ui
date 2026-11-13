@@ -3,7 +3,7 @@
 'use strict';
 const root=document.documentElement,themeButton=document.getElementById('themeBtn');
 function applyTheme(value){root.dataset.theme=value;themeButton?.setAttribute('aria-label',value==='dark'?'Use light theme':'Use dark theme');}
-try{applyTheme(localStorage.getItem('ldk-theme')==='light'?'light':'dark');}catch{applyTheme('dark');}
+try{applyTheme(localStorage.getItem('ldk-theme')==='dark'?'dark':'light');}catch{applyTheme('light');}
 themeButton?.addEventListener('click',()=>{const value=root.dataset.theme==='dark'?'light':'dark';applyTheme(value);try{localStorage.setItem('ldk-theme',value);}catch{}});
 const menu=document.getElementById('site-menu'),menuButton=document.getElementById('menu-button');
 function closeMenu(){menu.hidden=true;menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Open navigation');}

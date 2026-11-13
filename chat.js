@@ -7,7 +7,7 @@
     results: 'Students can open My records for the information already recorded by the school. Missing results mean Not recorded. Published results show the school’s recorded subject marks and position.',
     absence: 'Contact the Discipline Office about an absence. Online student absence submissions are postponed. A Discipline Officer can correct the main attendance record with a reason.',
     account: 'Staff use their school email. Students use their assigned ID and can request a private setup or reset code from the school. Never share passwords or setup codes here.',
-    general: 'I can explain Ruhuka and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
+    general: 'I can explain Lycée de Kigali and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
   };
   function localHelp(message) {
     if (/\b(attendance|register)\b/i.test(message)) return HELP.attendance;
@@ -40,7 +40,7 @@
   function append(text, role) {
     const node = document.createElement('div');
     node.className = 'ai-message ai-message-' + role;
-    node.setAttribute('role','article');node.setAttribute('aria-label',role==='user'?'Your message':'Ruhuka assistant message');
+    node.setAttribute('role','article');node.setAttribute('aria-label',role==='user'?'Your message':'LDK assistant message');
     // Model output is text, never trusted HTML, scripts, or executable links.
     node.textContent = text;
     byId('ai-messages').appendChild(node);
@@ -117,7 +117,7 @@
     history = [];
     lastQuestion = '';
     byId('ai-messages').replaceChildren();
-    append('Hello! Ask about RUHUKA or a learning topic. I cannot access private records or check live web sources.', 'assistant');
+    append('Hello! Ask about Lycée de Kigali or a learning topic. I cannot access private records or check live web sources.', 'assistant');
     byId('ai-retry').hidden = true;
     byId('ai-input').value = '';
     setStatus('Ready');announce(quiet?'':'New chat. Previous conversation cleared.');
@@ -176,7 +176,7 @@
       if (complete && active === run) {
         if (online) history = [...history, { role: 'user', content: message }, { role: 'assistant', content: reply }].slice(-12);
         setStatus(online ? 'Response complete · Current facts are not verified' : 'Local help · AI service unavailable');
-        announce((online?'Ruhuka assistant: ':'Local help: ')+reply);
+        announce((online?'LDK assistant: ':'Local help: ')+reply);
       }
     } finally { release(run); }
   };

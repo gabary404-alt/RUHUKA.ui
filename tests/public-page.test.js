@@ -6,7 +6,7 @@ test('assistant loads once on first use, including retry after a failed download
 test('phone navigation opens and closes with matching accessible state',()=>{const s=setup(),button=s.get('menu-button');button.listeners.click();assert.equal(s.get('site-menu').hidden,false);assert.equal(button.attrs['aria-expanded'],'true');assert.equal(button.attrs['aria-label'],'Close navigation');s.get('site-menu').listeners.click({target:{closest:()=>true}});assert.equal(s.get('site-menu').hidden,true);assert.equal(button.attrs['aria-expanded'],'false');});
 test('active workspace has no notebook or online absence submission controls',()=>{const html=fs.readFileSync('connected/index.html','utf8'),app=fs.readFileSync('connected/attendance.js','utf8');assert.ok(!/open-notebook|cloud-notebook|notebook\.js|explanation-list/.test(html));assert.ok(!/submit_absence_explanation|mountCloudNotebook|localStorage\.clear/.test(app));assert.ok(app.includes('correct_main_attendance'));assert.ok(html.includes('open-attendance'));assert.ok(html.includes('open-my-records'));});
 
-test('public stars are a small static decoration with no canvas, filter or animation',()=>{const css=fs.readFileSync('public.css','utf8'),stars=css.slice(css.indexOf('/* A few stationary'));assert.equal((stars.match(/radial-gradient/g)||[]).length,6);assert.ok(stars.includes('pointer-events:none'));assert.ok(!/animation:|filter:|@keyframes|url\(/.test(stars));assert.ok(!/requestAnimationFrame|setInterval|canvas/.test(fs.readFileSync('public.js','utf8')));});
+test('public rendering has no decorative animation loop or canvas',()=>{assert.ok(!/requestAnimationFrame|setInterval|canvas/.test(fs.readFileSync('public.js','utf8')));assert.ok(!/<canvas|shooting-star/.test(fs.readFileSync('index.html','utf8')));});
 
 test('approved public text stays plain, reveals news and supersedes older contact links',()=>{
  const {applyPublicText}=require('../public-content');
@@ -23,12 +23,12 @@ test('approved public text stays plain, reveals news and supersedes older contac
  assert.equal(oldContact.hidden,true);
 });
 
-test('visitor navigation scrolls to four distinct sections and opens real detail pages',()=>{
+test('visitor navigation opens distinct detail pages in the same tab',()=>{
  const home=fs.readFileSync('index.html','utf8');
  for(const [section,page] of [['about','our-school'],['academics','academics'],['school-life','school-life'],['contact','contact']]){
-  assert.ok(home.includes('href="#'+section+'"'));
   assert.ok(home.includes('id="'+section+'"'));
-  assert.ok(home.includes('href="'+page+'.html" target="_blank" rel="noopener"'));
+  assert.ok(home.includes('href="'+page+'.html"'));
+  assert.ok(!home.includes('target="_blank"'));
   const detail=fs.readFileSync(page+'.html','utf8');
   assert.ok(detail.includes('href="index.html#'+section+'"'));
   assert.ok(detail.includes('href="connected/"'));

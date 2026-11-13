@@ -116,7 +116,7 @@ test('assistant open/close updates expanded state and Escape returns focus to th
 });
 test('completed response has one full announcement; partial typing is not announced',async()=>{
  const s=setup(async()=>response('An answer long enough to reveal across several animation frames.'),{reduced:false});const pending=s.ctx.sendAIMessage('Question');await new Promise(r=>setTimeout(r,5));assert.equal(s.node('ai-announcement').textContent,'');s.ctx.stopAIResponse();await pending;assert.match(s.node('ai-announcement').textContent,/Response stopped/);
- const reduced=setup(async()=>response('Full answer'),{reduced:true});await reduced.ctx.sendAIMessage('Question');assert.equal(reduced.node('ai-announcement').textContent,'Ruhuka assistant: Full answer');assert.equal(reduced.messages().at(-1),'Full answer');
+ const reduced=setup(async()=>response('Full answer'),{reduced:true});await reduced.ctx.sendAIMessage('Question');assert.equal(reduced.node('ai-announcement').textContent,'LDK assistant: Full answer');assert.equal(reduced.messages().at(-1),'Full answer');
 });
 
 test('lazy-loaded chat initialises after the page has already loaded',async()=>{const s=setup(async()=>response('Answer'),{readyState:'complete'});assert.equal(s.messages().length,1);assert.ok(s.node('ai-input').listeners.keydown);await s.ctx.sendAIMessage('Hello');assert.equal(s.messages().at(-1),'Answer');});

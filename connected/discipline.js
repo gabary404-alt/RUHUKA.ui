@@ -28,7 +28,7 @@ function mountDiscipline(host,api,roles,current){
  const field=(text,type='text')=>{const l=el('label',text),i=el('input');i.type=type;l.append(i);return{l,i}};
  const rpc=(name,data)=>api('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(data)});
  const status=el('p');status.setAttribute('role','status');const say=t=>{if(valid())status.textContent=t};
- host.replaceChildren();host.append(el('h2','Discipline records'),el('p','Official totals from the school’s discipline record. RUHUKA does not calculate or deduct points. Academic results remain separate.'),status);
+ host.replaceChildren();host.append(el('h2','Discipline records'),el('p','Official totals from the school’s discipline record. This workspace does not calculate or deduct points. Academic results remain separate.'),status);
  const cls=el('select'),cl=el('label','Class');cl.append(cls);const refresh=button('Refresh imports',refreshClasses);host.append(cl,refresh);
  const editor=el('details'),form=el('form'),name=field('Name this upload'),date=field('Snapshot date','date'),ref=field('Official source reference'),file=field('Official totals CSV','file'),eventsFile=field('Official events CSV (optional)','file'),reason=field('Reason for correction');
  const correction=el('p'),cancel=button('Cancel correction',()=>{parent=null;reason.l.hidden=true;reason.i.required=false;correction.textContent='';cancel.hidden=true;invalidate()});cancel.hidden=true;reason.l.hidden=true;

@@ -1,6 +1,6 @@
 # RUHUKA first handover checklist
 
-Updated: 12 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
+Updated: 13 November 2026 (Africa/Kigali). Owner: project director; implementation: Codex.
 
 This is the delivery tracker. A checked item means the specifically stated outcome was verified, not that its whole feature is production-ready. Open items may already have partial code. Each working session picks the next dependency-ready item, records evidence and reports completed IDs, blockers and any owner action. Reopen a checked item when later changes invalidate its evidence. No calendar promise overrides acceptance checks.
 
@@ -397,3 +397,19 @@ Pending implementation/acceptance under H07/H09/H10 and I01/I11/J09:
 - [ ] Revalidate redesigned mobile/desktop layout, keyboard, contrast, asset loading and useful content before public release.
 
 These are scoped acceptance subtasks, not six additional original IDs. **98 verified / 18 open / 12 postponed** remains the historical technical tally; research does not close any of the remaining checks or certify the proposed redesign. No new school facts, logo or artwork were published to production in this session.
+
+
+### 13 November — approved LDK visitor redesign implemented
+
+Director approved red/green school identity, supplied newcomer emblem, bolder book illustration, same-tab navigation and researched history/club content except the outdated combinations. Director supplies approximate 6,000+ alumni and confirms ldkedu.com is a student showcase project.
+
+- [x] Built six consistent visitor pages with LDK identity, school crest, red/green accents, clearer book artwork and secondary member sign-in.
+- [x] Removed outdated combinations; linked enquiries to the office rather than inventing a new programme list.
+- [x] Added approved heritage/alumni and dated source-linked academic/sports milestones.
+- [x] Updated public, chatbot, workspace title and report school branding; kept technical identifiers stable and discreet developer credit.
+- [x] Implemented same-tab destinations, mobile menu, section/deep links and light-default theme with saved preference.
+- [x] Passed 184 Node tests and browser fixture at 320/390/768/1280px; inspected screenshots and corrected the narrow motto row.
+- [ ] Director review of final preview and clearer original crest if available.
+- [ ] Complete remaining launch gates and developer/demo-copy cleanup before production release.
+
+These are redesign subtasks, not new original IDs. **98 verified / 18 open / 12 postponed** remains the workflow tally. See verification/LDK_REDESIGN_2026-11-13.md for sources, files and verification limits. Production has not been merged or promoted.
