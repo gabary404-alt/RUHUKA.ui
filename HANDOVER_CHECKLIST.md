@@ -434,3 +434,12 @@ All 184 automated tests passed. Hosted Chromium checked the visitor pages at 320
 - Added repeatable build/link/exclusion checks and a GitHub Actions workflow for the Node suite and release bundle.
 - Photo/content decisions recorded in DIRECTOR_TESTING.md. No invented school activity, leader, annual marks formula or Rwanda section added.
 - Remaining count is unchanged: 98 verified, 18 open, 12 deferred. Director testing is the next acceptance activity, not a reason to wait for school sign-off before reviewing the site.
+
+## Director decisions and evidence plan — 14 November 2026
+
+- The director will perform the first full role review, then invite additional staff. Keep the production Headmaster account intact. Use the same director email in the isolated project with one active test role at a time; retain identity/history rather than deleting/recreating it. Revoke sessions between role changes. A second independent account is needed later to prove simultaneous cross-portal behavior. Test account creation is blocked on Auth dashboard access, not completed.
+- C07/F02: support a choice between the supplied template and a reviewed school format. Current code supports the template only (CSV/XLSX roster, CSV academics). A custom-format selection is not evidence of compatibility. Receive a redacted sample or exact column/worksheet specification, map fields explicitly, preview and apply through existing validators. Do not invent annual weighting.
+- J11: RUHUKA will provide support initially, as confirmed by the director. Named contact, response window, backups and school ownership remain to be agreed at handover.
+- J01/J02/J03/J09/K01/K07: add an existing-system and before/after workload check. Confirm whether LDK uses Karame/SDMS or another system; do not assume adoption or an available integration API. See verification/LDK_VALUE_REVIEW_2026-11-14.md and verification/pilot-measurements.csv.
+- Public page: added a restrained Rwanda/Kigali section using existing location/history/alumni context, without school ranking or unverified achievement claims. Real photography waits for the Headmaster’s input.
+- Tally unchanged: 98 verified, 18 open, 12 deferred. A developer/director review does not replace staff usability acceptance.
