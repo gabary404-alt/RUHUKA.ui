@@ -161,3 +161,9 @@
 .sports-gallery figcaption{padding:13px 16px;color:var(--t2);font-size:13px;line-height:1.5}
 .sports-gallery figcaption strong{display:block;color:var(--t);font-size:15px;margin-bottom:3px}
 @media(max-width:760px){.rwanda-photo{grid-column:1}.sports-gallery{grid-template-columns:1fr;max-width:440px;gap:20px}.sports-gallery img{height:250px}}
+
+/* Small editorial stickers fill the date column without adding motion. */
+.news-meta{min-width:0}.news-meta .story-meta{margin:0}
+.news-sticker{display:block;width:128px;height:128px;margin-top:20px;border-radius:18px;background-image:url('assets/news-stickers.webp');background-size:300% 200%;background-repeat:no-repeat;pointer-events:none}
+.sticker-basketball{background-position:0 0}.sticker-volleyball{background-position:50% 0}.sticker-heritage{background-position:100% 0}.sticker-gym{background-position:0 100%}.sticker-math{background-position:50% 100%}
+@media(max-width:760px){.news-meta{display:flex;align-items:center;justify-content:space-between;gap:16px}.news-sticker{width:64px;height:64px;flex:0 0 64px;margin:0;border-radius:10px}}
