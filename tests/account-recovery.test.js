@@ -1,0 +1,53 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm'),fs=require('node:fs');
+function setup(hash='',responses=[],config={url:'https://test.invalid',key:'public',emailRecoveryEnabled:true}){const nodes={},calls=[],events={},docEvents={};const get=id=>nodes[id]||(nodes[id]={value:'',hidden:id==='password-panel',textContent:'',focus(){}});for(const id of ['school-code','code-password','code-repeat','account-status','recovery-email','new-password','repeat-password','request-panel','password-panel','verified-account','recovery-send','password-save'])get(id);let replaced;const c={document:{getElementById:get,hidden:false,addEventListener(name,fn){docEvents[name]=fn}},window:{addEventListener(name,fn){events[name]=fn},RUHUKA_CONFIG:config},location:{hash,pathname:'/connected/account.html',href:'https://ruhukaui.vercel.app/connected/account.html'},history:{replaceState(a,b,c){replaced=c}},URL,URLSearchParams,AbortSignal,fetch:async(url,options)=>{calls.push({url,options});const r=responses.shift();if(!r)throw Error('Unexpected request');return{ok:r.ok!==false,status:r.status||200,json:async()=>r.data||{}}}};vm.createContext(c);vm.runInContext(fs.readFileSync('connected/account.js','utf8'),c);return{nodes,calls,replaced,events,docEvents,document:c.document,settle:()=>new Promise(setImmediate)};}
+test('recovery response does not reveal whether an email has an account',async()=>{const s=setup('',[{status:200}]);s.nodes['recovery-email'].value='someone@example.test';await s.nodes['recovery-request'].onsubmit({preventDefault(){}});assert.match(s.nodes['account-status'].textContent,/If this email has an account/);assert.ok(s.calls[0].url.includes('/recover?redirect_to='));});
+test('expired invitation keeps password form hidden and removes URL fragment',async()=>{const s=setup('#type=invite&access_token=bad',[]);await s.settle();assert.equal(s.replaced,'/connected/account.html');assert.equal(s.nodes['password-panel']?.hidden??true,true);assert.match(s.nodes['account-status'].textContent,/invalid or expired/);});
+test('verified setup validates passwords and ends sessions after saving',async()=>{const s=setup('#type=recovery&access_token=private-token',[{data:{email:'staff@example.test'}},{},{status:204}]);await s.settle();assert.equal(s.nodes['password-panel'].hidden,false);assert.match(s.nodes['verified-account'].textContent,/staff@example.test/);s.nodes['new-password'].value='a-strong-long-password';s.nodes['repeat-password'].value='different';await s.nodes['password-form'].onsubmit({preventDefault(){}});assert.equal(s.calls.length,1);s.nodes['repeat-password'].value=s.nodes['new-password'].value;await s.nodes['password-form'].onsubmit({preventDefault(){}});assert.equal(s.calls[1].options.method,'PUT');assert.ok(s.calls[2].url.endsWith('/logout?scope=global'));assert.equal(s.nodes['new-password'].value,'');assert.equal(s.nodes['password-panel'].hidden,true);assert.match(s.nodes['account-status'].textContent,/Password saved/);assert.ok(s.calls.every(c=>!c.url.includes('private-token')));});
+
+test('leaving or restoring account setup clears unfinished credentials without a network request',()=>{const s=setup();const fields=['school-code','code-password','code-repeat','new-password','repeat-password'];for(const event of ['hidden','pagehide','restore']){for(const id of fields)s.nodes[id].value='SYNTHETIC_SECRET';if(event==='hidden'){s.document.hidden=true;s.docEvents.visibilitychange();}else if(event==='restore')s.events.pageshow({persisted:true});else s.events.pagehide();for(const id of fields)assert.equal(s.nodes[id].value,'');assert.match(s.nodes['account-status'].textContent,/For privacy/);assert.equal(s.calls.length,0);}});
+
+test('a confirmed password change is not reported as failed when sign-out times out',async()=>{
+ const s=setup('#type=recovery&access_token=synthetic',[{data:{email:'staff@example.test'}},{status:200}]);
+ await s.settle();
+ s.nodes['new-password'].value=s.nodes['repeat-password'].value='a-strong-long-password';
+ await s.nodes['password-form'].onsubmit({preventDefault(){}});
+ assert.match(s.nodes['account-status'].textContent,/^Password saved.*sign-out could not be confirmed/);
+ assert.equal(s.nodes['password-panel'].hidden,true);
+ await s.nodes['password-form'].onsubmit({preventDefault(){}});
+ assert.equal(s.calls.length,3);
+});
+
+test('an unconfigured preview clears a callback fragment and hides account actions',()=>{
+ const s=setup('#type=invite&access_token=synthetic',[],null);
+ assert.equal(s.replaced,'/connected/account.html');
+ for(const id of ['student-code-panel','request-panel','password-panel'])assert.equal(s.nodes[id].hidden,true);
+ assert.match(s.nodes['account-status'].textContent,/Account setup is unavailable/);
+ assert.equal(s.calls.length,0);
+});
+
+test('a single-use Auth link is exchanged before showing the password form',async()=>{
+ const tokenHash='synthetic-recovery-hash-112233';
+ const s=setup('#type=recovery&token_hash='+tokenHash,[{data:{access_token:'new-session'}},{data:{email:'staff@example.test'}}]);
+ assert.equal(s.replaced,'/connected/account.html');
+ await s.settle();
+ assert.equal(s.nodes['password-panel'].hidden,false);
+ assert.ok(s.calls[0].url.endsWith('/verify'));
+ assert.deepEqual(JSON.parse(s.calls[0].options.body),{token_hash:tokenHash,type:'recovery'});
+ assert.equal(s.calls[1].options.headers.Authorization,'Bearer new-session');
+ assert.ok(s.calls.every(c=>!c.url.includes(tokenHash)));
+});
+
+test('expired or used Auth links leave the password form closed',async()=>{
+ const s=setup('#type=invite&token_hash=synthetic-used-invite-112233',[{ok:false,status:403}]);
+ await s.settle();
+ assert.equal(s.nodes['password-panel'].hidden,true);
+ assert.equal(s.calls.length,1);
+ assert.match(s.nodes['account-status'].textContent,/invalid or expired/);
+});
+
+test('ambiguous links with both session and one-time credentials make no Auth request',async()=>{
+ const s=setup('#type=recovery&token_hash=synthetic-used-invite-112233&access_token=ignored');
+ await s.settle();
+ assert.equal(s.nodes['password-panel'].hidden,true);
+ assert.equal(s.calls.length,0);
+});

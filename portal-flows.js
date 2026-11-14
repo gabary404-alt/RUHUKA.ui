@@ -41,7 +41,7 @@
   }
 
   window.getNeedsAttention = function () {
-    return (window.schoolData.students || []).filter(s => s.status !== 'Archived' && activeFlags(s).length);
+    return (window.schoolData.students || []).filter(s => s.status === 'Active' && activeFlags(s).length);
   };
   window.renderNeedsAttention = function () {
     const container = document.getElementById('needsAttentionList');
@@ -63,13 +63,13 @@
   window.renderTop30Overall = function () {
     const container = document.getElementById('top30Overall');
     if (!container || !window.schoolData) return;
-    const rows = competition(window.schoolData.students.filter(s => s.status !== 'Archived'), s => numberOrNull(s.academicScore));
+    const rows = competition(window.schoolData.students.filter(s => s.status === 'Active'), s => numberOrNull(s.academicScore));
     container.innerHTML = rankHtml(rows, row => row.score + '%');
   };
   window.renderTop30Discipline = function () {
     const container = document.getElementById('top30Discipline');
     if (!container || !window.schoolData) return;
-    const rows = competition(window.schoolData.students.filter(s => s.status !== 'Archived'), s => numberOrNull(s.disciplinePoints));
+    const rows = competition(window.schoolData.students.filter(s => s.status === 'Active'), s => numberOrNull(s.disciplinePoints));
     container.innerHTML = rankHtml(rows, row => row.score + '/40');
   };
   window.getClassLeaders = function () {
@@ -79,7 +79,7 @@
     const container = document.getElementById('classLeadersList');
     if (!container || !window.schoolData) return;
     const classes = {};
-    window.schoolData.students.filter(s => s.status !== 'Archived').forEach(s => {
+    window.schoolData.students.filter(s => s.status === 'Active').forEach(s => {
       classes[s.class] = classes[s.class] || [];
       classes[s.class].push(s);
     });
@@ -173,7 +173,7 @@
     }
     const domain = document.getElementById('reportDomain').value;
     const cls = classSelect.value;
-    const students = window.schoolData.students.filter(s => s.status !== 'Archived' && (!cls || s.class === cls));
+    const students = window.schoolData.students.filter(s => s.status === 'Active' && (!cls || s.class === cls));
     if (domain === 'attendance') {
       const withRate = students.filter(s => numberOrNull(s.attendanceRate) !== null);
       const missing = students.length - withRate.length;
@@ -198,7 +198,7 @@
     const timetable = document.getElementById('studentTimetable');
     if (!student) return;
     if (results) {
-      const mates = window.schoolData.students.filter(s => s.class === student.class && s.status !== 'Archived');
+      const mates = window.schoolData.students.filter(s => s.class === student.class && s.status === 'Active');
       const academic = competition(mates, s => numberOrNull(s.academicScore)).find(row => row.item.id === student.id);
       const discipline = competition(mates, s => numberOrNull(s.disciplinePoints)).find(row => row.item.id === student.id);
       results.innerHTML = '<h3 style="margin-bottom:8px">Academic results</h3><p>Score: <strong>' + (numberOrNull(student.academicScore) === null ? 'Not recorded' : student.academicScore + '%') + '</strong></p><p>Academic class place: <strong>' + (academic ? academic.place : 'Not ranked') + '</strong></p><p>Official discipline total: <strong>' + (numberOrNull(student.disciplinePoints) === null ? 'Not recorded' : student.disciplinePoints + '/40') + '</strong></p><p>Discipline class place: <strong>' + (discipline ? discipline.place : 'Not ranked') + '</strong></p><p style="font-size:12px;color:var(--t3);margin-top:8px">' + NOTE + '</p>';
@@ -223,7 +223,7 @@
     paintStudentExtras();
     const student = window.schoolData && window.schoolData.students.find(s => s.id === CURRENT_STUDENT.id);
     if (!student) return;
-    const mates = window.schoolData.students.filter(s => s.class === student.class && s.status !== 'Archived');
+    const mates = window.schoolData.students.filter(s => s.class === student.class && s.status === 'Active');
     const academic = competition(mates, s => numberOrNull(s.academicScore)).find(row => row.item.id === student.id);
     const el = document.getElementById('studentClassRank');
     if (el) el.textContent = academic ? '#' + academic.place + ' academic' : 'Not ranked';

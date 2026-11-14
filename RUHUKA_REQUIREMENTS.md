@@ -1,151 +1,73 @@
-# Ruhuka — agreed first functional handover
+## 7 November decisions — public school website and testing data
 
-Decisions confirmed by the project owner through 2026-11-02 (Africa/Kigali).
-This document supersedes conflicting older briefs and the frontend-only handover
-scope in RUHUKA_MASTER_HANDOFF.md. Requirements below are not implementation claims.
+The public website serves visitors learning about Lycée de Kigali as well as the school community. Restore visitor navigation (Our school, Learning & school life, Contact); keep School sign in as a separate route into private tools. Publish only confirmed facts. Old-site combinations, clubs, leaders, contacts and statistics are proposals in verification/SCHOOL_CONTENT_PROPOSALS.md until director/school approval. Do not use old marketing content to invent privacy or service promises.
 
-## Delivery and design
+The director confirmed existing notes and old records are disposable development data. Preservation is no longer a first-handover requirement for those identified test records. Prepare targeted cleanup before real school import; keep the working director account, schema, security and deployment history. Do not reset the whole Supabase project or assume device data in other browsers was removed.
 
-- Finish and review frontend workflows with synthetic records first; then connect
-  and verify Supabase. The actual school handover requires a functioning backend.
-- Preserve the current green/red identity and existing first-release features,
-  including notebooks and AI help. Prioritize phones while supporting desktop.
-- English first. Other languages will be directed by the owner later.
-- Exactly three portals: Student, Staff and Admin. Parent portal is deferred.
-- Keep tasks short and understandable; school staff should operate daily without
-  a developer. Ongoing support is expected.
+Staff accounts: Headmaster-only invitation, reviewed role assignment and disabling; recipients set their own passwords. Server-owned active roles determine access. Email delivery/redirect acceptance remains required. Roster import begins with explicit CSV template, server validation, before/after review, atomic apply and safe retry; no score/account/contact changes or repeated invitations. School Excel formats remain unfinished. Officers now require a Headmaster-issued, one-successful-use roster grant, valid up to 24 hours; failed validation does not consume it.
 
-## Roles and permissions
+# RUHUKA first handover requirements
+Updated 7 November 2026. Read this together with HANDOVER_CHECKLIST.md.
 
-| Role | Agreed responsibilities |
-| --- | --- |
-| Student | Own results, separate academic/discipline class rankings, attendance, absence explanations, announcements |
-| Academic Staff (teachers) | Assigned-class attendance, read-only student lookup, assigned-class announcements, notebook |
-| Discipline Staff (patrons/matrons) | School-wide attendance, read-only lookup, notebook; no discipline imports or clearing concerns |
-| Discipline Officer (Admin) | Attendance corrections, absence review, discipline imports, concerns, individual student additions, reset codes, announcements |
-| Dean of Studies (Admin) | Academic imports/corrections, teacher assignments, promotion review/settings, announcements |
-| Headmaster (Admin) | Roster, staff accounts/roles, teacher assignments, delegated permissions, term dates, reports/oversight, announcements |
+## Purpose
+RUHUKA helps Lycée de Kigali staff record attendance, maintain school records and follow up work without repeatedly copying it. The site must be simple enough for routine staff use, especially on phones. Core attendance must work without each student owning a phone.
 
-- Only Discipline Officers correct submitted attendance, including midday returns.
-  This supersedes the earlier suggestion that patrons/matrons could correct it.
-- Headmaster manages edits to names/classes and transferred/archived statuses.
-  Discipline Officers request those corrections.
-- Discipline Officers add individual students directly; notify the Headmaster
-  with HIGH priority. No additional grant is required.
-- Whole-roster import by a Discipline Officer requires a Headmaster grant to that
-  officer. It is consumed by ONE successful import, not failed validation/upload.
-- Permissions are specific actions, not an unrestricted superuser switch.
-- Public content editing is allowed to the Headmaster and named editors/developers
-  authorized by the school. Developer status alone grants no access.
-- UI visibility is not authorization. These rules must be enforced server-side
-  during integration, with per-role tests and audit records.
+## Current implementation
+The public page is a small introduction with real-account sign-in links. The role-checked workspace at /connected/ has Student, Staff and Admin navigation. It is a pilot, not a completed school release. The public production deployment has not been updated until a reviewed merge/release is authorised.
+The active database is RUHUKA system (jsqiqxflgokfdooogcst). The older project is excluded. The owner's temporary Headmaster account is not the final school-owned handover account.
 
-## Attendance and explanations
+## Roles
+- Teacher: main/follow-up attendance for assigned classes; assigned-class announcements.
+- Patron/matron: school-wide attendance; no officer corrections or private concern reviews.
+- Discipline Officer: attendance corrections with reasons/history, discipline follow-ups, single student additions with high-priority Headmaster notice, roster correction requests, relevant school notices.
+- Dean of Studies: academic work and academic follow-ups, teacher assignments and school notices.
+- Headmaster: roster/classes/terms, teacher assignments, priority notices, oversight and controlled school permissions.
+- Student: own recorded academic/discipline/attendance information and targeted school announcements. No online absence-submission form.
+Server permissions, not a browser role selector, decide access. No one can see a student's password.
 
-- One main attendance per class per school-local date. A teacher or patron normally
-  submits it. Follow-up lesson registers do not affect official daily statistics.
-- Reject a second main submission with a clear already-submitted message. Preserve
-  the existing register, including when two people submit concurrently.
-- Discipline Officers can correct submitted records. Preserve before/after values,
-  reason, authenticated editor and timestamp. Present with a late-arrival explanation
-  differs from an excused absence.
-- Discipline Office overview lists submitted/missing class registers by date and
-  shows the submitter and time. Missing registers are not student absences.
-- Students can submit explanations with optional photo/PDF proof. Send only to
-  Discipline Officers. Approval changes the linked absence to excused with history.
-- Save drafts on the device through connectivity loss, scoped to the signed-in
-  user. Show Not submitted until server confirmation. Recheck duplicate submissions
-  on reconnect; do not silently overwrite someone else's register.
-- Flag five consecutive recorded main-attendance school days absent. Missing
-  attendance is unknown, never automatically absent. Present/late/excused ends
-  the streak. An existing concern stays open until reviewed.
-- After closure, another absent day reopens a concern if the student has not
-  returned; after return, a new five-day streak creates a new concern.
-- Academic below 50% and official discipline below 20/40 remain separate concerns.
-  Clearing one category does not clear the others. No automated disciplinary action.
+## First-handover workflows
+1. One submitted main register per class/day. Reject incomplete, invalid, duplicate or wrong-class marks atomically.
+2. Separate follow-up lesson registers; these do not change official main-attendance totals.
+3. Present/Late count as attended; Excused is separate. Missing records mean unknown, not absent or zero.
+4. Officers correct submitted main attendance with a reason; retain original value, actor and time. Ordinary staff cannot overwrite another submission.
+5. Today lists permitted missing registers, follow-up concerns, upload issues and priority roster notices. Each available control opens its real action.
+6. Class/student management, three Headmaster-configured terms, teacher assignments, individual officer additions and protected bulk-import permissions.
+7. Freely named academic releases are connected in the pilot; official discipline imports are now connected through a strict pilot CSV format; school-format and device acceptance remain required. Different subject maxima are weighted; missing marks are not zero. Academic and discipline rankings stay separate. Dean/officer publish without a separate reviewer, with required notices/history.
+8. Below-threshold concerns lead to human review, not automatic punishment or promotion. Attendance concerns use five consecutive recorded main absences; returns break a streak but do not silently close an open case.
+9. School/class announcements and private recipient notifications retain targeting and history.
+10. Account setup/recovery, student ID sign-in, complete imports, school-owned service/access transfer and real-device/multi-role acceptance must be completed before handover.
+11. Class letters remain on the checklist after trustworthy sources/reports are ready. Generated numbers stay tied to records; editable wording stays separate.
 
-## Academics, reports and promotion
+## Design and AI
+Keep the green identity, readable typography, compact layouts, book illustration and small original helper in the existing chat control. No heavy animation library, continuous canvas scene or extra floating mascot.
+Use native scrolling. Load public-page code first; load optional chat only when opened. Do not generate sample school records on a normal page visit.
+AI answers start with the answer, normally 2–4 short sentences or up to three short bullets. More detail is available when requested. Keep private records, credentials and actions out of the assistant. It has no live web search. Full rate/cost controls and configured live-provider testing remain open.
 
-- Dean names a results release freely and uploads whenever needed, e.g. Beginning
-  of Term Tests. Preserve earlier releases and separate their rankings.
-- Upload has one student per row, individual subject marks and an overall percentage
-  in the last column. Subjects may have different maximum marks.
-- Overall calculation: sum earned marks / sum possible marks * 100. Use the
-  school-supplied overall for rankings; surface discrepancies rather than silently
-  replacing it. Blank is Not recorded; explicit zero is a valid recorded mark.
-- Warn the Dean about missing marks. Allow Review/fix or Publish anyway; retain
-  unresolved warnings and record the override. Published students WITH a supplied
-  overall percentage remain ranked even with a blank subject mark.
-- Academic and discipline rankings remain separate, within the student's own class.
-  Ties share positions (1,2,2,4). Never silently treat a missing total as zero.
-- Dean publishes and corrects results without Headmaster approval. Notify Headmaster
-  on uploads and corrections; retain before/after history and update rankings.
-- Promotion threshold defaults to 50%; Dean can set e.g. 55% or 60% per school year.
-  Prepare suggestions and route below-threshold/missing cases for review. Headmaster
-  OR Dean decides promote/repeat after review. Retain prior-year records.
-- OPEN: threshold choice is not the choice of annual results source. The owner has
-  not chosen final-term percentage vs all-term average vs a supplied annual release.
-  Require the Dean to explicitly select the basis before preparing promotion
-  suggestions; never silently choose a formula.
-- Three terms/year, with Headmaster-configured dates. Historical classes, marks and
-  attendance must not be rewritten by a new year's roster.
-- Excel and CSV imports; Excel, CSV and printable/PDF reports. Filters must affect
-  both displayed values and exports. Ordinary reports exclude private contacts.
-- Official source-file layouts, maximum-mark representation, and rounding tolerance
-  need synthetic/redacted samples before final parser acceptance. No real student
-  data in the current demo.
+## Postponed
+Personal notebooks for all Staff/Admin roles; online student absence submissions and proof uploads; parent portal/messaging; SMS; automatic promotion decisions; advanced charts/school-wide leaderboards; elaborate 3D.
+Identified old notes and records are disposable test data and may be removed in targeted cleanup before school use. Real school records and their history must be handled under the approved school policy. New student absence submissions are blocked at the database boundary. Historical privacy restrictions remain. Manual officer attendance corrections stay available.
 
-## Discipline imports and roster
+## Delivery evidence
+The checklist preserves all 128 original IDs and separates active and deferred work. Only verified outcomes are ticked. Mocked tests and SQL fixtures are not a substitute for actual school/device acceptance. Record limitations, open checks and any action needed from the director in plain language.
 
-- External school system is the authority for discipline points. No manual website
-  form for adding/deducting official points.
-- Discipline Officer previews/applies imports directly, without a second reviewer.
-  Notify Headmaster and fellow Discipline Officers; identify uploader and changes.
-- Keep validation, source evidence and upload history. Notifications replace approval
-  waiting, not validation or accountability.
-- Roster bulk import: preserve omitted fields, preview changes, no score changes or
-  automatic re-invitations, reject invalid batches rather than quietly skipping rows.
-- Preserve archived/transferred/graduated history; exclude inactive records from
-  current attendance and active rankings.
+## Academic publication boundary
 
-## Accounts, notices and public content
+The Dean names a class release, chooses its result date, uploads the pilot CSV and reviews a server-validated preview. Subject headers specify different maxima, student_id is first and overall_percent last. Every active class student must be included exactly once; missing marks/overall are blank, not zero. Incomplete subjects leave the calculated weighted total unavailable; a supplied overall can still determine the rank. Missing overall gives no rank. A discrepancy greater than 0.01 percentage points is a review warning. Warnings may be published only with a recorded reason.
 
-- Student login is ID + password. Email setup first; SMS deferred pending costs.
-- Verified parent/guardian email OR a privately issued school one-time setup code
-  can support students without email. Never give everyone a shared default password.
-- Discipline Officers can issue temporary reset codes, with a recorded action.
-  They must never see a student's password.
-- Only Headmaster creates staff accounts, assigns roles and disables access.
-  Both Headmaster and Dean assign teachers to classes.
-- Headmaster, Dean and Discipline Officers can publish school-wide announcements.
-  Teachers post to assigned classes. Student announcements stay in one feed.
-- Announcements are in-app only for first handover, not email/SMS delivery.
-- School-approved public details/achievements must replace unverified sample claims.
+No Headmaster approval is required. Publication and correction notify the Headmaster. A correction creates a new version with the original year/class cohort and preserved previous ranks. Current views may hide students who moved or left, but do not rerank saved history. Student access is restricted to their own result rows. Teachers read assigned classes; the Headmaster reads school releases; the Dean publishes. School-specific Excel/CSV mapping and real-role school acceptance remain open. Academic and discipline results stay separate.
 
-## AI assistant
+## Discipline/report/enrolment implementation — 7 November
 
-- Help with Ruhuka, school-approved information and general/learning questions.
-- No access to private student records, no data exports or administrative actions.
-- Replies should appear progressively with a waiting indicator and usable stop/error
-  states. Preserve accessibility and reduced-motion support.
-- Current information requires actual current-source retrieval with meaningful
-  citations. Do not promise freshness merely by adding a system prompt.
-- Current endpoint is EjoLabs JSON response, not a verified streaming/search API.
-  Frontend progressive reveal is an interim UI behavior, not live token streaming.
-- Production work still needs server-controlled instructions, verified provider
-  capabilities, bounded requests/rate limits, approved school knowledge and current
-  source retrieval. Never expose privileged credentials in frontend code.
+Discipline Officer uploads a dated class snapshot with official totals (0–40), document reference and optional source event evidence; no separate reviewer or Headmaster approval. Totals are never calculated from event changes. Full original class cohort is required; missing totals are rejected rather than guessed. Corrections retain the original date/year/cohort, previous source and a reason. Totals-only corrections preserve existing event evidence; explicit new events CSV replaces it after preview. Headmaster/fellow officers get an in-app notice and Today task. Student views show only own current permitted source rows. Canonical parsed source values/filenames/reference/fingerprints are retained; raw files/photos and school-specific spreadsheet mapping remain open.
 
-## Reviewable implementation sequence
+Reports use class/date plus one selected result release, with separate academic and discipline numbers, current-status filtering and explicit historical-version labels. Academic rank is frozen at publication; discipline rank describes only the selected discipline view. Attendance reports distinguish unique students absent from absence marks; unsubmitted days are unknown, Late counts as attended, Excused and follow-up lessons are excluded from the percentage. Exports/print use exactly the loaded snapshot; changing filters invalidates old exports. No private contacts, explanations or credentials enter report data.
 
-1. Chat UI and requirements baseline (first change).
-2. Attendance calculation/duplicate/correction/absence/overview flows and tests.
-3. Roster, scoped one-use grants, staff assignments, notifications and public editors.
-4. Academic releases/imports/corrections, reports and promotion review.
-5. Mobile/offline/attachment/notebook/announcement QA and accessible first-use help.
-6. Reconcile existing Supabase migrations, then implement auth, persistence, storage,
-   access controls, notifications and shared updates in tested steps.
-7. Verify cross-device workflows, role isolation, imports, recovery, email delivery,
-   AI provider/source behavior and school acceptance before functional handover.
+Enrolment history records class/name/status/year before/after states with actor/time from the labelled baseline onward. Headmaster reviews a class-year change against its expected current year; previous states and source results remain. This never promotes or repeats a student automatically. Manual promote/repeat decision workflow remains F13.
 
-No production-ready or fully functional claim until the final verification passes.
+## Class letters, manual review and public text — 7 November implementation
+
+Class letters are shared account-controlled snapshots, authored by Dean/Discipline Officer and read by Headmaster. Explicit class/year/date/source selection, main attendance counts/returns/unknown coverage, aggregate academic missing/zero/source details and separate official discipline snapshot/events remain deterministic. Author explanation is separate and must be human-reviewed; never automatically include private explanations, contacts, medical evidence or notebook text. Saved versions keep prior numbers; later source corrections prompt another reviewed version. Additional evidence may print on extra pages. No external sending. School practice/usefulness remains K01/K07.
+
+Headmaster/Dean manual year-end review chooses one student's Promote/Repeat destination, source year/results and conclusion with explicit confirmation. Threshold defaults to 50% and Dean can change it per year, but it never chooses a decision. Corrections retain earlier decisions and class history. Headmaster handles Graduated status separately. Automatic promotions remain deferred.
+
+Public text may be published only by Headmaster or individually authorised active staff after confirming school approval. Five bounded plain-text sections, stale-version protection, author/version history, explicit grant/revoke and a separate read-only public projection. No facts from the outdated school website are silently published. Public reader failure keeps static HTML usable; no user session or school record is sent. The approved stationary-star design uses six fixed CSS points; no movement/timer/canvas/library.

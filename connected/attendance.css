@@ -1,0 +1,47 @@
+body{background:#f3f7f4;color:var(--t)}main{max-width:980px;margin:auto;padding:20px}header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}header strong{color:var(--p);font-size:24px}header span{flex:1}section{background:var(--s1);padding:24px;border:1px solid var(--b);border-radius:16px;margin:20px 0}label{display:flex;flex-direction:column;gap:6px;margin:14px 0}input,select{padding:12px;border:1px solid #a4b7ac;border-radius:8px;background:white;min-height:46px;width:100%;font-size:16px}button{padding:10px 16px;min-height:44px;border:1px solid var(--p);border-radius:8px;color:var(--p);margin:6px 6px 6px 0}.primary{background:var(--p);color:white}button:disabled{opacity:.55}#notice{padding:14px;border-left:4px solid var(--p);background:white;white-space:pre-wrap}#notice.error{border-color:var(--r);color:#991b1b}.row{padding:16px 0;border-bottom:1px solid var(--b);overflow-wrap:anywhere}.row p{color:var(--t2)}[hidden]{display:none!important}:focus-visible{outline:3px solid #16a34a;outline-offset:3px}@media(max-width:600px){main{padding:12px}section{padding:16px}button{width:100%}header button{width:auto}}
+
+textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);border-radius:8px;font:inherit;font-size:16px;resize:vertical}
+
+.today-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}.today-card{border:1px solid var(--b);border-radius:12px;padding:16px;background:var(--s2)}.today-card h3{font-size:17px;line-height:1.4}.today-card button{width:100%;margin-top:12px}.inline-choice{display:flex;flex-direction:row;align-items:center;gap:10px}.inline-choice input{width:24px;min-height:24px}.today-grid+section:focus{outline:2px solid var(--a);outline-offset:3px}#today-desk details{margin:12px 0}#today-desk summary{cursor:pointer;padding:10px 0}#today-desk small{display:block;overflow-wrap:anywhere}
+
+.today-illustration{float:right;max-width:30%;height:auto;margin:-10px 0 8px 16px}#today-desk:after{content:"";display:block;clear:both}@media(max-width:600px){.today-illustration{width:100px;max-width:28%;margin:0 0 8px 8px}}
+
+.workspace-brand{font-weight:800;font-size:23px;text-decoration:none;color:var(--p)}.workspace-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:16px 0;position:sticky;top:0;padding:8px 0;background:var(--sky-top);z-index:10}.workspace-nav button{margin:0;background:var(--s1)}.workspace-nav button[aria-current=page]{background:var(--p);color:white}#workspace{padding:0;border:0;background:none}#workspace>section{margin-top:12px}.muted{font-size:14px;color:var(--t2)}.school-form{padding:14px 18px;border:1px solid var(--b);border-radius:12px;margin:12px 0;background:var(--s1)}.school-form summary{cursor:pointer;min-height:44px;display:list-item;align-content:center}.school-form summary h3{display:inline;font-size:17px}.school-form summary:focus-visible{outline:3px solid var(--a);outline-offset:3px}header{gap:12px}input,select,textarea{min-width:0;max-width:100%}#attendance-view h2{margin-bottom:12px}#identity{overflow-wrap:anywhere}#portal-title{font-size:clamp(25px,5vw,34px);margin:12px 0}h3{line-height:1.4}.row{overflow-wrap:anywhere}@media(max-width:600px){header{font-size:14px}header button{margin-left:auto}.workspace-nav button{font-size:14px;padding:10px 8px}.school-form{padding:10px 14px}}
+
+/* Reports keep long records in local disclosures, with a plain full print view. */
+.report-print{display:none}
+@media print{
+ body>*{display:none!important}body>.report-print{display:block!important;margin:0;padding:0;border:0;background:white;color:#111;font:10pt/1.4 Arial,sans-serif}
+ .report-print table{border-collapse:collapse;width:100%;font-size:8pt;table-layout:fixed}.report-print th,.report-print td{padding:5px;border:1px solid #aaa;overflow-wrap:anywhere;vertical-align:top}.report-print thead{display:table-header-group}.report-print tr{break-inside:avoid}.report-print h1{font-size:18pt}.report-print h2,.report-print h3{break-after:avoid}
+ @page{margin:12mm;size:landscape}
+}
+
+.class-letter-paper{max-width:76ch;margin:20px auto;padding:clamp(18px,4vw,40px);background:#fff;color:#17382b;border:1px solid #c2d7c9;border-radius:10px;overflow-wrap:anywhere}.class-letter-paper h1{font-size:26px;line-height:1.25}.class-letter-paper h2{font-size:19px}.class-letter-paper p{white-space:pre-wrap}.letter-evidence{margin-top:24px}
+@page letter{size:A4 portrait;margin:16mm}
+@media print{body>.letter-print{page:letter;font-size:11pt;line-height:1.5}.letter-print p{white-space:pre-wrap;overflow-wrap:anywhere}.letter-print .letter-evidence{break-before:page;border:0;padding:0}.letter-print h1{font-size:20pt}}
+
+@page student-results{size:A4 portrait;margin:14mm}
+@media print{body>.student-report-print{page:student-results;font:11pt/1.5 Arial,sans-serif}.student-report-print h1{font-size:20pt;color:#14532d}.student-report-print table{font-size:10pt;margin:20px 0}.student-report-print th{background:#e7f3eb;color:#17382b}.student-report-print th:first-child,.student-report-print td:first-child{width:46%}.student-report-print p{overflow-wrap:anywhere}}
+
+/* Keep the workspace navigation from covering focused fields on small screens. */
+@media (max-width: 600px), (max-height: 520px) {
+  .workspace-nav { position: static; }
+}
+
+.test-workspace-banner {
+  padding: 10px 12px;
+  border: 1px solid #a47422;
+  border-radius: 8px;
+  background: #fff4d4;
+  color: #573b07;
+}
+
+.student-discipline { overflow-wrap: anywhere; }
+.student-discipline h5 { margin: 0; font: inherit; font-weight: 700; }
+.student-discipline .row p { margin: .35rem 0 0; }
+
+@media print {
+  .student-report-heading { text-align: center; border-bottom: 1px solid #17382b; }
+  .student-report-heading p { margin: 0; }
+  .student-report-print caption { text-align: left; font-weight: bold; padding-bottom: 4px; }
+}

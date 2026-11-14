@@ -1,0 +1,245 @@
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);let token=null,refreshToken=null,refreshing=null,user=null,roles=[],roster=[],epoch=0,busy=false,loaded=null;
+const drafts=window.createAttendanceDrafts({getItem(key){return localStorage.getItem(key)},setItem(key,value){return localStorage.setItem(key,value)},removeItem(key){return localStorage.removeItem(key)}});
+let draftReadFailed=false;let reviewedSignature=null;let studentRecords=null;let studentOnly=false;let schoolDesk=null;let letterDesk=null;let disciplineDesk=null;let reportsDesk=null;let academicsDesk=null;let accountsDesk=null;let rosterDesk=null;let todayDesk=null;
+const config=window.RUHUKA_CONFIG;
+let detailRequest=0;
+function notify(message,error=false){$('notice').textContent=message;$('notice').classList.toggle('error',error);}
+if (!config?.url || !config?.key) {
+  $('login-form').hidden = true;
+  notify('School sign-in is unavailable here. If you are using a preview, use a dedicated test workspace. If you are on the school website, reload or contact the administrator.', true);
+  return;
+}
+async function renewSession(){
+ if(!refreshToken)throw Error('Your session expired. Sign in again.');
+ if(!refreshing){const version=epoch;const value=refreshToken;
+ refreshing=(async()=>{const response=await fetch(config.url+'/auth/v1/token?grant_type=refresh_token',{signal:AbortSignal.timeout(20000),method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:value})});
+ const data=await response.json();if(version!==epoch)throw Error('Session changed. Sign in again.');if(!response.ok){clear();notify('Your session expired. Sign in again. Your saved draft stays on this device.',true);throw Error('Your session expired. Sign in again. Your saved draft stays on this device.');}token=data.access_token;refreshToken=data.refresh_token;})().finally(()=>{refreshing=null;});}return refreshing;
+}
+async function request(path,options={},retried=false){
+ const response=await fetch(config.url+path,{signal:AbortSignal.timeout(20000),...options,headers:{apikey:config.key,...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json',...options.headers}});
+ if(response.status===204)return null;const data=await response.json();if(response.status===401&&path==='/auth/v1/user'){throw Error('Your session ended. Sign in again.');}if(response.status===401&&token&&!path.startsWith('/auth/')&&!retried){await renewSession();return request(path,options,true);}if(!response.ok){const e=new Error(response.status===401&&!path.endsWith('/student-access')?'Your session expired. Sign in again.':data.message||data.msg||data.error_description||'Request failed.');e.code=data.code;throw e;}return data;
+}
+const rpc=(name,args)=>request('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(args)});
+function row(text){const box=document.createElement('div');box.className='row';const p=document.createElement('p');p.textContent=text;box.append(p);return box;}
+function action(label,fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;return b;}
+function clear(){document.getElementById('ruhuka-report-print')?.remove?.();if(letterDesk){letterDesk.dispose();letterDesk=null;}$('class-letters').hidden=true;$('open-letters').hidden=true;if(disciplineDesk){disciplineDesk.dispose();disciplineDesk=null;}if(reportsDesk){reportsDesk.dispose();reportsDesk=null;}$('discipline').hidden=true;$('reports').hidden=true;$('open-discipline').hidden=true;$('open-reports').hidden=true;if(academicsDesk){academicsDesk.dispose();academicsDesk=null;}$('academics').hidden=true;$('open-academics').hidden=true;if(accountsDesk){accountsDesk.dispose();accountsDesk=null;}if(rosterDesk){rosterDesk.dispose();rosterDesk=null;}$('staff-accounts').hidden=true;$('roster-import').hidden=true;$('open-accounts').hidden=true;$('open-roster-import').hidden=true;if(todayDesk){todayDesk.dispose();todayDesk=null;}$('today-desk').hidden=true;$('open-today').hidden=true;if(schoolDesk){schoolDesk.dispose();schoolDesk=null;}$('school-desk').hidden=true;$('open-school').hidden=true;if(studentRecords){studentRecords.dispose();studentRecords=null;}$('student-records').hidden=true;$('open-my-records').hidden=true;$('open-attendance').hidden=true;studentOnly=false;epoch++;token=null;refreshToken=null;user=null;roles=[];roster=[];loaded=null;$('workspace').hidden=true;$('login').hidden=false;$('signout').hidden=true;$('password').value='';$('students').replaceChildren();$('overview').replaceChildren();$('details').replaceChildren();$('summary-result').replaceChildren();$('followup-list').replaceChildren();$('official-summary').hidden=true;$('identity').textContent='';$('portal-label').textContent='School sign in';document.title='School sign in · Lycée de Kigali';}
+if (config.testWorkspace) $('test-workspace-banner').hidden = false;
+$('sign-in-kind').onchange=()=>{const student=$('sign-in-kind').value==='student';$('email').type=student?'text':'email';$('identifier-label').textContent=student?'Student ID':'Staff email';$('email').value='';$('password').value='';notify(student?'Use the student ID supplied by the school. For first setup, open Account setup below.':'Use your assigned staff email and password.');};
+$('login-form').onsubmit=async event=>{event.preventDefault();const version=++epoch;const button=event.submitter;button.disabled=true;
+ try{notify('Signing in…');const session=await request($('sign-in-kind').value==='student'?'/functions/v1/student-access':'/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify($('sign-in-kind').value==='student'?{action:'login',student_id:$('email').value.trim(),password:$('password').value}:{email:$('email').value.trim(),password:$('password').value})});if(version!==epoch)return;token=session.access_token;refreshToken=session.refresh_token;user=session.user;
+ const [profile,grants]=await Promise.all([request('/rest/v1/profiles?select=display_name,is_active&id=eq.'+user.id),request('/rest/v1/user_roles?select=role&user_id=eq.'+user.id)]);if(version!==epoch)return;
+ roles=grants.map(x=>x.role);if(!profile[0]?.is_active||!roles.some(r=>['teacher','discipline_staff','discipline_officer','headmaster','dean','student'].includes(r)))throw Error('This account has no active school staff access.');
+ $('open-letters').hidden=!roles.some(r=>['headmaster','dean','discipline_officer'].includes(r));$('open-discipline').hidden=!roles.some(r=>['headmaster','discipline_officer'].includes(r));$('open-reports').hidden=!roles.some(r=>['headmaster','dean','discipline_officer','teacher','discipline_staff'].includes(r));$('open-academics').hidden=!roles.some(r=>['headmaster','dean','teacher'].includes(r));$('open-accounts').hidden=!roles.includes('headmaster');$('open-roster-import').hidden=!roles.some(r=>['headmaster','discipline_officer'].includes(r));studentOnly=roles.includes('student')&&!roles.some(r=>['teacher','discipline_staff','discipline_officer','headmaster','dean'].includes(r));$('open-school').hidden=false;if(window.mountToday&&!studentOnly){$('today-desk').hidden=false;$('open-today').hidden=false;const signedInEpoch=epoch;todayDesk=window.mountToday($('today-desk'),request,roles,()=>epoch===signedInEpoch,openTodayTask,()=>$('day').value);}$('identity').textContent=(profile[0].display_name||user.email)+' · '+roles.map(r=>({teacher:'Teacher',discipline_staff:'Patron / matron',discipline_officer:'Discipline Officer',headmaster:'Headmaster',dean:'Dean of Studies',student:'Student'})[r]||r).join(' · ');$('login').hidden=true;$('workspace').hidden=false;$('signout').hidden=false;$('password').value='';$('submit-panel').hidden=!roles.some(r=>['teacher','discipline_staff'].includes(r));
+ const title=studentOnly?'Student Portal':roles.some(r=>['headmaster','dean','discipline_officer'].includes(r))?'Admin Portal':'Staff Portal';$('portal-label').textContent=title;$('portal-title').textContent=title;document.title=title+' · Lycée de Kigali';$('open-attendance').hidden=studentOnly;$('open-my-records').hidden=!studentOnly;
+ 
+ $('overview-panel').hidden=studentOnly;$('refresh').hidden=studentOnly;
+ if(studentOnly){notify('Signed in. Open My records to view your school information.');await $('open-my-records').onclick();return;}showView('today-desk');
+ await refreshClassChoices();if(version!==epoch)return;$('official-summary').hidden=false;$('summary-from').value=$('day').value;$('summary-to').value=$('day').value;await overview();notify('Signed in. Records are loaded from the school database.');
+ }catch(error){if(version===epoch){clear();notify(error.message,true);}}finally{button.disabled=false;}};
+$('signout').onclick=async()=>{const old=token;clear();notify('Signed out.');if(old)try{await request('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+old}});}catch{notify('Signed out on this page. Server session revocation could not be confirmed.',true);}};
+function showView(id){if(id!=='attendance-view')detailRequest++;if(id!=='school-desk')schoolDesk?.hideSensitive?.();document.getElementById('ruhuka-report-print')?.remove?.();for(const name of ['today-desk','attendance-view','school-desk','student-records','staff-accounts','roster-import','academics','discipline','reports','class-letters'])$(name).hidden=name!==id;for(const [button,panel]of [['open-today','today-desk'],['open-attendance','attendance-view'],['open-school','school-desk'],['open-my-records','student-records'],['open-accounts','staff-accounts'],['open-roster-import','roster-import'],['open-academics','academics'],['open-discipline','discipline'],['open-reports','reports'],['open-letters','class-letters']])$(button).setAttribute('aria-current',id===panel?'page':'false');}
+const schoolToolLoads=new Map();window.loadSchoolTool=function(src){if(!['class-letters.js','progression.js','public-editor.js','student-access.js','student-report.js','school-desk.js','student-records.js','staff-accounts.js','roster-import.js','roster-xlsx.js','academics.js','discipline.js','reports.js'].includes(src))return Promise.reject(Error('Unknown school tool'));if(!schoolToolLoads.has(src)){schoolToolLoads.set(src,new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>{s.remove();schoolToolLoads.delete(src);reject(Error('This tool could not load. Check your connection and try again.'));};document.body.append(s);}));}return schoolToolLoads.get(src);};
+async function openSchoolTool(view, scripts, mount) {
+ const version=epoch;
+ showView(view);
+ try {
+  for (const [file, exported] of scripts) {
+   if (!window[exported]) await window.loadSchoolTool(file);
+   if (version!==epoch||$(view).hidden) return;
+  }
+  await mount(version);
+ } catch(error) {
+  if (version===epoch&&!$(view).hidden) notify(error.message,true);
+ }
+}
+$('open-letters').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','dean','discipline_officer'].includes(r))) return;
+ return openSchoolTool('class-letters',[['class-letters.js','mountClassLetters']],version=>{
+  if (!letterDesk) letterDesk=window.mountClassLetters($('class-letters'),request,roles,()=>epoch===version);
+  return letterDesk.ready;
+ });
+};
+$('open-discipline').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','discipline_officer'].includes(r))) return;
+ return openSchoolTool('discipline',[['academics.js','RUHUKACSV'],['discipline.js','mountDiscipline']],version=>{
+  if (!disciplineDesk) disciplineDesk=window.mountDiscipline($('discipline'),request,roles,()=>epoch===version);
+  return disciplineDesk.ready;
+ });
+};
+$('open-reports').onclick=()=>{
+ if (!user||studentOnly) return;
+ return openSchoolTool('reports',[['reports.js','mountReports']],version=>{
+  if (!reportsDesk) reportsDesk=window.mountReports($('reports'),request,roles,()=>epoch===version);
+  return reportsDesk.ready;
+ });
+};
+$('open-academics').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','dean','teacher'].includes(r))) return;
+ return openSchoolTool('academics',[['academics.js','mountAcademics']],version=>{
+  if (!academicsDesk) academicsDesk=window.mountAcademics($('academics'),request,roles,()=>epoch===version);
+  return academicsDesk.ready;
+ });
+};
+$('open-accounts').onclick=()=>{
+ if (!user||!roles.includes('headmaster')) return;
+ return openSchoolTool('staff-accounts',[['staff-accounts.js','mountStaffAccounts']],version=>{
+  if (!accountsDesk) accountsDesk=window.mountStaffAccounts($('staff-accounts'),request,()=>epoch===version);
+  return accountsDesk.ready;
+ });
+};
+$('open-roster-import').onclick=()=>{
+ if (!user||!roles.some(r=>['headmaster','discipline_officer'].includes(r))) return;
+ return openSchoolTool('roster-import',[['roster-import.js','mountRosterImport']],version=>{
+  if (!rosterDesk) rosterDesk=window.mountRosterImport($('roster-import'),request,()=>epoch===version);
+ });
+};
+async function refreshClassChoices(){const version=epoch,previous=$('class').value,summary=$('summary-class').value;const classes=await request('/rest/v1/school_classes?select=class_name&order=class_name');if(version!==epoch)return;for(const id of ['class','summary-class']){$(id).replaceChildren();classes.forEach(c=>{const o=document.createElement('option');o.value=c.class_name;o.textContent=c.class_name;$(id).append(o);});}const chosen=classes.some(c=>c.class_name===previous)?previous:classes[0]?.class_name||'';$('class').value=chosen;$('summary-class').value=classes.some(c=>c.class_name===summary)?summary:classes[0]?.class_name||'';$('load').disabled=!classes.length;$('load-summary').disabled=!classes.length;$('load-followups').disabled=!classes.length;if(loaded&&loaded.cls!==chosen){loaded=null;reviewedSignature=null;$('submit').hidden=true;$('students').replaceChildren();notify('Your available classes changed. Device drafts are kept; open an available class.');}}
+$('open-attendance').onclick=async()=>{if(!user||studentOnly)return;showView('attendance-view');try{await refreshClassChoices();await overview();}catch(e){notify('Could not refresh available classes. '+e.message,true);}};
+$('open-my-records').onclick=()=>{
+ if (!user||!studentOnly) return;
+ return openSchoolTool('student-records',[['student-records.js','mountStudentRecords']],version=>{
+  if (!studentRecords) studentRecords=window.mountStudentRecords($('student-records'),request,()=>epoch===version);
+  return studentRecords.ready;
+ });
+};
+$('open-today').onclick=()=>{showView('today-desk');const host=$('today-desk');host.hidden=false;todayDesk?.refresh();host.scrollIntoView?.({block:'start'});};
+$('open-school').onclick=()=>{
+ if (!user) return;
+ return openSchoolTool('school-desk',[['school-desk.js','mountSchoolDesk']],async version=>{
+  const host=$('school-desk');
+  if (!schoolDesk) schoolDesk=window.mountSchoolDesk(host,request,roles,()=>epoch===version,openTodayTask);
+  await schoolDesk.ready;
+  if (version===epoch&&!host.hidden) host.scrollIntoView?.({block:'start'});
+ });
+};
+
+async function openTodayTask(task){
+ if(task.action==='class_letter'){await $('open-letters').onclick();if(letterDesk)await letterDesk.openLetter(task.letter_id);}
+ else if(task.action==='discipline_release'){await $('open-discipline').onclick();if(disciplineDesk)await disciplineDesk.openRelease(task.release_id);}
+ else if(task.action==='academic_release'){await $('open-academics').onclick();if(academicsDesk)await academicsDesk.openRelease(task.release_id);}
+ else if(task.action==='attendance'){showView('attendance-view');
+  if(!$('submit-panel').hidden){await refreshClassChoices();$('class').value=task.class_name;$('attendance-kind').value='main';$('lesson-label').hidden=true;await $('load').onclick();$('submit-panel').scrollIntoView?.({block:'start'});}
+  else{await overview();$('overview-panel').scrollIntoView?.({block:'start'});notify(task.class_name+' has no main register for this date. A teacher or patron/matron submits it.');}
+ }
+ else if(['roster','notices'].includes(task.action)){await $('open-school').onclick();schoolDesk?.focusSection(task.action==='roster'?'Requested student corrections':'Your notifications (latest 100)');}
+}
+$('attendance-kind').onchange=()=>{$('lesson-label').hidden=$('attendance-kind').value!=='followup';loaded=null;$('submit').hidden=true;$('students').replaceChildren();};$('lesson').oninput=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
+function dateChanged(){detailRequest++;$('overview').replaceChildren();$('followup-list').replaceChildren();todayDesk?.refresh();reviewedSignature=null;$('review-totals').textContent='';$('submit').textContent='Review attendance';loaded=null;$('submit').hidden=true;$('students').replaceChildren();$('details').replaceChildren();overview().catch(e=>notify(e.message,true));}
+$('day').value=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Kigali',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());$('day').onchange=dateChanged;$('class').onchange=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
+async function overview(){if(!token||studentOnly)return;const version=epoch,day=$('day').value;const rows=await rpc('main_attendance_overview_v2',{day});if(version!==epoch||day!==$('day').value)return;$('overview').replaceChildren();if(!rows.length)$('overview').append(row(roles.some(r=>['headmaster','dean','discipline_officer'].includes(r))?'No classes with attendance to show yet. Set up classes and students in School desk.':'No accessible class registers yet. Ask the Headmaster to check your class setup and assignments.'));rows.forEach(r=>{const box=row(r.class_name+' — '+(r.session_id?'Submitted · '+r.absent+' absent / '+r.recorded+' recorded':'Not submitted'));if(r.session_id){box.append(row('Submitted '+(r.submitted_at?new Date(r.submitted_at).toLocaleString():'(time unavailable)')+' · By '+(r.submitter_name||'Name not recorded')+' · '+Number(r.corrected_records||0)+' corrected records'));box.append(action('View register',()=>details(r,day)));}$('overview').append(box);});}
+$('refresh').onclick=()=>overview().then(()=>notify('Records refreshed.')).catch(e=>notify(e.message,true));
+$('load').onclick=async()=>{const version=epoch,cls=$('class').value,day=$('day').value,kind=$('attendance-kind').value||'main',lesson=$('lesson').value.trim();if(kind==='followup'&&!lesson){notify('Name the follow-up lesson first.',true);return;}loaded=null;$('submit').hidden=true;$('students').replaceChildren();try{const rows=await request('/rest/v1/students?select=student_id,full_name&class_name=eq.'+encodeURIComponent(cls)+'&status=eq.Active&order=full_name');if(version!==epoch||cls!==$('class').value||day!==$('day').value||kind!==($('attendance-kind').value||'main')||lesson!==$('lesson').value.trim())return;roster=rows;loaded={cls,day,kind,lesson,draftKey:kind==='followup'?cls+' / Follow-up: '+lesson:cls};reviewedSignature=null;$('review-totals').textContent='';$('submit').textContent='Review attendance';draftReadFailed=false;let saved=[];
+ try{saved=drafts.load(user.id,loaded.draftKey,day);$('draft-status').textContent=saved.length?'Draft restored from this device — not submitted.':'Not submitted. Changes save on this device until you submit.';}
+ catch{draftReadFailed=true;$('draft-status').textContent='Could not read the device draft. Existing draft will not be overwritten. Keep this page open while marking attendance.';}
+ rows.forEach(s=>{const label=document.createElement('label');label.textContent=s.full_name+' · '+s.student_id;const select=document.createElement('select');select.required=true;select.dataset.student=s.student_id;['','present','absent','late','excused'].forEach(status=>{const o=document.createElement('option');o.value=status;o.textContent=({present:'Present',absent:'Absent',late:'Late (counts as attended)',excused:'Excused absence'})[status]||'Choose status';select.append(o);});const previous=saved.find(r=>r.student_id===s.student_id);if(previous)select.value=previous.status;
+ select.onchange=()=>{reviewedSignature=null;$('review-totals').textContent='';$('submit').textContent='Review attendance';if(!loaded||!user||draftReadFailed)return;try{drafts.save(user.id,loaded.draftKey,loaded.day,[...$('students').querySelectorAll('select')].map(input=>({student_id:input.dataset.student,status:input.value})));$('draft-status').textContent='Draft saved on this device — not submitted.';}catch{$('draft-status').textContent='Draft not saved: browser storage is unavailable or full. Keep this page open; attendance has not been submitted.';}};
+ label.append(select);$('students').append(label);});$('submit').hidden=!rows.length;notify(rows.length?'Mark each student, then submit.':'No active students in this class.');}catch(e){notify(e.message,true);}};
+$('register').onsubmit=async e=>{e.preventDefault();if(busy||!loaded)return;busy=true;$('submit').disabled=true;const version=epoch;const submitted={...loaded,userId:user.id};const locked=[...$('students').querySelectorAll('select'),$('class'),$('day'),$('attendance-kind'),$('lesson'),$('load')].map(input=>({input,disabled:input.disabled}));locked.forEach(({input})=>input.disabled=true);try{const marks=[...$('students').querySelectorAll('select')].map(s=>({student_id:s.dataset.student,status:s.value}));
+ const review=window.attendanceState.reviewMarks(marks);
+ if(reviewedSignature!==review.signature){reviewedSignature=review.signature;$('review-totals').textContent=review.total+' students: '+review.counts.present+' present, '+review.counts.absent+' absent, '+review.counts.late+' late, '+review.counts.excused+' excused. Check these totals, then confirm.';$('submit').textContent=submitted.kind==='followup'?'Confirm follow-up lesson':'Confirm main attendance';notify('Review the totals before submitting.');return;}
+ if(submitted.kind!=='followup'&&await window.attendanceState.existingRegister(request,submitted.cls,submitted.day)){if(version===epoch){$('submit').hidden=true;$('submit').disabled=true;$('draft-status').textContent='Already submitted by someone. Your device draft is preserved for comparison.';notify('Main attendance already exists. Ask a Discipline Officer for corrections.',true);}return;}
+ if(version!==epoch)return;
+ const latest=await request('/rest/v1/students?select=student_id,full_name&class_name=eq.'+encodeURIComponent(submitted.cls)+'&status=eq.Active&order=full_name');
+ if(version!==epoch||!loaded||loaded.cls!==submitted.cls||loaded.day!==submitted.day||loaded.kind!==submitted.kind||loaded.lesson!==submitted.lesson)return;
+ const reconciled=window.rosterState.reconcileRoster(roster,latest,marks);
+ if(reconciled.changed){
+  try{drafts.save(submitted.userId,submitted.draftKey,submitted.day,reconciled.marks);}catch{notify('The class roster changed, but the revised device draft could not be saved. Keep this page open and copy your marks before reopening the class.',true);return;}
+  reviewedSignature=null;await $('load').onclick();notify('The class roster changed: '+reconciled.added+' added, '+reconciled.removed+' removed. Marks for remaining students are kept. Review every student again before submitting.',true);return;
+ }
+ notify('Submitting to the school…');await rpc(submitted.kind==='followup'?'submit_followup_attendance':'submit_main_attendance',{target_class:submitted.cls,day:submitted.day,...(submitted.kind==='followup'?{lesson:submitted.lesson}:{}),marks});if(version!==epoch)return;$('submit').hidden=true;loaded=null;
+ try{drafts.remove(submitted.userId,submitted.draftKey,submitted.day);$('draft-status').textContent='Submitted to the school.';}catch{$('draft-status').textContent='Submitted to the school. The older device draft could not be removed; do not submit it again.';}
+ notify('Attendance submitted to the school.');
+ try {
+  await overview();
+ } catch {
+  if (version===epoch) notify('Attendance was submitted. The overview could not refresh. Use Refresh records to check it.');
+ }
+ }catch(error){
+  if(version===epoch&&error.code==='23505'&&submitted.kind==='main'){
+   $('submit').hidden=true;
+   $('draft-status').textContent='Already submitted by someone. Your device draft is preserved for comparison.';
+   notify('Attendance for this class and day has already been submitted. Ask a Discipline Officer for corrections.',true);
+  }else if(version===epoch)notify(error.message,true);
+ }finally{busy=false;if(version===epoch)locked.forEach(({input,disabled})=>input.disabled=disabled);if(loaded)$('submit').disabled=false;}};
+async function details(session, day) {
+ if (day!==$('day').value) return;
+ const version=epoch;
+ const requestId=++detailRequest;
+ const current=()=>version===epoch&&requestId===detailRequest&&day===$('day').value;
+ const host=$('details');
+ host.replaceChildren(row('Loading register…'));
+ try {
+  const rows=await request('/rest/v1/attendance_records?select=id,student_id,status,note,students(full_name)&session_id=eq.'+session.session_id+'&order=student_id');
+  if (!current()) return;
+  host.replaceChildren(row(session.class_name+' · '+day+' · '+(session.period||'Main attendance')));
+  for (const record of rows) {
+   const box=row((record.students?.full_name?record.students.full_name+' · ':'')+record.student_id+' · '+record.status+(record.note?' · '+record.note:''));
+   if (roles.includes('discipline_officer')&&!session.period) {
+    const form=document.createElement('form');
+    const select=document.createElement('select');
+    select.setAttribute('aria-label','Correct status for '+record.student_id);
+    for (const status of ['present','absent','late','excused']) {
+     const option=document.createElement('option');
+     option.value=status;
+     option.textContent=status;
+     select.append(option);
+    }
+    select.value=record.status;
+    const reason=document.createElement('input');
+    reason.required=true;
+    reason.maxLength=1000;
+    const reasonLabel=document.createElement('label');
+    reasonLabel.textContent='Reason for correction';
+    reasonLabel.append(reason);
+    const save=document.createElement('button');
+    save.textContent='Save correction';
+    form.append(select,reasonLabel,save);
+    form.onsubmit=async event=>{
+     event.preventDefault();
+     if (!current()||save.disabled) return;
+     save.disabled=true;
+     try {
+      await rpc('correct_main_attendance',{record_id:record.id,new_status:select.value,reason:reason.value});
+      if (!current()) return;
+      notify('Correction saved with history.');
+      await details(session,day);
+      if (version===epoch&&day===$('day').value) await overview().catch(()=>{});
+     } catch(error) {
+      if (current()) notify(error.message,true);
+     } finally {
+      save.disabled=false;
+     }
+    };
+    box.append(form);
+    box.append(action('View correction history',async()=>{
+     if (!current()) return;
+     try {
+      const events=await request('/rest/v1/audit_events?select=action,actor_user_id,created_at,details&entity_type=eq.attendance_record&entity_id=eq.'+record.id+'&order=created_at.desc');
+      if (!current()) return;
+      const history=document.createElement('div');
+      for (const event of events) history.append(row(new Date(event.created_at).toLocaleString()+' · '+(event.details.before?.status||'New')+' → '+(event.details.after?.status||'Removed')+' · '+(event.details.after?.note||'')+' · By account '+event.actor_user_id));
+      if (!events.length) history.append(row('No corrections recorded.'));
+      box.append(history);
+     } catch(error) {
+      if (current()) notify(error.message,true);
+     }
+    }));
+   }
+   host.append(box);
+  }
+ } catch(error) {
+  if (current()) {
+   host.replaceChildren(row('Could not load this register. Open it again to retry.'));
+   notify(error.message,true);
+  }
+ }
+}
+window.addEventListener('online',async()=>{if(!token)return;const version=epoch,snapshot=loaded;try{await overview();if(snapshot&&snapshot.kind!=='followup'&&await window.attendanceState.existingRegister(request,snapshot.cls,snapshot.day)){if(version===epoch&&loaded===snapshot){$('submit').hidden=true;$('draft-status').textContent='Already submitted while this device was offline. Your draft is preserved; ask an officer to compare it.';notify('Reconnected. Another register already exists; your draft was not uploaded.',true);}}else if(version===epoch)notify('Reconnected. Drafts stay on this device until you review and submit.');}catch(error){if(version===epoch)notify('Reconnect check failed. Your draft remains unsubmitted. '+error.message,true);}});
+$('load-summary').onclick=async()=>{const version=epoch;try{const rows=await rpc('class_main_attendance_summary',{target_class:$('summary-class').value,start_day:$('summary-from').value,end_day:$('summary-to').value});if(version!==epoch)return;const s=rows[0];$('summary-result').replaceChildren();$('summary-result').append(row(s.main_sessions+' submitted main registers · '+s.present_marks+' present · '+s.late_marks+' late · '+s.excused_marks+' excused · '+s.absent_marks+' absent · Attendance '+(s.attendance_rate===null?'Not recorded':s.attendance_rate+'%')));}catch(error){if(version===epoch)notify(error.message,true);}};
+$('load-followups').onclick=async()=>{const version=epoch,cls=$('summary-class').value,day=$('day').value;try{const rows=await request('/rest/v1/attendance_sessions?select=id,class_name,period,submitted_at&class_name=eq.'+encodeURIComponent(cls)+'&attendance_date=eq.'+day+'&attendance_type=eq.period_followup&status=eq.submitted');if(version!==epoch||day!==$('day').value||cls!==$('summary-class').value)return;$('followup-list').replaceChildren();if(!rows.length)$('followup-list').append(row('No follow-up registers for this class/day.'));rows.forEach(s=>$('followup-list').append(action(s.period+' · excluded from official totals',()=>details({...s,session_id:s.id},day))));}catch(error){if(version===epoch)notify(error.message,true);}};
+async function checkAccess(){if(!token||document.hidden)return;const version=epoch;try{const state=await rpc('school_access_state',{});if(version!==epoch)return;if(!state||JSON.stringify([...state.roles].sort())!==JSON.stringify([...roles].sort())){clear();notify('Your school access changed or your session ended. Sign in again. Saved attendance drafts remain on this device.',true);}}catch(error){if(version!==epoch)return;if(/session expired|sign in again/i.test(error.message)){clear();notify('Your session ended. Sign in again. Saved attendance drafts remain on this device.',true);}else notify('Could not check current access. Reconnect before continuing.',true);}}
+setInterval(checkAccess,30000);document.addEventListener?.('visibilitychange',()=>{if(!document.hidden)checkAccess();});
+setInterval(()=>{if(token&&!document.hidden&&!$('attendance-view').hidden)overview().catch(e=>notify('Could not refresh attendance. '+e.message,true));},5000);
+})();

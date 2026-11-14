@@ -1,0 +1,7 @@
+{
+  "buildCommand": "node scripts/build-public-site.cjs",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/connected/config.js", "destination": "/api/school-config" }
+  ]
+}

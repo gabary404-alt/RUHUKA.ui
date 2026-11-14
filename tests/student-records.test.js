@@ -1,0 +1,18 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const tick=()=>new Promise(r=>setImmediate(r));
+function all(n){return[n,...n.children.flatMap(all)]}
+function setup(api){const node=(tag,text)=>({tag,textContent:text||'',children:[],append(...x){this.children.push(...x)},replaceChildren(){this.children=[]},setAttribute(){}}),host=node('main');const c={module:{exports:{}},document:{createElement:node}};vm.createContext(c);vm.runInContext(fs.readFileSync('connected/student-records.js','utf8'),c);const handle=c.module.exports.mountStudentRecords(host,api,()=>true);return{host,handle};}
+test('student view reads only the ownership-checked endpoint and preserves zero versus missing',async()=>{const calls=[];const s=setup(async(url,o)=>{calls.push({url,body:o.body});return{student:{student_id:'s',full_name:'Student',class_name:'S1'},academic:[{term:'Tests',subject:'Maths',score:0,maximum_score:40,recorded_on:'2026-11-01'}],discipline:null,discipline_events:[],attendance:[{attendance_date:'2026-11-01',status:'late'}]}});await s.handle.ready;assert.equal(calls[0].url,'/rest/v1/rpc/my_student_records');assert.equal(calls[0].body,'{}');assert.ok(all(s.host).some(n=>n.textContent==='0 / 40'));assert.ok(all(s.host).some(n=>n.textContent==='Official total: Not recorded.'));assert.ok(all(s.host).some(n=>String(n.textContent).includes('Late (counts as attended)')));assert.equal(all(s.host).filter(n=>n.tag==='form').length,0);});
+test('student view gives useful unlinked-account and failure messages',async()=>{const s=setup(async()=>({student:null}));await s.handle.ready;assert.ok(all(s.host).some(n=>String(n.textContent).includes('not linked')));const f=setup(async()=>{throw Error('Connection lost')});await f.handle.ready;assert.ok(all(f.host).some(n=>String(n.textContent).includes('Could not load your records')));});
+test('signout disposal prevents a late private-record response from restoring content',async()=>{let resolve;const s=setup(()=>new Promise(r=>resolve=r));s.handle.dispose();resolve({student:null});await tick();assert.equal(s.host.children.length,0);});
+test('own published releases show rank and missing subject marks separately from zero',async()=>{const s=setup(async()=>({student:{student_id:'s',full_name:'Student',class_name:'S1'},academic:[],releases:[{release_name:'Tests',class_name:'S1',academic_year:'TEST',recorded_on:'2026-11-07',overall:0,rank:1,subjects:[{name:'Math',maximum:40},{name:'English',maximum:60}],marks:{Math:0,English:null}}],discipline:null,discipline_events:[],attendance:[]}));await s.handle.ready;assert.ok(all(s.host).some(n=>n.textContent==='Math: 0 / 40'));assert.ok(all(s.host).some(n=>n.textContent==='English: Not recorded'));assert.ok(all(s.host).some(n=>String(n.textContent).includes('Overall: 0% · Rank when published: 1')));});
+
+test('student discipline separates official total from reported events and labels missing details',async()=>{
+ const s=setup(async()=>({student:{student_id:'001',full_name:'Synthetic Student'},academic:[],attendance:[],
+  discipline:{official_total:0,snapshot_date:'2026-11-11'},discipline_events:[
+   {event_date:'2026-11-08',reason:'Example event',reported_change:-2,source_recorded_by:'Example recorder'},
+   {event_date:'2026-11-07',reason:'Example note',reported_change:null,source_recorded_by:null}
+  ]}));
+ await s.handle.ready;
+ const copy=all(s.host).map(n=>n.textContent);
+ for(const value of ['Official total: 0 / 40','As of 2026-11-11','Reported points change: -2','Reported points change: Not recorded','Original recorder: Example recorder','Original recorder: Not recorded'])assert.ok(copy.includes(value),value);
+});

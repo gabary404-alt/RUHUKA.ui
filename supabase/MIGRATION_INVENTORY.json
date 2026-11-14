@@ -1,0 +1,312 @@
+[
+  {
+    "version": "20261012175745",
+    "path": "supabase/history/20261012175745_attendance_foundation_and_demo_student_cleanup.sql",
+    "sha256": "b904f56c5a9933e2329fd3961c1dd20c2131714ac4ba7b4467234d00cb30ad9e"
+  },
+  {
+    "version": "20261012185237",
+    "path": "supabase/history/20261012185237_academic_results_and_bulk_import_foundation.sql",
+    "sha256": "c2196946686adcd43932c082c96662713675e426ecdbbeffaba1c5e6ee92bfdf"
+  },
+  {
+    "version": "20261012185319",
+    "path": "supabase/history/20261012185319_discipline_import_context_fields.sql",
+    "sha256": "58d0be15fef1d4d03b010640ce63fa485b7b6caada0db7064d81921bf230bba1"
+  },
+  {
+    "version": "20261012185721",
+    "path": "supabase/history/20261012185721_student_discipline_score_field.sql",
+    "sha256": "9325ebd4a0f977b16abd66ecd0dae33c7e4b11eec06772d2d52ca1016c91da7f"
+  },
+  {
+    "version": "20261012185748",
+    "path": "supabase/history/20261012185748_idempotent_academic_and_discipline_imports.sql",
+    "sha256": "f35cadb89d3c8262cce8731602a649f37c458975c4c244851ae1807e29b14358"
+  },
+  {
+    "version": "20261012185851",
+    "path": "supabase/history/20261012185851_allow_students_to_read_own_profile_record.sql",
+    "sha256": "252eb2969b22d5a164d4e5f0b0567e2a2063006c86aee173e0dc75d41f9be5cb"
+  },
+  {
+    "version": "20261012190009",
+    "path": "supabase/history/20261012190009_fix_discipline_import_conflict_index.sql",
+    "sha256": "6aa224ec6c0f1c886ed000b7cb82868a0b70f9c9cb3115034945fb3b216ec8a4"
+  },
+  {
+    "version": "20261012190808",
+    "path": "supabase/history/20261012190808_allow_multiple_attendance_periods_per_day.sql",
+    "sha256": "3f158e54f7a1e47b682ff64a701755224d83e6bad8353ac3606ad5ee1bcd4d69"
+  },
+  {
+    "version": "20261020165638",
+    "path": "supabase/migrations/20261020165638_002_reset_and_apply_new_schema.sql",
+    "sha256": "8f02e4da0c2f5f6cce23f1debb85010731f5dfacd8855614869ced31f52ad58e"
+  },
+  {
+    "version": "20261026190220",
+    "path": "supabase/migrations/20261026190220_shared_accounts_attendance_realtime_discipline_imports.sql",
+    "sha256": "8cfd59cced9fb8acd8a825aeb0e3fb056bf8fdf55e510ac09de1151007fbe2ea"
+  },
+  {
+    "version": "20261026190416",
+    "path": "supabase/migrations/20261026190416_tighten_school_access_and_import_controls.sql",
+    "sha256": "a82649b8b76bd57428cf48aaa8e91e18d8edbaa4f73d56a26862fda1661e81df"
+  },
+  {
+    "version": "20261026190523",
+    "path": "supabase/migrations/20261026190523_index_school_foreign_keys.sql",
+    "sha256": "496b9c9b66027e2f3385be6f113ff3499e9ad814f8a5f59af79acdd1012dd2c0"
+  },
+  {
+    "version": "20261027180652",
+    "path": "supabase/migrations/20261027180652_allow_class_wide_teacher_assignments.sql",
+    "sha256": "af32269b9d021f1c7de279f0f74b00510cdaa68e9b7bc764511e8e8b42553eea"
+  },
+  {
+    "version": "20261103174849",
+    "path": "supabase/migrations/20261103174849_restrict_submitted_main_attendance_updates.sql",
+    "sha256": "16ea74fda176b16a3f2126de522a718f874a692617fdc3f8af629f5ccdf55b31"
+  },
+  {
+    "version": "20261103180521",
+    "path": "supabase/migrations/20261103180521_officer_attendance_correction_reason_history.sql",
+    "sha256": "240417bd3c22e879d9a11000621fc54f95015e68f6204c17dde776ba5435777b"
+  },
+  {
+    "version": "20261103180633",
+    "path": "supabase/migrations/20261103180633_atomic_teacher_main_attendance_submission.sql",
+    "sha256": "d648b7f6cbd81a6d4e6935467ed6c30e2bb21e4c68b4958d3b15d39a4023d1a6"
+  },
+  {
+    "version": "20261103184710",
+    "path": "supabase/migrations/20261103184710_exclusive_validated_main_attendance_and_patron_scope.sql",
+    "sha256": "0c4c8444ed1a58dca0b8f50df006c8b9f99739738766caa2245b694ac3c382d0"
+  },
+  {
+    "version": "20261103184815",
+    "path": "supabase/migrations/20261103184815_staff_daily_attendance_overview.sql",
+    "sha256": "fd49f618b8bfec9d230739982ca60aa93b76d92c08c7e56f5e536c8d915f351f"
+  },
+  {
+    "version": "20261103190757",
+    "path": "supabase/migrations/20261103190757_private_absence_explanations_and_atomic_officer_review.sql",
+    "sha256": "d378875d13b4e297c924dc3a8dd29b89a385c38dafa3077e3718e4ff5af86d8b"
+  },
+  {
+    "version": "20261103193157",
+    "path": "supabase/migrations/20261103193157_private_user_notebooks_with_revision_checks.sql",
+    "sha256": "646111b795026e9e9c1becdaff01017c5e66916b2046204d3de9c6b7262ea9f7"
+  },
+  {
+    "version": "20261104173934",
+    "path": "supabase/migrations/20261104173934_private_notebook_search_pagination.sql",
+    "sha256": "8a09be516eb5158363fddb57a2758f90cb0a90771444a98fa0c5bc28f6941f10"
+  },
+  {
+    "version": "20261104174408",
+    "path": "supabase/migrations/20261104174408_attendance_overview_names_and_correction_status.sql",
+    "sha256": "f09a7ea44110917728837e1cc634938613a995c324fd08e97eb41f13ab55d7de"
+  },
+  {
+    "version": "20261104174620",
+    "path": "supabase/migrations/20261104174620_keep_explanation_decisions_private_in_audit.sql",
+    "sha256": "ab7fde6087650153616bd542aac84eb7032ea6f8c5cca2d93c9a517f04badcb0"
+  },
+  {
+    "version": "20261104175004",
+    "path": "supabase/migrations/20261104175004_derive_correction_status_from_audit_records.sql",
+    "sha256": "184bb5036c7aa477ba151e9bc073912903df0cff2782526f948d0c3d6e7d9303"
+  },
+  {
+    "version": "20261104175929",
+    "path": "supabase/migrations/20261104175929_validated_followup_and_official_main_summary.sql",
+    "sha256": "5a9ec63f7a3e57901b7cff2b3600089b49296f200c3e4bbdab9e0689e0e7f25d"
+  },
+  {
+    "version": "20261104181427",
+    "path": "supabase/migrations/20261104181427_school_roster_calendar_notices_and_announcements.sql",
+    "sha256": "450a02ca62d72e15831594e91094d3cc115f8762c0e3c86546dad1a96dff3732"
+  },
+  {
+    "version": "20261104181532",
+    "path": "supabase/migrations/20261104181532_teacher_directory_and_atomic_roster_request_resolution.sql",
+    "sha256": "3d5705e899d23811c52dcb6de27d99466681ef179b3786a78522ddf7a00fd8df"
+  },
+  {
+    "version": "20261104184445",
+    "path": "supabase/migrations/20261104184445_restrict_private_contact_read_and_write_scope.sql",
+    "sha256": "1fe370aaf6f1bad600633ae85c3f54bb017b061ccf2a90ce3b5bfa492adeaa30"
+  },
+  {
+    "version": "20261104185612",
+    "path": "supabase/migrations/20261104185612_active_role_required_for_linked_school_record_reads.sql",
+    "sha256": "1cb06eaba29678336ddd4ba361ebef35564bf3d8f830c34d9d8d471881499c5a"
+  },
+  {
+    "version": "20261104191012",
+    "path": "supabase/migrations/20261104191012_school_followup_concerns_and_today_tasks.sql",
+    "sha256": "8884fe1a352f39acbb4fb002bb24f9d0850a4683c83f72d5ce5e8e42721cabe3"
+  },
+  {
+    "version": "20261104191148",
+    "path": "supabase/migrations/20261104191148_reopen_attendance_followup_only_on_new_absence.sql",
+    "sha256": "b30005ccd3431be00f5fdba66489fb0a1fdd7b4acd7979de2b8fca254eeb40a1"
+  },
+  {
+    "version": "20261104191913",
+    "path": "supabase/migrations/20261104191913_private_category_scoped_concern_review_history.sql",
+    "sha256": "0a80473ca1208abe1563de0d6bb40cd1096d0f25ad14fbe5ccdb35e595ab1d4d"
+  },
+  {
+    "version": "20261107072057",
+    "path": "supabase/migrations/20261107072057_first_handover_deferred_submissions_and_private_student_views.sql",
+    "sha256": "ecc136a484eb53c64f8a094cb423efe669c5a54be3629ca3fe6a06b28eab5195"
+  },
+  {
+    "version": "20261107101838",
+    "path": "supabase/migrations/20261107101838_headmaster_staff_access_and_reviewed_roster_imports.sql",
+    "sha256": "23cc7381012ef113683b35f17916acbd7be767681b01cf31edae07586ca22f29"
+  },
+  {
+    "version": "20261107102136",
+    "path": "supabase/migrations/20261107102136_explicit_roster_before_after_preview.sql",
+    "sha256": "2b5d8b0e076411763e6b131d5fc85b948074c9ee574319d5a568f7bec25052a2"
+  },
+  {
+    "version": "20261107102255",
+    "path": "supabase/migrations/20261107102255_explicitly_deny_direct_roster_receipt_access.sql",
+    "sha256": "9d44cc0d1033ea01fe74139cf88cf1eedb8376761fdc902a6e4d036d2e5d63b9"
+  },
+  {
+    "version": "20261107102330",
+    "path": "supabase/migrations/20261107102330_server_checked_workspace_access_state.sql",
+    "sha256": "b17ed5522453e69565dbf485ff7461c56dc5c66d943fcb669905bf4ab0fef70f"
+  },
+  {
+    "version": "20261107105555",
+    "path": "supabase/migrations/20261107105555_named_academic_releases_with_reviewed_atomic_publication.sql",
+    "sha256": "c32c2339469e7ccf47062d4a12d0cc23248e2581b6d351fce1c0ebd3c7d90296"
+  },
+  {
+    "version": "20261107110014",
+    "path": "supabase/migrations/20261107110014_one_successful_roster_import_permission_for_officers.sql",
+    "sha256": "54025ab94d4444e0982a0ac0d9cb8fa8fe1f213a38e44d2bcf8ddd81a14057d3"
+  },
+  {
+    "version": "20261107110056",
+    "path": "supabase/migrations/20261107110056_connect_published_releases_to_student_records_and_followups.sql",
+    "sha256": "bbb25b37006ee2b95d1c125f65680fbea293b296e8e4691deab42f3882fd4a2b"
+  },
+  {
+    "version": "20261107110101",
+    "path": "supabase/migrations/20261107110101_preserve_original_class_cohort_during_result_corrections.sql",
+    "sha256": "9e63323790c617dfd033cc8c995b2f6a30499f9606a35467be814b95d910066c"
+  },
+  {
+    "version": "20261107110148",
+    "path": "supabase/migrations/20261107110148_show_officer_one_use_permission_in_headmaster_directory.sql",
+    "sha256": "dc12a0973f80bcb0fc6b5703fe5411ab78fe6045ef768e997fb007c78a04bec5"
+  },
+  {
+    "version": "20261107111342",
+    "path": "supabase/migrations/20261107111342_scope_academic_followups_to_current_year_and_name_publishers.sql",
+    "sha256": "cb2de94111b9243d3b17c6010203d0108b22b4e93e5065d72366044a8c037287"
+  },
+  {
+    "version": "20261107111732",
+    "path": "supabase/migrations/20261107111732_require_guarded_dean_publication_for_academic_writes.sql",
+    "sha256": "81c705d85f2111d5e3b279c791d1305065d8ed7dd3aa1bb91591ce2a84e6b501"
+  },
+  {
+    "version": "20261107112937",
+    "path": "supabase/migrations/20261107112937_show_unread_academic_publications_on_headmaster_today.sql",
+    "sha256": "9534e2b3495261cef762ea38a160704ce3f76a2051acf7caf8f636feacdd0e84"
+  },
+  {
+    "version": "20261107154503",
+    "path": "supabase/migrations/20261107154503_official_discipline_snapshots_with_guarded_import_and_corrections.sql",
+    "sha256": "0d29f29690657c37de5521a88214cc8abed3977dcfc06e19330c4eee09c92b39"
+  },
+  {
+    "version": "20261107154805",
+    "path": "supabase/migrations/20261107154805_role_scoped_filtered_school_reports.sql",
+    "sha256": "b4ab92448943f50da60fec22e4d774bcc30f55fee2d1eb6227111997caf3b7c8"
+  },
+  {
+    "version": "20261107155418",
+    "path": "supabase/migrations/20261107155418_append_only_student_class_and_year_history.sql",
+    "sha256": "ac83426493b242e9119bc64a3cc69cc4857cf8434a7849e17835576e3d0015dd"
+  },
+  {
+    "version": "20261107155806",
+    "path": "supabase/migrations/20261107155806_headmaster_reviewed_class_year_changes.sql",
+    "sha256": "acf0c13cc4fc2458103336a6fb514b30ff1655221613b0874efb3745695684dc"
+  },
+  {
+    "version": "20261107160112",
+    "path": "supabase/migrations/20261107160112_preserve_official_event_evidence_on_totals_only_corrections.sql",
+    "sha256": "d7df798aed3f914cf1877552ab8d1c0497d18588490efa4eaaef04e5d665e801"
+  },
+  {
+    "version": "20261107160456",
+    "path": "supabase/migrations/20261107160456_surface_official_discipline_updates_on_today.sql",
+    "sha256": "b2cdc015d508492f3e9e029f0220c971d0ccfcf882d326fadbaf4c801d15641e"
+  },
+  {
+    "version": "20261107171948",
+    "path": "supabase/migrations/20261107171948_versioned_class_letters_from_explicit_school_sources.sql",
+    "sha256": "0f7daa9c2add69849b786d640fdade9baa2a8f16495fdfa088d60b16ef93dba6"
+  },
+  {
+    "version": "20261107172206",
+    "path": "supabase/migrations/20261107172206_school_approved_public_content_and_named_editors.sql",
+    "sha256": "e7adfe46b8484149765f30af668ce4da2b9f1cbde17bd7b28d21e8e5cbeda5ed"
+  },
+  {
+    "version": "20261107172424",
+    "path": "supabase/migrations/20261107172424_reviewed_manual_promote_repeat_decisions_with_history.sql",
+    "sha256": "911ad9f7e9c929f0986b7bc1f5dba7289155b557b2c92f590658a67e358aab60"
+  },
+  {
+    "version": "20261107172810",
+    "path": "supabase/migrations/20261107172810_guard_review_year_sources_and_surface_saved_letters.sql",
+    "sha256": "35202e7708ab823eb03415aab894929d2fd2c6919bb425163158cda6dbffc178"
+  },
+  {
+    "version": "20261107172950",
+    "path": "supabase/migrations/20261107172950_explicit_manual_review_year_variable_scope.sql",
+    "sha256": "e24b81bb6305fba63cdb914e49e13bdf4375e451ba9e1d401640d9da5557becb"
+  },
+  {
+    "version": "20261107173035",
+    "path": "supabase/migrations/20261107173035_isolate_anonymous_public_text_in_read_only_projection.sql",
+    "sha256": "9472ba356270c2958219a6da4ee164054031c2219182ac543e232f0f11622aa8"
+  },
+  {
+    "version": "20261107173729",
+    "path": "supabase/migrations/20261107173729_revoke_disabled_public_editors_and_normalize_review_years.sql",
+    "sha256": "fd0c7193995b07a1baabc743131bea6c595c0d4aa1f4985535105709d3e1064d"
+  },
+  {
+    "version": "20261107191305",
+    "path": "supabase/migrations/20261107191305_private_student_setup_reset_codes_and_edge_only_login_targets.sql",
+    "sha256": "c25596bd959252b48131027891ac175eea043390a03203dd6dd76a7274c803b6"
+  },
+  {
+    "version": "20261107191907",
+    "path": "supabase/migrations/20261107191907_notify_headmaster_about_officer_student_access_codes.sql",
+    "sha256": "fd2196ec9e6882dd2994d7c371cb35c97221be1bd57467552d4cac70c270c945"
+  },
+  {
+    "version": "20261107194133",
+    "path": "supabase/migrations/20261107194133_least_privilege_anonymous_and_maintenance_table_grants.sql",
+    "sha256": "02618d79d57deab610e862d1d59951b0be30181193649736b4b13c26dba8e577"
+  },
+  {
+    "version": "20261110173624",
+    "path": "supabase/migrations/20261110173624_durable_private_chat_request_budget.sql",
+    "sha256": "66b6bad101be411cd116d13928a8a85fca74a864c254f8aa12ae8b02ff800681"
+  }
+]

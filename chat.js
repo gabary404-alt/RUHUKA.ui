@@ -3,11 +3,11 @@
 (function (root) {
   'use strict';
   const HELP = {
-    attendance: 'Teachers use Staff → Mark Attendance for their assigned class. Main daily attendance and follow-up lessons are separate. Ask the Discipline Office about corrections to a submitted register. The current demo saves on this browser only.',
-    results: 'Students can open Results to view their academic record and Discipline to view official discipline records. Academic and discipline rankings are separate. The current records are demonstration data.',
-    absence: 'Open Student → Absence to explain an absence. The intended school workflow sends it to the Discipline Officer for review. The current demo does not deliver it to another person.',
-    account: 'This version uses demo role previews, not real school accounts. Student setup codes and password resets will become available when secure accounts are connected. Never share a password or setup code in chat.',
-    general: 'I can explain Ruhuka and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
+    attendance: 'Sign in, open Attendance and choose your class and date. Mark each student, review the totals, then confirm. Only a Discipline Officer can correct a submitted main register.',
+    results: 'Students can open My records for the information already recorded by the school. Missing results mean Not recorded. Published results show the school’s recorded subject marks and position.',
+    absence: 'Contact the Discipline Office about an absence. Online student absence submissions are postponed. A Discipline Officer can correct the main attendance record with a reason.',
+    account: 'Staff use their school email. Students use their assigned ID and can request a private setup or reset code from the school. Never share passwords or setup codes here.',
+    general: 'I can explain Lycée de Kigali and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
   };
   function localHelp(message) {
     if (/\b(attendance|register)\b/i.test(message)) return HELP.attendance;
@@ -31,6 +31,7 @@
   let lastQuestion = '';
   const requestTimeout = 45000;
   function setStatus(text) { byId('ai-status').textContent = text; }
+  function announce(text) { byId('ai-announcement').textContent = text; }
   function busy(value) {
     byId('ai-send').disabled = value;
     byId('ai-stop').hidden = !value;
@@ -39,6 +40,7 @@
   function append(text, role) {
     const node = document.createElement('div');
     node.className = 'ai-message ai-message-' + role;
+    node.setAttribute('role','article');node.setAttribute('aria-label',role==='user'?'Your message':'LDK assistant message');
     // Model output is text, never trusted HTML, scripts, or executable links.
     node.textContent = text;
     byId('ai-messages').appendChild(node);
@@ -107,7 +109,7 @@
     // A partial/stopped reply is not added to future model context.
     release(run);
     if (run.finishReveal) run.finishReveal(false);
-    setStatus('Stopped. You can ask another question.');
+    setStatus('Stopped. You can ask another question.');announce('Response stopped. The partial response remains in the conversation.');
     byId('ai-input').focus();
   };
   root.clearAIConversation = function (quiet) {
@@ -115,10 +117,10 @@
     history = [];
     lastQuestion = '';
     byId('ai-messages').replaceChildren();
-    append('Hello! Ask me about Ruhuka or a general learning topic. I cannot access private student records. For current facts, check an official source; live web lookup is not connected yet.', 'assistant');
+    append('Hello! Ask about Lycée de Kigali or a learning topic. I cannot access private records or check live web sources.', 'assistant');
     byId('ai-retry').hidden = true;
     byId('ai-input').value = '';
-    setStatus('Ready');
+    setStatus('Ready');announce(quiet?'':'New chat. Previous conversation cleared.');
     if (!quiet) byId('ai-input').focus();
   };
   root.sendAIMessage = async function (suggestion) {
@@ -133,7 +135,7 @@
     byId('ai-retry').hidden = true;
     const run = { controller: new AbortController(), node: waiting(), timeout: null, tick: null, timedOut: false };
     active = run;
-    busy(true);
+    busy(true);announce('');input.focus();
     setStatus('Preparing a response…');
     let reply;
     let online = false;
@@ -145,20 +147,26 @@
         run.timeout = setTimeout(() => { run.timedOut = true; run.controller.abort(); }, requestTimeout);
         const response = await fetch(AI_CONFIG.API_URL, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: run.controller.signal,
-          body: JSON.stringify({ model: AI_CONFIG.MODEL, messages: [
-            { role: 'system', content: AI_CONFIG.SYSTEM_PROMPT },
-            ...history, { role: 'user', content: message }
-          ], temperature: 0.7, max_tokens: 800, stream: false })
+          body: JSON.stringify({messages:(()=>{const messages=[...history,{role:'user',content:message}];while(messages.length>1&&(messages.length>13||messages.reduce((n,m)=>n+m.content.length,0)>24000))messages.splice(0,2);return messages;})()})
         });
-        if (!response.ok) throw new Error('AI unavailable');
-        reply = extractReply(await response.json());
+        const data = await response.json();
+        if (!response.ok) {
+          const error = new Error(response.status === 429 ? 'Usage limit' : 'AI unavailable');
+          if (typeof data.reference === 'string' && /^[a-f0-9-]{36}$/i.test(data.reference)) error.reference = data.reference;
+          throw error;
+        }
+        reply = extractReply(data);
         clearTimeout(run.timeout);
         online = true;
       }
     } catch (error) {
       if (active !== run) return;
       clearTimeout(run.timeout);
-      reply = (run.timedOut ? 'The AI took too long to respond. ' : 'The AI service is unavailable right now. ') + 'Here is local help instead:\n\n' + localHelp(message);
+      const reason = run.timedOut ? 'The AI took too long to respond.' :
+        error?.message === 'Usage limit' ? 'The assistant has reached its usage limit. Try again later.' :
+        'The AI service is unavailable right now.';
+      reply = reason + (error?.reference ? ' Support reference: ' + error.reference + '.' : '') +
+        '\n\nHere is local help.\n\n' + localHelp(message);
       byId('ai-retry').hidden = false;
     }
     if (active !== run) return;
@@ -167,20 +175,22 @@
       const complete = await reveal(run, reply);
       if (complete && active === run) {
         if (online) history = [...history, { role: 'user', content: message }, { role: 'assistant', content: reply }].slice(-12);
-        setStatus(online ? 'Response complete · Current facts are not verified' : 'Local help · Live AI unavailable');
+        setStatus(online ? 'Response complete · Current facts are not verified' : 'Local help · AI service unavailable');
+        announce((online?'LDK assistant: ':'Local help: ')+reply);
       }
     } finally { release(run); }
   };
   root.retryAIMessage = function () { if (lastQuestion) root.sendAIMessage(lastQuestion); };
-  document.addEventListener('DOMContentLoaded', () => {
+  function initialiseChat() {
     byId('ai-input').addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
         event.preventDefault(); root.sendAIMessage();
       }
     });
     byId('ai-chat-panel').addEventListener('keydown', event => {
-      if (event.key === 'Escape') root.toggleAI();
+      if (event.key === 'Escape'&&!byId('ai-chat-panel').hidden) {event.preventDefault();event.stopPropagation();root.toggleAI();}
     });
     root.clearAIConversation(true);
-  });
+  }
+  if(document.readyState==='loading'||!document.readyState)document.addEventListener('DOMContentLoaded',initialiseChat);else initialiseChat();
 })(typeof window === 'undefined' ? globalThis : window);
