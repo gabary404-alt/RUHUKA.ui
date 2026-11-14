@@ -150,6 +150,14 @@
 [data-theme=dark], [data-theme=dark] .institution{color-scheme:dark;--sky-top:#0c0d0e;--s1:#151819;--s2:#1a201e;--s3:#222b27;--b:#39423e;--t:#e3f4ef;--t2:#c0ccc7;--t3:#a4b5ac;--a:#7cbea4;--a2:#92cbb5;--p:#1e6b55;--red:#e5a19b}
 [data-theme=dark] .heritage-band{background:#10211b}
 [data-theme=dark] .institution .button.primary,[data-theme=dark] .institution #ai-fab{background:#163c2e;border-color:#47735f}
-.rwanda-photo{grid-column:1/-1;margin-top:12px!important}
-.rwanda-photo img{display:block;width:100%;height:auto;max-height:500px;object-fit:cover;border-radius:3px;filter:saturate(.78) brightness(.92)}
+.rwanda-photo{grid-column:2;width:min(100%,320px);margin:18px 0 0!important;justify-self:start}
+.rwanda-photo img{display:block;width:100%;height:auto;max-height:220px;object-fit:cover;border-radius:3px;filter:saturate(.78) brightness(.92)}
 .rwanda-photo figcaption{font-size:12px;color:var(--t3);padding-top:10px}
+
+/* Compact sports photographs retain the full action and building framing. */
+.sports-gallery{display:grid;grid-template-columns:minmax(0,280px) minmax(0,480px);gap:24px;margin:28px 0 36px;align-items:start}
+.sports-gallery figure{margin:0;min-width:0;border:1px solid var(--b);border-radius:10px;overflow:hidden;background:var(--s1)}
+.sports-gallery img{display:block;width:100%;height:280px;object-fit:contain;background:var(--s2)}
+.sports-gallery figcaption{padding:13px 16px;color:var(--t2);font-size:13px;line-height:1.5}
+.sports-gallery figcaption strong{display:block;color:var(--t);font-size:15px;margin-bottom:3px}
+@media(max-width:760px){.rwanda-photo{grid-column:1}.sports-gallery{grid-template-columns:1fr;max-width:440px;gap:20px}.sports-gallery img{height:250px}}
