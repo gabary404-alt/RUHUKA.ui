@@ -134,3 +134,14 @@
     align-self: start;
   }
 }
+
+/* Brief, user-triggered theme transitions; no looping effects or image overlays. */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-ready body, .theme-ready .site-header, .theme-ready .site-menu,
+  .theme-ready .card, .theme-ready .button, .theme-ready .theme-button,
+  .theme-ready .contact-band, .theme-ready .site-footer {
+    transition: background-color 280ms ease, color 280ms ease, border-color 280ms ease;
+  }
+  .theme-ready .theme-button::before { transition: transform 320ms ease; }
+  [data-theme=dark] .theme-button::before { transform: rotate(180deg); }
+}
