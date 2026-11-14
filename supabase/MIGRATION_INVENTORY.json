@@ -308,5 +308,10 @@
     "version": "20261110173624",
     "path": "supabase/migrations/20261110173624_durable_private_chat_request_budget.sql",
     "sha256": "66b6bad101be411cd116d13928a8a85fca74a864c254f8aa12ae8b02ff800681"
+  },
+  {
+    "version": "20261114141834",
+    "path": "supabase/migrations/20261114141834_scheduled_school_year_rollover.sql",
+    "sha256": "f604de95526337d57e6f0cdfa04dd0bc5a349c2116df311232381ed3cd5c3bf6"
   }
 ]

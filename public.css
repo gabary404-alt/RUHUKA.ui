@@ -145,3 +145,11 @@
   .theme-ready .theme-button::before { transition: transform 320ms ease; }
   [data-theme=dark] .theme-button::before { transform: rotate(180deg); }
 }
+
+/* Quiet charcoal palette requested by the school-site reviewer. */
+[data-theme=dark], [data-theme=dark] .institution{color-scheme:dark;--sky-top:#0c0d0e;--s1:#151819;--s2:#1a201e;--s3:#222b27;--b:#39423e;--t:#e3f4ef;--t2:#c0ccc7;--t3:#a4b5ac;--a:#7cbea4;--a2:#92cbb5;--p:#1e6b55;--red:#e5a19b}
+[data-theme=dark] .heritage-band{background:#10211b}
+[data-theme=dark] .institution .button.primary,[data-theme=dark] .institution #ai-fab{background:#163c2e;border-color:#47735f}
+.rwanda-photo{grid-column:1/-1;margin-top:12px!important}
+.rwanda-photo img{display:block;width:100%;height:auto;max-height:500px;object-fit:cover;border-radius:3px;filter:saturate(.78) brightness(.92)}
+.rwanda-photo figcaption{font-size:12px;color:var(--t3);padding-top:10px}
