@@ -45,3 +45,28 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
   .student-report-heading p { margin: 0; }
   .student-report-print caption { text-align: left; font-weight: bold; padding-bottom: 4px; }
 }
+
+/* Task-based navigation, roomier forms and readable dark surfaces. */
+.school-workspace{background:var(--sky-top)}
+.school-workspace main{max-width:1320px;padding:28px}
+#workspace{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0 30px;align-items:start}
+#portal-title,#identity{grid-column:1/-1}
+.workspace-nav{grid-column:1;grid-row:3/span 12;display:flex;flex-direction:column;gap:22px;top:20px;padding:18px;border:1px solid var(--b);border-radius:12px;max-height:calc(100vh - 40px);overflow:auto}
+.nav-group{display:grid;gap:8px}.nav-group:not(:has(button:not([hidden]))){display:none}
+.nav-group h2{font:700 11px/1.5 system-ui;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:0 0 4px}
+.workspace-nav button{text-align:left;padding:12px;font-size:14px;border-color:var(--b);color:var(--t)}
+.workspace-nav button[aria-current=page]{background:var(--p);color:#fff}
+#workspace>.workspace-intro,#workspace>section{grid-column:2;min-width:0}
+.workspace-intro{padding:20px 0 4px}.workspace-intro h2{font-size:26px;margin:0 0 8px}.workspace-intro p{max-width:66ch;margin:0;color:var(--t2)}
+#workspace>section{padding:28px;margin-top:20px;border-radius:12px}
+.school-form, #school-desk>details{padding:18px 22px;border:1px solid var(--b);border-radius:10px;margin:18px 0;background:var(--s1)}
+#school-desk>h3{margin:36px 0 6px;font-size:21px}#school-desk>h3+p{margin-top:0;color:var(--t2)}
+#school-desk summary{cursor:pointer;min-height:44px;align-content:center;font-weight:650}
+.school-workspace form{max-width:760px}.school-workspace label{margin:22px 0 10px}
+.school-workspace input,.school-workspace select,.school-workspace textarea{background:var(--s1);color:var(--t);border:1px solid var(--b)}
+.school-workspace button{background:var(--s1);color:var(--t);border-color:var(--b)}.school-workspace button.primary{background:var(--p);color:#fff}
+.school-workspace #notice{background:var(--s1)}[data-theme=dark] .school-workspace #notice.error{color:#ffb6ad}
+.import-help{padding:18px 22px;background:var(--s2);border-left:3px solid var(--p);margin:22px 0}.import-help p{margin:10px 0}
+@media(min-width:1000px){.school-form form{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}.school-form form>button{grid-column:1/-1;justify-self:start}.school-form label:has(textarea){grid-column:1/-1}}
+@media(max-width:800px){.school-workspace main{padding:16px}#workspace{display:block}.workspace-nav{position:static;max-height:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;padding:16px}.workspace-nav button{width:100%;font-size:14px}#workspace>section{padding:20px}.workspace-intro{padding-top:24px}}
+@media(prefers-reduced-motion:no-preference){.theme-ready .school-workspace section,.theme-ready .school-workspace input,.theme-ready .school-workspace button,.theme-ready .school-workspace nav{transition:background-color 280ms ease,color 280ms ease,border-color 280ms ease}}

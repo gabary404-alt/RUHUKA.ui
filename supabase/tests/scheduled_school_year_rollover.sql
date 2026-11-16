@@ -1,0 +1,42 @@
+begin;
+insert into auth.users(id) values('22000000-0000-4000-8000-000000000001'),('22000000-0000-4000-8000-000000000002');
+insert into public.profiles(id,display_name)values('22000000-0000-4000-8000-000000000001','Rollover fixture head'),('22000000-0000-4000-8000-000000000002','Rollover fixture teacher')on conflict(id)do nothing;
+insert into public.user_roles(user_id,role)values('22000000-0000-4000-8000-000000000001','headmaster'),('22000000-0000-4000-8000-000000000002','teacher');
+insert into public.school_classes(class_name,grade,academic_year)values('__ROLL_A__','S1','__ROLL_YEAR__'),('__ROLL_B__','S2','__ROLL_YEAR__'),('__ROLL_OTHER__','S3','__OTHER_YEAR__');
+insert into public.students(student_id,full_name,class_name,status)values('__ROLL_STUDENT__','Synthetic Student','__ROLL_A__','Active');
+insert into public.school_terms values('__ROLL_YEAR__',3,current_date,current_date+20);
+select set_config('request.jwt.claim.sub','22000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+select public.schedule_school_year_rollover('__ROLL_YEAR__','__ROLL_NEXT__',true);
+reset role;
+do $$begin
+ if private.run_school_year_rollovers()<>0 then raise exception 'Ran before term end';end if;
+end$$;
+select set_config('request.jwt.claim.sub','22000000-0000-4000-8000-000000000002',true);
+set local role authenticated;
+do $$begin
+ begin perform public.schedule_school_year_rollover('__ROLL_YEAR__','BAD',true);raise exception 'Teacher scheduled a year change';exception when insufficient_privilege then null;end;
+ begin perform private.run_school_year_rollovers();raise exception 'Teacher ran scheduler';exception when insufficient_privilege then null;end;
+ if exists(select 1 from public.school_year_rollovers where source_year='__ROLL_YEAR__')then raise exception 'Teacher read schedule';end if;
+end$$;
+reset role;
+select set_config('request.jwt.claim.sub','22000000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+select public.schedule_school_year_rollover('__ROLL_YEAR__','__ROLL_NEXT__',false);
+reset role;
+update public.school_terms set starts_on=current_date-20,ends_on=(now() at time zone 'Africa/Kigali')::date-1 where academic_year='__ROLL_YEAR__';
+do $$begin if private.run_school_year_rollovers()<>0 then raise exception 'Disabled plan ran';end if;end$$;
+update public.school_year_rollovers set enabled=true where source_year='__ROLL_YEAR__';
+select set_config('request.jwt.claim.sub','',true);
+do $$begin
+ if private.run_school_year_rollovers()<>2 then raise exception 'Expected two classes';end if;
+ if private.run_school_year_rollovers()<>0 then raise exception 'Duplicate execution';end if;
+ if(select academic_year from public.school_classes where class_name='__ROLL_OTHER__')<>'__OTHER_YEAR__'then raise exception 'Other year changed';end if;
+ if not exists(select 1 from public.students where student_id='__ROLL_STUDENT__'and class_name='__ROLL_A__'and status='Active')then raise exception 'Student promoted or status changed';end if;
+ if not exists(select 1 from private.student_enrolment_history where student_id='__ROLL_STUDENT__'and event='class_year_changed'and previous_state->>'academic_year'='__ROLL_YEAR__'and next_state->>'academic_year'='__ROLL_NEXT__')then raise exception 'History missing';end if;
+ if(select count(*)from public.audit_events where action='class_year_changed_automatically'and entity_id in('__ROLL_A__','__ROLL_B__'))<>2 then raise exception 'Audit missing';end if;
+ if not exists(select 1 from public.school_year_rollovers where source_year='__ROLL_YEAR__'and completed_at is not null and classes_changed=2 and not enabled)then raise exception 'Completion missing';end if;
+ if has_function_privilege('anon','public.schedule_school_year_rollover(text,text,boolean)','execute')or has_function_privilege('authenticated','private.run_school_year_rollovers()','execute')then raise exception 'Unexpected privilege';end if;
+end$$;
+select 'PASS: timing, cancellation, roles, RLS, batch change, idempotence, history, no promotion' as result;
+rollback;
