@@ -150,18 +150,102 @@
 [data-theme=dark], [data-theme=dark] .institution{color-scheme:dark;--sky-top:#0c0d0e;--s1:#151819;--s2:#1a201e;--s3:#222b27;--b:#39423e;--t:#e3f4ef;--t2:#c0ccc7;--t3:#a4b5ac;--a:#7cbea4;--a2:#92cbb5;--p:#1e6b55;--red:#e5a19b}
 [data-theme=dark] .heritage-band{background:#10211b}
 [data-theme=dark] .institution .button.primary,[data-theme=dark] .institution #ai-fab{background:#163c2e;border-color:#47735f}
-.rwanda-photo{grid-column:2;width:min(100%,320px);margin:18px 0 0!important;justify-self:start}
-.rwanda-photo img{display:block;width:100%;height:auto;max-height:220px;object-fit:cover;filter:saturate(.78) brightness(.92)}
-.rwanda-photo figcaption{font-size:12px;color:var(--t3);padding-top:10px}
+/* Editorial photography uses the same frame across the public pages. */
+.institution .rwanda-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+  align-items: center;
+  gap: clamp(28px, 6vw, 76px);
+}
 
-/* Compact sports photographs retain the full action and building framing. */
-.sports-gallery{display:grid;grid-template-columns:minmax(0,280px) minmax(0,480px);gap:24px;margin:28px 0 36px;align-items:start}
-.sports-gallery figure{margin:0;min-width:0;border:1px solid var(--b);border-radius:var(--editorial-image-radius);overflow:hidden;background:var(--s1)}
-.sports-photo-frame{display:grid;place-items:center;height:280px;background:var(--s2)}
-.sports-gallery img{display:block;width:auto;height:auto;max-width:100%;max-height:280px}
-.sports-gallery figcaption{padding:13px 16px;color:var(--t2);font-size:13px;line-height:1.5}
-.sports-gallery figcaption strong{display:block;color:var(--t);font-size:15px;margin-bottom:3px}
-@media(max-width:760px){.rwanda-photo{grid-column:1}.sports-gallery{grid-template-columns:1fr;max-width:440px;gap:20px}.sports-photo-frame{height:250px}.sports-gallery img{max-height:250px}}
+.rwanda-feature h2 {
+  margin-bottom: 16px;
+}
+
+.editorial-photo {
+  min-width: 0;
+  margin: 0;
+}
+
+.photo-link {
+  display: block;
+  border-radius: var(--editorial-image-radius);
+  outline-offset: 5px;
+}
+
+.photo-link:focus-visible {
+  outline: 2px solid var(--a);
+}
+
+.editorial-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+
+.editorial-photo figcaption {
+  padding: 12px 2px 0;
+  color: var(--t2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.editorial-photo figcaption strong {
+  display: block;
+  color: var(--t);
+  font-size: 15px;
+}
+
+.sports-gallery {
+  display: grid;
+  /* Match the width of each column to its photo’s aspect ratio. */
+  grid-template-columns: minmax(0, 128fr) minmax(0, 280.5fr);
+  gap: clamp(16px, 3vw, 30px);
+  max-width: 900px;
+  margin: 28px 0 36px;
+}
+
+/* A small physical tilt on the Kigali print adds depth on desktop. */
+.rwanda-photo .photo-link {
+  box-shadow: 0 14px 28px -18px rgb(0 0 0 / 45%), 0 0 0 1px var(--b);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .rwanda-photo {
+    perspective: 1000px;
+  }
+
+  .rwanda-photo .photo-link {
+    transition: transform 220ms ease, box-shadow 220ms ease;
+  }
+
+  .rwanda-photo .photo-link:is(:hover, :focus-visible) {
+    transform: translateZ(12px) rotateX(2deg) rotateY(-3deg);
+    box-shadow: 0 20px 35px -16px rgb(0 0 0 / 48%), 0 0 0 1px var(--b);
+  }
+}
+
+@media (max-width: 760px) {
+  .institution .rwanda-feature {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rwanda-photo {
+    width: min(100%, 400px);
+  }
+}
+
+@media (max-width: 560px) {
+  .sports-gallery {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .sports-gallery .sports-action {
+    width: min(100%, 290px);
+  }
+}
 
 /* Small editorial stickers fill the date column without adding motion. */
 .news-meta{min-width:0}.news-meta .story-meta{margin:0}
@@ -173,6 +257,4 @@
 .institution{--editorial-image-radius:28px}
 .hero-art img,
 .academic-art img,
-.life-inner img,
-.rwanda-photo img,
-.sports-gallery img{border-radius:var(--editorial-image-radius)}
+.life-inner img{border-radius:var(--editorial-image-radius)}
