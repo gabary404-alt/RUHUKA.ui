@@ -2,12 +2,13 @@
 'use strict';
 const labels={teacher:'Teacher',discipline_staff:'Patron / matron',discipline_officer:'Discipline Officer',dean:'Dean of Studies',headmaster:'Headmaster'};
 function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>!stopped&&current();const el=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e};const say=t=>{if(valid())status.textContent=t};const status=el('p');status.setAttribute('role','status');host.append(el('h2','Staff accounts'),el('p','Only the Headmaster manages staff access. Staff choose their own passwords; no password is shown here.'),status);
- const invite=el('details'),summary=el('summary','Invite a staff member'),form=el('form');invite.append(summary,form);const fields={};for(const [key,label,type]of [['display_name','Full name','text'],['email','Staff email','email']]){const l=el('label',label),i=el('input');i.type=type;i.required=true;i.maxLength=key==='email'?254:160;l.append(i);form.append(l);fields[key]=i;}const roleLabel=el('label','Role'),role=el('select');for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const o=el('option',labels[r]);o.value=r;role.append(o)}roleLabel.append(role);form.append(roleLabel);const review=el('p'),send=el('button','Review invitation');
- const result=el('div'),setupLabel=el('label','Private setup link'),setupLink=el('input'),emailDraft=el('a','Open email draft');
+ const invite=el('details'),summary=el('summary','Invite a staff member'),form=el('form');invite.open=true;invite.append(summary,form);const fields={};for(const [key,label,type]of [['display_name','Full name','text'],['email','Staff email','email']]){const l=el('label',label),i=el('input');i.type=type;i.required=true;i.maxLength=key==='email'?254:160;l.append(i);form.append(l);fields[key]=i;}const roleLabel=el('label','Role'),role=el('select');for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const o=el('option',labels[r]);o.value=r;role.append(o)}roleLabel.append(role);form.append(roleLabel);const review=el('p'),send=el('button','Review invitation');
+ const result=el('div'),setupLabel=el('label','Private setup link'),setupLink=el('input'),emailDraft=el('a','Send invite by email');
+ emailDraft.className='button primary';
  result.hidden=true;
  setupLink.readOnly=true;
  setupLabel.append(setupLink);
- result.append(el('p','Share this link only with the intended staff member. It lets them choose their password.'),setupLabel,emailDraft);
+ result.append(el('p','Send the invitation from your email app, or copy the private setup link for the intended staff member.'),setupLabel,emailDraft);
  form.append(review,send,result);
  if(root.RUHUKA_CONFIG?.staffInvitesEnabled!==true){
   send.disabled=true;
