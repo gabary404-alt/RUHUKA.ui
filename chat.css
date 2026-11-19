@@ -46,3 +46,73 @@
   .ai-suggestions { display: none; }
   .ai-disclaimer { margin: 4px 12px 6px; }
 }
+
+/* Keep the shared widget independent of information and school workspace layouts. */
+#ai-assistant {
+  --chat-accent: #174b37;
+  --s1: var(--chat-background, #fff);
+  --s2: var(--chat-surface, #edf4ef);
+  --s3: var(--chat-control, #ddeae1);
+  --b: var(--chat-border, #bacfc2);
+  --t: var(--chat-text, #172c23);
+  --t2: var(--chat-muted, #385348);
+  --a: var(--chat-accent);
+  --p: var(--chat-accent);
+  color: var(--t);
+  line-height: 1.4;
+}
+
+[data-theme="dark"] #ai-assistant {
+  --chat-accent: #21634e;
+  --chat-background: #151819;
+  --chat-surface: #1a201e;
+  --chat-control: #222b27;
+  --chat-border: #506158;
+  --chat-text: #e3f4ef;
+  --chat-muted: #c0ccc7;
+}
+
+#ai-chat-panel {
+  margin: 0;
+  padding: 0;
+}
+
+#ai-assistant .ai-header {
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+#ai-assistant button {
+  width: auto;
+  margin: 0;
+}
+
+#ai-assistant .ai-toolbar button,
+#ai-assistant .ai-progress button {
+  background: transparent;
+}
+
+#ai-input {
+  width: auto;
+  min-height: 0;
+  background: transparent;
+  border: 0;
+}
+
+#ai-load-status {
+  max-width: min(280px, calc(100vw - 40px));
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--b);
+  border-radius: 8px;
+  background: var(--s1);
+  font-size: 13px;
+}
+
+#ai-load-status:empty { margin: 0; padding: 0; border: 0; }
+.ldk-chat-page:not(.institution) { padding-bottom: 72px; }
+
+@media print {
+  #ai-assistant { display: none !important; }
+  .ldk-chat-page:not(.institution) { padding-bottom: 0; }
+}
