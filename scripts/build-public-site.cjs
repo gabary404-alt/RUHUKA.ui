@@ -8,6 +8,7 @@ const files = [
   'privacy.html', 'support.html', 'terms.html',
   'public.css', 'info.css', 'chat.css', 'chat-launcher.js', 'public.js', 'public-content.js', 'chat.js',
   'assets/news-stickers.webp', 'assets/basketball-action-retouched.webp', 'assets/ldk-gymnasium-retouched.webp', 'assets/kigali-convention.webp', 'assets/ldk-crest.png', 'assets/learning-sketch.webp', 'assets/learning-sketch-small.webp',
+  'assets/rwanda-flag.webp', 'assets/academic-watercolor.webp', 'assets/academic-watercolor-small.webp',
   'assets/kigali-hills.webp', 'assets/kigali-hills-small.webp', 'assets/school-court.webp',
   'assets/learning-orbit.svg', 'assets/ruhuka-helper.svg', 'assets/school-day.svg',
   ...[

@@ -228,6 +228,13 @@ School source-file examples; approved public wording/claims; school year/term da
 
 ## Session log
 
+### 19 November — visitor review and artwork update
+
+- Reviewed all 12 production visitor and signed-out workspace routes in desktop Chromium at 320px and 1366px. Repeated the route, image, overflow, Ask LDK open/close and keyboard focus checks on the revised static release at 320px, 390px, 768px and 1366px. Checked phone menu dismissal and homepage theme persistence.
+- Used the supplied Rwanda artwork in the Our School feature and the supplied watercolor on Academics. Kept both below the fold, exported WebP variants, aligned the Academics image with its introduction and made the mobile navigation scroll when the viewport is short.
+- Node 24 passed all 191 automated tests. The 61-file release check resolved local links and confirmed the exclusion of legacy demo and deferred workspace files.
+- This advances the browser evidence for I01 and I11 and the bundle evidence for J08. Physical device and signed-in role acceptance, production account cleanup and school approval remain open. B06, B09 and B10 still require successful hosted account trials. Deferred notebooks and student absence submissions remain outside first handover. The tally stays at 98 verified, 18 open and 12 deferred.
+
 - 3 Nov: Tracker created from requirements, approved scope changes, applied SQL and current PRs. Starting A02–A04. Evidence from prior sessions is limited to the explicitly checked SQL/setup items; browser acceptance remains open.
 
 - 3 Nov session: A02–A04 completed. Seven focused notebook interaction/storage tests pass: collection preservation/switch/reload, checklist edit/toggle/remove/search, confirmed deletion, legacy migration, failed collection saves, blocked storage and malformed note preservation. Fixed misleading empty state in newly created notebooks, stale editor timestamp display and malformed stored-note crash. A05 browser/mobile verification remains open. No owner input needed for these fixes.

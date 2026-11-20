@@ -151,17 +151,6 @@
 [data-theme=dark] .heritage-band{background:#10211b}
 [data-theme=dark] .institution .button.primary,[data-theme=dark] .institution #ai-fab{background:#163c2e;border-color:#47735f}
 /* Editorial photography uses the same frame across the public pages. */
-.institution .rwanda-feature {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
-  align-items: center;
-  gap: clamp(28px, 6vw, 76px);
-}
-
-.rwanda-feature h2 {
-  margin-bottom: 16px;
-}
-
 .editorial-photo {
   min-width: 0;
   margin: 0;
@@ -206,36 +195,6 @@
   margin: 28px 0 36px;
 }
 
-/* A small physical tilt on the Kigali print adds depth on desktop. */
-.rwanda-photo .photo-link {
-  box-shadow: 0 14px 28px -18px rgb(0 0 0 / 45%), 0 0 0 1px var(--b);
-}
-
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .rwanda-photo {
-    perspective: 1000px;
-  }
-
-  .rwanda-photo .photo-link {
-    transition: transform 220ms ease, box-shadow 220ms ease;
-  }
-
-  .rwanda-photo .photo-link:is(:hover, :focus-visible) {
-    transform: translateZ(12px) rotateX(2deg) rotateY(-3deg);
-    box-shadow: 0 20px 35px -16px rgb(0 0 0 / 48%), 0 0 0 1px var(--b);
-  }
-}
-
-@media (max-width: 760px) {
-  .institution .rwanda-feature {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .rwanda-photo {
-    width: min(100%, 400px);
-  }
-}
-
 @media (max-width: 560px) {
   .sports-gallery {
     grid-template-columns: minmax(0, 1fr);
@@ -258,3 +217,72 @@
 .hero-art img,
 .academic-art img,
 .life-inner img{border-radius:var(--editorial-image-radius)}
+
+/* The Rwanda artwork is scoped to the Our School feature. */
+.rwanda-feature {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fffaf0;
+  background: #101e19;
+}
+
+.rwanda-art {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -2;
+  width: 72%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.rwanda-feature::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, #101e19 9%, #101e19f7 26%, #101e19e8 44%, #101e1959 72%, #101e1929 100%);
+}
+
+.institution .rwanda-feature > .section {
+  display: grid;
+  align-content: center;
+  min-height: clamp(420px, 43vw, 575px);
+}
+
+.rwanda-feature .section-copy { max-width: 580px; }
+.rwanda-feature h2 { font-size: clamp(34px, 4.1vw, 56px); }
+.rwanda-feature .section-copy > p { max-width: 53ch; }
+.institution .rwanda-feature .eyebrow { color: #f5df9a; }
+.institution .rwanda-feature .lead { color: #fffaf0; }
+.rwanda-feature .text-link { color: #f5df9a; }
+.rwanda-feature .text-link:is(:hover, :focus-visible) { color: #fff; }
+.rwanda-feature .text-link:focus-visible { outline-color: #f5df9a; }
+.academic-detail > div > p:first-child { margin-top: 0; }
+.institution .site-menu {
+  max-height: calc(100dvh - 88px);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+@media (max-width: 760px) {
+  .rwanda-art {
+    width: 100%;
+    height: auto;
+    min-height: 225px;
+    max-height: 330px;
+    object-fit: cover;
+    object-position: 65% top;
+  }
+
+  .rwanda-feature::before {
+    background: linear-gradient(180deg, transparent, #101e198c 135px, #101e19 270px);
+  }
+
+  .institution .rwanda-feature > .section { padding-top: clamp(172px, 39vw, 248px); }
+}
+
+@media (forced-colors: active) {
+  .rwanda-art { display: none; }
+}
