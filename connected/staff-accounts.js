@@ -19,6 +19,37 @@ function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>
  refresh.type='button';
  refresh.onclick=load;
  host.append(refresh,list);
+ let directoryRequest=0;
+
+ function staffDeleteControls(person,card){
+  const controls=el('div');
+  const open=el('button','Delete account');
+  const review=el('div');
+  const confirm=el('button','Confirm delete');
+  const cancel=el('button','Cancel');
+  open.type=confirm.type=cancel.type='button';
+  open.setAttribute('aria-label','Delete account for '+(person.display_name||person.email||'this staff member'));
+  review.hidden=true;
+  review.append(el('p','Delete '+(person.display_name||'this account')+(person.email?' ('+person.email+')':'')+'? This ends school access and removes the account from Staff access. Past school records stay. This cannot be undone here, and the email stays reserved.'),cancel,confirm);
+  open.onclick=()=>{open.hidden=true;review.hidden=false;cancel.focus();};
+  cancel.onclick=()=>{review.hidden=true;open.hidden=false;open.focus();};
+  confirm.onclick=async()=>{
+   if(!valid()||confirm.disabled)return;
+   cancel.disabled=confirm.disabled=true;
+   try{
+    const result=await api('/rest/v1/rpc/staff_account_delete',{method:'POST',body:JSON.stringify({target_user:person.id})});
+    if(!valid())return;
+    if(result?.deleted!==true)throw new Error('Deletion could not be confirmed. Refresh staff accounts before trying again.');
+    card.remove();
+    refresh.focus();
+    say('Staff account deleted. Past school records were kept.');
+    await load();
+   }catch(e){say(e.message)}finally{cancel.disabled=confirm.disabled=false;}
+  };
+  controls.append(open,review);
+  return controls;
+ }
+
  let reviewed=null;
  function clearLink(){
   result.hidden=true;
@@ -66,7 +97,7 @@ function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>
    await load();
   }catch(e){say(e.message)}finally{send.disabled=fields.email.disabled=fields.display_name.disabled=role.disabled=false}
  };
- async function load(){try{const people=await api('/rest/v1/rpc/staff_directory',{method:'POST',body:'{}'});if(!valid())return;list.replaceChildren();for(const p of people){const card=el('article');card.className='row';card.append(el('h3',p.display_name||'Unnamed account'),el('p',(p.email||'Email unavailable')+' · '+(p.is_active?'Active':'Disabled')),el('p',p.roles.map(r=>labels[r]||r).join(', ')));if(p.roles.includes('headmaster')){card.append(el('p','Headmaster ownership is managed separately.'));list.append(card);continue;}if(p.is_active&&p.roles.includes('discipline_officer')){const permission=el('p',p.roster_import_permission?'One roster import allowed until '+new Date(p.roster_import_permission.expires_at).toLocaleString():'Bulk roster imports require your permission. Adding one student does not require this grant.');const grant=el('button',p.roster_import_permission?'Revoke roster import permission':'Allow one roster import');grant.type='button';let confirmed=false;grant.onclick=async()=>{if(!confirmed){confirmed=true;grant.textContent=p.roster_import_permission?'Confirm revocation':'Confirm one import within 24 hours';return;}grant.disabled=true;try{await api('/rest/v1/rpc/roster_grant_save',{method:'POST',body:JSON.stringify({beneficiary:p.id,allow_import:!p.roster_import_permission})});say('Roster import permission updated. It turns off after one successful import; validation errors do not use it.');await load()}catch(e){say(e.message)}finally{grant.disabled=false}};card.append(permission,grant);}const f=el('form'),nameLabel=el('label','Full name'),name=el('input');name.value=p.display_name||'';name.required=true;name.maxLength=160;nameLabel.append(name);f.append(nameLabel);const choices=[];for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const l=el('label',labels[r]),i=el('input');l.className='inline-choice';i.type='checkbox';i.checked=p.roles.includes(r);l.append(i);f.append(l);choices.push({r,i})}const activeLabel=el('label','Account enabled'),active=el('input');active.type='checkbox';active.checked=p.is_active;activeLabel.className='inline-choice';activeLabel.append(active);f.append(activeLabel);const confirm=el('p'),save=el('button','Review access change');f.append(confirm,save);let pending=null;f.oninput=()=>{pending=null;confirm.textContent='';save.textContent='Review access change'};f.onsubmit=async event=>{event.preventDefault();const data={target_user:p.id,display_name:name.value.trim(),staff_roles:choices.filter(x=>x.i.checked).map(x=>x.r),enabled:active.checked};if(!data.staff_roles.length){say('Choose at least one staff role.');return;}const signature=JSON.stringify(data);if(pending!==signature){pending=signature;confirm.textContent='Save '+(data.enabled?'enabled':'disabled')+' access as '+data.staff_roles.map(r=>labels[r]).join(', ')+'? Disabled accounts lose access and must sign in again after re-enabling.';save.textContent='Confirm access change';return;}save.disabled=true;try{await api('/rest/v1/rpc/staff_account_save',{method:'POST',body:signature});say('Staff access saved with history.');await load()}catch(e){say(e.message)}finally{save.disabled=false}};card.append(f);list.append(card)}}catch(e){say(e.message)}}
+ async function load(){const request=++directoryRequest;try{const people=await api('/rest/v1/rpc/staff_directory',{method:'POST',body:'{}'});if(!valid()||request!==directoryRequest)return;list.replaceChildren();for(const p of people){const card=el('article');card.className='row';card.append(el('h3',p.display_name||'Unnamed account'),el('p',(p.email||'Email unavailable')+' · '+(p.is_active?'Active':'Disabled')),el('p',p.roles.map(r=>labels[r]||r).join(', ')));if(p.roles.includes('headmaster')){card.append(el('p','Headmaster ownership is managed separately.'));list.append(card);continue;}if(p.is_active&&p.roles.includes('discipline_officer')){const permission=el('p',p.roster_import_permission?'One roster import allowed until '+new Date(p.roster_import_permission.expires_at).toLocaleString():'Bulk roster imports require your permission. Adding one student does not require this grant.');const grant=el('button',p.roster_import_permission?'Revoke roster import permission':'Allow one roster import');grant.type='button';let confirmed=false;grant.onclick=async()=>{if(!confirmed){confirmed=true;grant.textContent=p.roster_import_permission?'Confirm revocation':'Confirm one import within 24 hours';return;}grant.disabled=true;try{await api('/rest/v1/rpc/roster_grant_save',{method:'POST',body:JSON.stringify({beneficiary:p.id,allow_import:!p.roster_import_permission})});say('Roster import permission updated. It turns off after one successful import; validation errors do not use it.');await load()}catch(e){say(e.message)}finally{grant.disabled=false}};card.append(permission,grant);}const f=el('form'),nameLabel=el('label','Full name'),name=el('input');name.value=p.display_name||'';name.required=true;name.maxLength=160;nameLabel.append(name);f.append(nameLabel);const choices=[];for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const l=el('label',labels[r]),i=el('input');l.className='inline-choice';i.type='checkbox';i.checked=p.roles.includes(r);l.append(i);f.append(l);choices.push({r,i})}const activeLabel=el('label','Account enabled'),active=el('input');active.type='checkbox';active.checked=p.is_active;activeLabel.className='inline-choice';activeLabel.append(active);f.append(activeLabel);const confirm=el('p'),save=el('button','Review access change');f.append(confirm,save);let pending=null;f.oninput=()=>{pending=null;confirm.textContent='';save.textContent='Review access change'};f.onsubmit=async event=>{event.preventDefault();const data={target_user:p.id,display_name:name.value.trim(),staff_roles:choices.filter(x=>x.i.checked).map(x=>x.r),enabled:active.checked};if(!data.staff_roles.length){say('Choose at least one staff role.');return;}const signature=JSON.stringify(data);if(pending!==signature){pending=signature;confirm.textContent='Save '+(data.enabled?'enabled':'disabled')+' access as '+data.staff_roles.map(r=>labels[r]).join(', ')+'? Disabled accounts lose access and must sign in again after re-enabling.';save.textContent='Confirm access change';return;}save.disabled=true;try{await api('/rest/v1/rpc/staff_account_save',{method:'POST',body:signature});say('Staff access saved with history.');await load()}catch(e){say(e.message)}finally{save.disabled=false}};card.append(f);if(p.can_delete===true)card.append(staffDeleteControls(p,card));list.append(card)}}catch(e){if(request===directoryRequest)say(e.message)}}
  const ready=load();return{ready,dispose(){stopped=true;host.replaceChildren()}};
 }
 if(typeof module!=='undefined'&&module.exports)module.exports={mountStaffAccounts};else root.mountStaffAccounts=mountStaffAccounts;
