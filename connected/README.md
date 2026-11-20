@@ -1,7 +1,7 @@
 # RUHUKA school workspace pilot
 Updated 7 November 2026.
 
-The public page links directly to /connected/. Sign in with the assigned account email; the database supplies the real active role. There is no public demo-role chooser. Tokens remain in memory; refresh/signout handling clears visible private data.
+The public page links directly to /connected/. Sign in with the assigned account email; the database supplies the real active role. There is no public demo-role chooser. Refreshing the same tab restores the session after checking access with the school server. The portal keeps the refresh token in that tab and reopens the last permitted workspace view. An open attendance register reloads its device draft. Sign out on shared devices to clear the tab session and private views.
 
 ## Active navigation
 Staff/Admin: Today, Attendance, School desk and Sign out. Students: My records and School desk announcements. Each button opens one clear panel. Forms in School desk expand only when needed. Students cannot submit absence explanations, and no role has a Notebook entry point in the active workspace.
