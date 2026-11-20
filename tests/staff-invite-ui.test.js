@@ -24,7 +24,7 @@ function descendants(node) {
   return [node, ...node.children.flatMap(descendants)];
 }
 
-test('Headmaster can review, create and email a private staff invitation', async () => {
+test('Headmaster can send a setup link and use a manual fallback when email is unavailable', async () => {
   const context = {
     document: { createElement },
     RUHUKA_CONFIG: { staffInvitesEnabled: true },
@@ -35,11 +35,15 @@ test('Headmaster can review, create and email a private staff invitation', async
   const host = createElement('main');
   const setupUrl = context.location.origin + '/connected/account.html#type=invite&token_hash=fixture';
   const requests = [];
+  let emailEnabled=true;
   const panel = context.mountStaffAccounts(host, async (path, options) => {
     if (path.endsWith('staff_directory')) return [];
     assert.equal(path, '/functions/v1/staff-accounts');
-    requests.push(JSON.parse(options.body));
-    return { setup_url: setupUrl, message: 'Setup link created' };
+    const payload=JSON.parse(options.body);
+    requests.push(payload);
+    if(payload.action==='invite'&&emailEnabled)return {saved:true};
+    if(payload.action==='invite')throw Object.assign(Error('Email disabled'),{code:'staff_email_unavailable'});
+    return { saved:true, setup_url: setupUrl, message: 'Setup link created' };
   }, () => true);
   await panel.ready;
 
@@ -57,20 +61,33 @@ test('Headmaster can review, create and email a private staff invitation', async
   const event = { preventDefault() {} };
 
   await form.onsubmit(event);
-  assert.equal(review.textContent, 'Create setup link');
+  assert.equal(review.textContent, 'Send setup link');
   assert.deepEqual(requests, []);
   await form.onsubmit(event);
 
   assert.deepEqual(requests, [{
-    action: 'invite_link',
+    action: 'invite',
     email: 'teacher@example.test',
     display_name: 'Test Teacher',
     roles: ['teacher'],
   }]);
+  assert.equal(result.hidden, true);
+  assert.ok(descendants(host).some(node=>node.textContent==='Setup link sent to teacher@example.test.'));
+
+  emailEnabled=false;
+  elements.find(node => node.type === 'text').value = 'Second Teacher';
+  elements.find(node => node.type === 'email').value = 'second@example.test';
+  form.oninput();
+  await form.onsubmit(event);
+  await form.onsubmit(event);
+  const manual=elements.find(node=>node.textContent==='Create link manually');
+  assert.equal(manual.hidden,false);
+  await manual.onclick();
+  assert.deepEqual(requests.map(x=>x.action),['invite','invite','invite_link']);
   assert.equal(result.hidden, false);
   const draft = new URL(send.href);
   assert.equal(draft.protocol, 'mailto:');
-  assert.equal(decodeURIComponent(draft.pathname), 'teacher@example.test');
+  assert.equal(decodeURIComponent(draft.pathname), 'second@example.test');
   assert.ok(draft.searchParams.get('body').includes(setupUrl));
 
   form.oninput();

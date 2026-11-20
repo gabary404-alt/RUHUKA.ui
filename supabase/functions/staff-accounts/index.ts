@@ -18,21 +18,21 @@ Deno.serve(async(req)=>{
  const raw=await req.text();if(raw.length>8192)return reply(413,{message:'Request is too large.'});const input=JSON.parse(raw);
  if(!input||!['invite','invite_link'].includes(input.action)||Object.keys(input).some(k=>!['action','email','display_name','roles'].includes(k)))return reply(400,{message:'Invalid staff invitation.'});
  const linkMode = input.action === 'invite_link';
- if (!linkMode && Deno.env.get('RUHUKA_STAFF_INVITES_ENABLED') !== 'true') {
-   return reply(503, { message: 'Automatic invitation emails are not enabled. Create a setup link instead.' });
- }
  const productionOrigin = 'https://ruhukaui.vercel.app';
  const previewOrigin = /^https:\/\/ruhuka-[a-z0-9-]+-izere-osees-projects\.vercel\.app$/.test(origin);
  const matchingWorkspace =
    (origin === productionOrigin && url === 'https://jsqiqxflgokfdooogcst.supabase.co') ||
    (previewOrigin && url === 'https://utbgxbweuustxmacpcuj.supabase.co');
- if (linkMode && !matchingWorkspace) return reply(403, { message: 'Open Staff access from the school portal or its isolated test preview.' });
+ if (!matchingWorkspace) return reply(403, { message: 'Open Staff access from the school portal or its isolated test preview.' });
+ if (!linkMode && Deno.env.get('RUHUKA_STAFF_INVITES_ENABLED') !== 'true') {
+   return reply(503, { code: 'staff_email_unavailable', message: 'Automatic invitation emails are not enabled. Create a setup link manually.' });
+ }
  const email=typeof input.email==='string'?input.email.trim().toLowerCase():'';const name=typeof input.display_name==='string'?input.display_name.trim():'';const roles=input.roles;
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254||name.length<1||name.length>160||!Array.isArray(roles)||roles.length<1||roles.length>4||new Set(roles).size!==roles.length||roles.some(r=>!['teacher','discipline_staff','discipline_officer','dean'].includes(r)))return reply(400,{message:'Provide a name, email and valid staff role.'});
  const lookup=await call('/rest/v1/rpc/staff_email_lookup',{email_address:email});if(!lookup.ok)return reply(403,{message:'Account access changed. Sign in again.'});
  // Existing accounts must be reviewed explicitly; invitation retry never changes roles.
  if(lookup.data)return reply(409,{message:'An account already uses this email. Review it in staff accounts; no invitation or role change was made.'});
- const callback = (linkMode ? origin : productionOrigin) + '/connected/account.html';
+ const callback = origin + '/connected/account.html';
  const path = linkMode ? '/auth/v1/admin/generate_link' : '/auth/v1/invite';
  const generated = await call(path + '?redirect_to=' + encodeURIComponent(callback),
    { ...(linkMode ? { type: 'invite' } : {}), email, data: { display_name: name } }, true);

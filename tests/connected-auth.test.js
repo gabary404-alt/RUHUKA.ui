@@ -1,9 +1,9 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const path=require('node:path');
-function setup(replies, config={url:'https://test.invalid',key:'publishable'}){
- const nodes={},events={},intervals=[],storage=new Map();let todayNavigation;const focused=[];const create=()=>({dataset:{},value:'',hidden:false,disabled:false,textContent:'',children:[],classList:{toggle(){}},append(x){this.children.push(x)},replaceChildren(...children){this.children=children},setAttribute(){},querySelectorAll(){return []}});
+function setup(replies, config={url:'https://test.invalid',key:'publishable'},tab=new Map(),storage=new Map()){
+ const nodes={},events={},intervals=[];let todayNavigation;const focused=[];const create=()=>({dataset:{},value:'',hidden:false,disabled:false,textContent:'',children:[],classList:{toggle(){}},append(x){this.children.push(x)},replaceChildren(...children){this.children=children},setAttribute(){},querySelectorAll(){return []}});
  const scripts=[];
  const document={hidden:false,body:{append(script){scripts.push(script)}},getElementById(id){return nodes[id]||(nodes[id]=create())},createElement(tag){const element=create();if(tag==='script')element.remove=()=>{};return element;}};const calls=[];
- const context={localStorage:{getItem(k){return storage.get(k)||null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},document,window:{mountStudentRecords(){return {ready:Promise.resolve(),dispose(){}};},mountToday(host,api,roles,current,navigate){todayNavigation=navigate;return {refresh(){},dispose(){}};},mountSchoolDesk(){return {ready:Promise.resolve(),focusSection(title){focused.push(title)},dispose(){}};},addEventListener(name,handler){events[name]=handler;},rosterState:require('../connected/roster-state'),attendanceState:require('../connected/attendance-state'),createAttendanceDrafts:require('../connected/drafts.js').createAttendanceDrafts,RUHUKA_CONFIG:config},Intl,Date,AbortSignal,setInterval(fn,ms){intervals.push({fn,ms})},fetch:async(url,options)=>{calls.push({url,options});const r=await replies.shift();if(!r)throw Error('Unexpected request');return {ok:r.ok!==false,status:r.status||200,json:async()=>r.data}}};
+ const context={sessionStorage:{getItem:k=>tab.get(k)||null,setItem:(k,v)=>tab.set(k,v),removeItem:k=>tab.delete(k)},localStorage:{getItem(k){return storage.get(k)||null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},document,window:{mountStudentRecords(){return {ready:Promise.resolve(),dispose(){}};},mountToday(host,api,roles,current,navigate){todayNavigation=navigate;return {refresh(){},dispose(){}};},mountSchoolDesk(){return {ready:Promise.resolve(),focusSection(title){focused.push(title)},dispose(){}};},addEventListener(name,handler){events[name]=handler;},rosterState:require('../connected/roster-state'),attendanceState:require('../connected/attendance-state'),createAttendanceDrafts:require('../connected/drafts.js').createAttendanceDrafts,RUHUKA_CONFIG:config},Intl,Date,AbortSignal,setInterval(fn,ms){intervals.push({fn,ms})},fetch:async(url,options)=>{calls.push({url,options});const r=await replies.shift();if(!r)throw Error('Unexpected request');return {ok:r.ok!==false,status:r.status||200,json:async()=>r.data}}};
  vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../connected/attendance.js'),'utf8'),context);document.getElementById('email').value='staff@example.test';document.getElementById('password').value='test-password';return {nodes,calls,events,intervals,scripts,window:context.window,navigate:task=>todayNavigation(task),focused};
 }
 test('failed login keeps real workspace closed and clears password',async()=>{
@@ -164,4 +164,61 @@ test('an unconfigured preview hides sign-in and starts no school requests',()=>{
  assert.match(nodes.notice.textContent,/School sign-in is unavailable/);
  assert.equal(calls.length,0);
  assert.equal(intervals.length,0);
+});
+
+test('refresh restores the same attendance register and its saved marks without a password',async()=>{
+ const storage=new Map(),tab=new Map();
+ const fixture=[{student_id:'s1',full_name:'One'}];
+ const first=setup([
+  {data:{access_token:'first',refresh_token:'renew-on-reload',user:{id:'u'}}},
+  {data:[{is_active:true}]},{data:[{role:'teacher'}]},{data:[{class_name:'S1'}]},{data:[]},
+  {data:[{class_name:'S1'}]},{data:[]},{data:fixture},{data:[]}
+ ],undefined,tab,storage);
+ await first.nodes['login-form'].onsubmit({preventDefault(){},submitter:{}});
+ await first.nodes['open-attendance'].onclick();
+ first.nodes.day.value='2026-11-19';
+ await first.nodes.load.onclick();
+ const mark=first.nodes.students.children[0].children[0];
+ mark.value='absent';
+ first.nodes.students.querySelectorAll=()=>[mark];
+ mark.onchange();
+ first.events.pagehide();
+ assert.ok(!JSON.stringify([...tab]).includes('test-password'));
+
+ const reloaded=setup([
+  {data:{access_token:'restored',refresh_token:'rotated',user:{id:'u'}}},
+  {data:[{is_active:true}]},{data:[{role:'teacher'}]},{data:{roles:['teacher']}},
+  {data:[{class_name:'S1'}]},{data:fixture},{data:[]},{data:[]},{status:204}
+ ],undefined,tab,storage);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(reloaded.nodes.workspace.hidden,false);
+ assert.equal(reloaded.nodes['attendance-view'].hidden,false);
+ assert.equal(reloaded.nodes.day.value,'2026-11-19');
+ assert.equal(reloaded.nodes.students.children[0].children[0].value,'absent');
+ assert.match(reloaded.nodes['draft-status'].textContent,/Draft restored/);
+ assert.equal(JSON.parse(reloaded.calls[0].options.body).refresh_token,'renew-on-reload');
+ assert.match([...tab.values()][0],/rotated/);
+ await reloaded.nodes.signout.onclick();
+ assert.equal(tab.size,0);
+ assert.equal(reloaded.nodes.workspace.hidden,true);
+});
+
+test('an unavailable connection during refresh keeps the session for retry',async()=>{
+ const tab=new Map([['ruhuka-school-session-v1:https://test.invalid',JSON.stringify({userId:'u',refreshToken:'existing'})]]);
+ const portal=setup([{ok:false,status:503,data:{}}],undefined,tab);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(tab.size,1);
+ assert.match(portal.nodes.notice.textContent,/Reconnect and reload/);
+});
+
+test('revoked school access prevents restoring private workspace',async()=>{
+ const tab=new Map([['ruhuka-school-session-v1:https://test.invalid',JSON.stringify({userId:'u',refreshToken:'existing'})]]);
+ const portal=setup([
+  {data:{access_token:'restored',refresh_token:'rotated',user:{id:'u'}}},
+  {data:[{is_active:true}]},{data:[{role:'teacher'}]},{data:null}
+ ],undefined,tab);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(tab.size,0);
+ assert.equal(portal.nodes.workspace.hidden,true);
+ assert.match(portal.nodes.notice.textContent,/Sign in again/);
 });
