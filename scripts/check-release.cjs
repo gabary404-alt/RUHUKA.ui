@@ -27,6 +27,13 @@ for (const file of files.filter(file => file.endsWith('.html'))) {
   }
 }
 assert.deepEqual(missing, [], 'Broken local page or asset references');
+const homepage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const homepageIds = [...homepage.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
+const homepageTargets = new Set(homepageIds);
+assert.equal(homepageTargets.size, homepageIds.length, 'Duplicate IDs in the scrollable homepage');
+for (const [, anchor] of homepage.matchAll(/href="#([^"]+)"/g)) {
+  assert.ok(homepageTargets.has(anchor), 'Missing homepage anchor: #' + anchor);
+}
 for (const forbidden of ['script.js', 'phase1.js', 'portal-flows.js', 'notebook.js',
   'connected/notebook.js', 'supabase', 'verification', 'tests', 'HANDOVER_CHECKLIST.md']) {
   assert.equal(fs.existsSync(path.join(root, forbidden)), false, 'Development/deferred file shipped: ' + forbidden);

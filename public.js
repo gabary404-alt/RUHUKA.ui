@@ -10,15 +10,5 @@ function closeMenu(){menu.hidden=true;menuButton.setAttribute('aria-expanded','f
 menuButton?.addEventListener('click',()=>{menu.hidden=!menu.hidden;menuButton.setAttribute('aria-expanded',String(!menu.hidden));menuButton.setAttribute('aria-label',menu.hidden?'Open navigation':'Close navigation');});
 menu?.addEventListener('click',e=>{if(e.target.closest('a'))closeMenu();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){closeMenu();menuButton.focus();}});
-const bookArt=document.querySelector?.('.hero-art, .academic-art');
-if(bookArt&&typeof IntersectionObserver==='function'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
- const watch=new IntersectionObserver(entries=>{
-  if(entries.some(entry=>entry.isIntersecting)){
-   bookArt.classList.add('book-motion');
-   watch.disconnect();
-  }
- },{threshold:.25});
- watch.observe(bookArt);
-}
 window.RUHUKA_CONFIG_PUBLIC=true;
 })();

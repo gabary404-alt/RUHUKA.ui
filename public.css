@@ -186,26 +186,6 @@
   font-size: 15px;
 }
 
-.sports-gallery {
-  display: grid;
-  /* Match the width of each column to its photo’s aspect ratio. */
-  grid-template-columns: minmax(0, 128fr) minmax(0, 280.5fr);
-  gap: clamp(16px, 3vw, 30px);
-  max-width: 900px;
-  margin: 28px 0 36px;
-}
-
-@media (max-width: 560px) {
-  .sports-gallery {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
-  }
-
-  .sports-gallery .sports-action {
-    width: min(100%, 290px);
-  }
-}
-
 /* Small editorial stickers fill the date column without adding motion. */
 .news-meta{min-width:0}.news-meta .story-meta{margin:0}
 .news-sticker{display:block;width:128px;height:128px;margin-top:20px;border-radius:18px;background-image:url('assets/news-stickers.webp');background-size:300% 200%;background-repeat:no-repeat;pointer-events:none}
@@ -287,20 +267,33 @@
   .rwanda-art { display: none; }
 }
 
-/* Book motion sampled from keyframes authored in Blender. */
-@keyframes ldk-book-motion {
-  0% { transform: translateY(0.000px) rotate(0.000deg) scale(1.00000); }
-  10% { transform: translateY(-0.424px) rotate(-0.170deg) scale(1.00509); }
-  20% { transform: translateY(-1.278px) rotate(-0.511deg) scale(1.01534); }
-  30% { transform: translateY(-1.951px) rotate(-0.780deg) scale(1.02341); }
-  40% { transform: translateY(-1.932px) rotate(-0.649deg) scale(1.02318); }
-  50% { transform: translateY(-1.638px) rotate(-0.113deg) scale(1.01966); }
-  60% { transform: translateY(-1.214px) rotate(0.374deg) scale(1.01457); }
-  70% { transform: translateY(-0.770px) rotate(0.424deg) scale(1.00924); }
-  80% { transform: translateY(-0.367px) rotate(0.265deg) scale(1.00440); }
-  90% { transform: translateY(-0.100px) rotate(0.086deg) scale(1.00120); }
-  100% { transform: translateY(0.000px) rotate(0.000deg) scale(1.00000); }
+/* One continuous visitor story, with the same content available on direct pages. */
+.visitor-chapter { border-top: 1px solid var(--b); }
+.institution .visitor-chapter > .page-heading { padding-block: clamp(36px, 6vw, 80px) 24px; border-bottom: 0; }
+.visitor-chapter .page-heading .eyebrow { margin-top: 0; }
+.visitor-chapter .page-heading h2 { font-size: clamp(38px, 5vw, 64px); max-width: 22ch; }
+.visitor-chapter .page-heading .lead { margin-bottom: 0; }
+
+.sports-jump { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 18px 0 24px; }
+.sports-jump a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+.sport-feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.22fr); align-items: center; gap: clamp(22px, 6vw, 70px); padding-block: clamp(28px, 6vw, 70px); border-top: 1px solid var(--b); }
+.institution .sport-feature h3 { font-size: clamp(30px, 4vw, 48px); line-height: 1.12; margin: 0 0 12px; }
+.sport-feature .lead { margin-block: 0 14px; }
+.sport-feature-basketball { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); }
+.sport-feature-basketball figure { grid-column: 1; grid-row: 1; width: min(100%, 360px); margin-inline: auto; }
+.sport-feature-text { grid-template-columns: minmax(0, 660px); }
+@media (max-width: 760px) {
+  .sport-feature, .sport-feature-basketball { grid-template-columns: minmax(0, 1fr); }
+  .sport-feature-basketball figure { grid-column: auto; grid-row: auto; margin-inline: 0; }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .book-motion img { animation: ldk-book-motion 4.8s linear both; }
-}
+
+/* Each effect is a separate layer. The original illustration never moves. */
+.hero-art { position: relative; }
+.branch-wind { position: absolute; inset: 0 auto auto 0; width: 30%; height: auto; pointer-events: none; border-top-left-radius: var(--editorial-image-radius); }
+.book-toggle { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: var(--a2); text-align: left; }
+.book-stage { display: block; position: relative; }
+.book-stage img { display: block; }
+.book-leaf { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.book-toggle-label { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; text-decoration: underline; text-underline-offset: 4px; font-size: 14px; font-weight: 700; }
+.book-turn-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.book-turned::after { content: ''; position: absolute; inset: 0; clip-path: polygon(40% 46%, 50% 37%, 62% 39%, 83% 57%, 68% 55%, 56% 68%); background: #fff8d935; pointer-events: none; }
