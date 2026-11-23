@@ -1,7 +1,7 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');
 function setup(){const nodes=new Map(),scripts=[];const make=()=>({hidden:false,disabled:false,attrs:{},listeners:{},textContent:'',setAttribute(k,v){this.attrs[k]=v},addEventListener(k,v){this.listeners[k]=v},focus(){},remove(){this.removed=true}});const get=id=>{if(!nodes.has(id))nodes.set(id,make());return nodes.get(id)};get('site-menu').hidden=true;
  const c={document:{documentElement:{dataset:{}},getElementById:get,addEventListener(){},createElement:make,body:{append(n){scripts.push(n)}}},localStorage:{getItem(key){assert.equal(key,'ldk-theme');return null},setItem(key){assert.equal(key,'ldk-theme')}},Error,Promise};c.window=c;Object.defineProperty(c,'schoolData',{get(){throw Error('Private/demo records touched')}});vm.createContext(c);vm.runInContext(fs.readFileSync('public.js','utf8'),c);return{c,get,scripts};}
-test('opening the public page does not load portal/chat scripts or read school records',()=>{const s=setup();assert.equal(s.scripts.length,0);const html=fs.readFileSync('index.html','utf8');assert.deepEqual([...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map(m=>m[1]),['connected/config.js','public-content.js','public.js','chat-launcher.js']);assert.ok(html.includes('href="connected/"'));assert.ok(!html.includes('setR('));assert.ok(!html.includes('notebook.js'));});
+test('opening the public page does not load portal/chat scripts or read school records',()=>{const s=setup();assert.equal(s.scripts.length,0);const html=fs.readFileSync('index.html','utf8');assert.deepEqual([...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map(m=>m[1]),['connected/config.js','public-content.js','public.js','public-book-motion.js','chat-launcher.js']);assert.ok(html.includes('href="connected/"'));assert.ok(!html.includes('setR('));assert.ok(!html.includes('notebook.js'));});
 test('assistant lazy-loads once, retries a failed download, and resolves assets from nested pages', async()=>{
  const {c,get,scripts}=setup();
  c.URL=URL;
@@ -46,11 +46,11 @@ test('approved public text stays plain, reveals news and supersedes older contac
  assert.equal(oldContact.hidden,true);
 });
 
-test('visitor navigation opens distinct detail pages in the same tab',()=>{
- const home=fs.readFileSync('index.html','utf8');
+test('homepage navigation jumps to the full chapters and direct pages remain available',()=>{
+ const home=require('../scripts/visitor-home.cjs').renderVisitorHome(process.cwd());
  for(const [section,page] of [['about','our-school'],['academics','academics'],['school-life','school-life'],['contact','contact']]){
   assert.ok(home.includes('id="'+section+'"'));
-  assert.ok(home.includes('href="'+page+'.html"'));
+  assert.ok(home.includes('href="#'+section+'"'));
   assert.ok(!home.includes('target="_blank"'));
   const detail=fs.readFileSync(page+'.html','utf8');
   assert.ok(detail.includes('href="index.html#'+section+'"'));
@@ -60,7 +60,8 @@ test('visitor navigation opens distinct detail pages in the same tab',()=>{
 
 test('every published HTML page loads the shared chat launcher and stylesheet',()=>{
  const release=fs.readFileSync('scripts/build-public-site.cjs','utf8');
- const pages=[...release.matchAll(/'([^']+\.html)'/g)].map(m=>m[1]);
+ const list=release.match(/const files = \[([\s\S]*?)\n\];/)[1];
+ const pages=[...list.matchAll(/'([^']+\.html)'/g)].map(m=>m[1]);
  const portalStart=pages.lastIndexOf('index.html');
  assert.ok(portalStart>0);
  for(const [i,page] of pages.entries()){

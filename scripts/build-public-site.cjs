@@ -1,13 +1,14 @@
 'use strict';
 
-const { copyFileSync, mkdirSync, rmSync } = require('node:fs');
+const { copyFileSync, mkdirSync, rmSync, writeFileSync } = require('node:fs');
 const { dirname, resolve } = require('node:path');
+const { renderVisitorHome } = require('./visitor-home.cjs');
 
 const files = [
   'index.html', 'our-school.html', 'academics.html', 'school-life.html', 'contact.html', 'news.html',
   'privacy.html', 'support.html', 'terms.html',
-  'public.css', 'info.css', 'chat.css', 'chat-launcher.js', 'public.js', 'public-content.js', 'chat.js',
-  'assets/news-stickers.webp', 'assets/basketball-action-retouched.webp', 'assets/ldk-gymnasium-retouched.webp', 'assets/kigali-convention.webp', 'assets/ldk-crest.png', 'assets/learning-sketch.webp', 'assets/learning-sketch-small.webp',
+  'public.css', 'info.css', 'chat.css', 'chat-launcher.js', 'public.js', 'public-book-motion.js', 'public-content.js', 'chat.js',
+  'assets/news-stickers.webp', 'assets/basketball-action-retouched.webp', 'assets/ldk-gymnasium-retouched.webp', 'assets/ldk-gymnasium-english.webp', 'assets/kigali-convention.webp', 'assets/ldk-crest.png', 'assets/learning-sketch.webp', 'assets/learning-sketch-small.webp',
   'assets/rwanda-flag.webp', 'assets/academic-watercolor.webp', 'assets/academic-watercolor-small.webp',
   'assets/kigali-hills.webp', 'assets/kigali-hills-small.webp', 'assets/school-court.webp',
   'assets/learning-orbit.svg', 'assets/ruhuka-helper.svg', 'assets/school-day.svg',
@@ -29,7 +30,8 @@ rmSync(output, { recursive: true, force: true });
 for (const file of files) {
   const target = resolve(output, file);
   mkdirSync(dirname(target), { recursive: true });
-  copyFileSync(resolve(root, file), target);
+  if (file === 'index.html') writeFileSync(target, renderVisitorHome(root));
+  else copyFileSync(resolve(root, file), target);
 }
 
 console.log('Prepared ' + files.length + ' school website files.');
