@@ -18,7 +18,8 @@ const tools={
  'open-letters':['Class summaries','Prepare a written class summary from recorded attendance, results and discipline. Review the wording before saving.']
 };
 const intro=document.getElementById('workspace-intro'),nav=document.querySelector('.workspace-nav');
-for(const [id,[label,description]] of Object.entries(tools)){const b=document.getElementById(id);b.textContent=label;b.title=description;}
+for(const [id,[label,description]] of Object.entries(tools)){const b=document.getElementById(id);b.textContent=label;b.setAttribute('aria-label',label);
+ const detail=document.createElement('span');detail.className='tool-card-description';detail.textContent=description;b.append(detail);}
 function guide(){const selected=Object.keys(tools).find(id=>document.getElementById(id).getAttribute('aria-current')==='page');intro.replaceChildren();if(!selected)return;const heading=document.createElement('h2'),copy=document.createElement('p');[heading.textContent,copy.textContent]=tools[selected];intro.append(heading,copy);}
 new MutationObserver(guide).observe(nav,{subtree:true,attributes:true,attributeFilter:['aria-current']});guide();
 })();

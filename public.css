@@ -286,3 +286,21 @@
 @media (forced-colors: active) {
   .rwanda-art { display: none; }
 }
+
+/* Book motion sampled from keyframes authored in Blender. */
+@keyframes ldk-book-motion {
+  0% { transform: translateY(0.000px) rotate(0.000deg) scale(1.00000); }
+  10% { transform: translateY(-0.424px) rotate(-0.170deg) scale(1.00509); }
+  20% { transform: translateY(-1.278px) rotate(-0.511deg) scale(1.01534); }
+  30% { transform: translateY(-1.951px) rotate(-0.780deg) scale(1.02341); }
+  40% { transform: translateY(-1.932px) rotate(-0.649deg) scale(1.02318); }
+  50% { transform: translateY(-1.638px) rotate(-0.113deg) scale(1.01966); }
+  60% { transform: translateY(-1.214px) rotate(0.374deg) scale(1.01457); }
+  70% { transform: translateY(-0.770px) rotate(0.424deg) scale(1.00924); }
+  80% { transform: translateY(-0.367px) rotate(0.265deg) scale(1.00440); }
+  90% { transform: translateY(-0.100px) rotate(0.086deg) scale(1.00120); }
+  100% { transform: translateY(0.000px) rotate(0.000deg) scale(1.00000); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .book-motion img { animation: ldk-book-motion 4.8s linear both; }
+}
