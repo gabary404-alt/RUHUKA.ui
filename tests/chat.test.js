@@ -44,8 +44,8 @@ test('supported provider JSON and invalid data',()=>{
   for(const invalid of [{},{response:''},{response:{secret:'do not display'}},null]) assert.throws(()=>extractReply(invalid));
 });
 test('offline help does not export or inspect private school data',()=>{
-  assert.match(localHelp('export every student'),/cannot read private student records, export records/);
-  assert.match(localHelp('attendance'),/Sign in/);
+  assert.match(localHelp('export every student in English'),/cannot read private student records, export records/);
+  assert.match(localHelp('attendance in English'),/Sign in/);
   assert.doesNotMatch(code,/schoolData|localStorage|createObjectURL/);
 });
 test('successful answer remains literal text and controls recover',async()=>{
@@ -62,11 +62,11 @@ test('only one request runs at once, stop ignores late completion',async()=>{
   const first=s.ctx.sendAIMessage('first');await s.ctx.sendAIMessage('second');
   assert.equal(calls,1);s.ctx.stopAIResponse();resolve(response('late answer'));await first;
   assert.equal(s.messages().some(m=>m.includes('late answer')),false);
-  assert.match(s.messages().at(-1),/Stopped/);assert.equal(s.node('ai-send').disabled,false);
+  assert.match(s.messages().at(-1),/Byahagaritswe/);assert.equal(s.node('ai-send').disabled,false);
 });
 test('failed service offers local help and retry, hides diagnostics',async()=>{
   const s=setup(async()=>({ok:false,status:500}));await s.ctx.sendAIMessage('attendance');
-  assert.match(s.messages().at(-1),/local help/);assert.equal(s.node('ai-retry').hidden,false);
+  assert.match(s.messages().at(-1),/Injira kuri konti/);assert.equal(s.node('ai-retry').hidden,false);
   assert.doesNotMatch(s.messages().at(-1),/API_KEY|500|stack|CORS/);
 });
 test('malformed JSON does not dump provider payload',async()=>{
@@ -75,20 +75,20 @@ test('malformed JSON does not dump provider payload',async()=>{
 });
 test('request timeout releases controls and shows recoverable help',async()=>{
   const s=setup((url,opts)=>new Promise((resolve,reject)=>opts.signal.addEventListener('abort',()=>reject(new Error('aborted')))),{timeout:5});
-  await s.ctx.sendAIMessage('hello');assert.match(s.messages().at(-1),/took too long/);
+  await s.ctx.sendAIMessage('hello');assert.match(s.messages().at(-1),/Igisubizo cyatinze/);
   assert.equal(s.node('ai-send').disabled,false);
 });
 test('typing reveals progressively and can stop during rendering',async()=>{
   const s=setup(async()=>response('This answer is long enough to reveal over multiple frames.'),{reduced:false});
   const pending=s.ctx.sendAIMessage('hello');await new Promise(r=>setTimeout(r,5));
   const partial=s.messages().at(-1);assert.ok(partial.length>0 && partial.length<57);
-  s.ctx.stopAIResponse();await pending;assert.match(s.messages().at(-1),/Stopped/);
+  s.ctx.stopAIResponse();await pending;assert.match(s.messages().at(-1),/Byahagaritswe/);
 });
 test('new chat clears context and an older request cannot overwrite it',async()=>{
   let resolve;
   const s=setup(()=>new Promise(r=>resolve=r));const pending=s.ctx.sendAIMessage('old');
   s.ctx.clearAIConversation();resolve(response('old result'));await pending;
-  assert.equal(s.messages().length,1);assert.match(s.messages()[0],/Hello/);
+  assert.equal(s.messages().length,1);assert.match(s.messages()[0],/Muraho/);
 });
 test('history includes complete turns but is cleared between chats',async()=>{
   const bodies=[];const s=setup(async(u,o)=>{bodies.push(JSON.parse(o.body));return response('Answer');});
@@ -98,7 +98,7 @@ test('history includes complete turns but is cleared between chats',async()=>{
 });
 test('offline mode never calls provider',async()=>{
   const s=setup(()=>{throw new Error('must not fetch')},{online:false});
-  await s.ctx.sendAIMessage('attendance');assert.match(s.messages().at(-1),/Sign in/);
+  await s.ctx.sendAIMessage('attendance');assert.match(s.messages().at(-1),/Injira kuri konti/);
 });
 test('empty and too-long questions never call provider',async()=>{
   let calls=0;const s=setup(async()=>{calls++;return response('Answer')});

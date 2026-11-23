@@ -11,7 +11,8 @@ Deno.serve(async(req)=>{
  try{
  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_ANON_KEY'),admin=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
  const userHeaders={apikey:key,Authorization:authorization,'Content-Type':'application/json'};
- const call=async(path,body,privileged=false)=>{const r=await fetch(url+path,{method:'POST',signal:AbortSignal.timeout(20000),headers:privileged?{apikey:admin,Authorization:'Bearer '+admin,'Content-Type':'application/json'}:userHeaders,body:JSON.stringify(body)});let data;try{data=await r.json()}catch{data=null}return{ok:r.ok,status:r.status,data}};
+ const adminHeaders={apikey:admin,Authorization:'Bearer '+admin,'Content-Type':'application/json'};
+ const call=async(path,body,privileged=false)=>{const r=await fetch(url+path,{method:'POST',signal:AbortSignal.timeout(20000),headers:privileged?adminHeaders:userHeaders,body:JSON.stringify(body)});let data;try{data=await r.json()}catch{data=null}return{ok:r.ok,status:r.status,data}};
  // Validates the live auth session, not just the signature of a cached JWT.
  const identity=await fetch(url+'/auth/v1/user',{headers:userHeaders,signal:AbortSignal.timeout(10000)});if(!identity.ok)return reply(401,{message:'Sign in again.'});
  const directory=await call('/rest/v1/rpc/staff_directory',{});if(!directory.ok)return reply(403,{message:'Headmaster access required.'});
@@ -30,21 +31,38 @@ Deno.serve(async(req)=>{
  const email=typeof input.email==='string'?input.email.trim().toLowerCase():'';const name=typeof input.display_name==='string'?input.display_name.trim():'';const roles=input.roles;
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254||name.length<1||name.length>160||!Array.isArray(roles)||roles.length<1||roles.length>4||new Set(roles).size!==roles.length||roles.some(r=>!['teacher','discipline_staff','discipline_officer','dean'].includes(r)))return reply(400,{message:'Provide a name, email and valid staff role.'});
  const lookup=await call('/rest/v1/rpc/staff_email_lookup',{email_address:email});if(!lookup.ok)return reply(403,{message:'Account access changed. Sign in again.'});
- // Existing accounts must be reviewed explicitly; invitation retry never changes roles.
- if(lookup.data)return reply(409,{message:'An account already uses this email. Review it in staff accounts; no invitation or role change was made.'});
+ // An existing staff invitation can be renewed only for the same active roles.
+ const existingId=lookup.data;
+ if(existingId){
+   const account=Array.isArray(directory.data)?directory.data.find(row=>row.id===existingId):null;
+   const sameRoles=Array.isArray(account?.roles)&&account.roles.length===roles.length&&roles.every(role=>account.roles.includes(role));
+   if(!account?.is_active||account.can_delete!==true||!sameRoles||!/^[0-9a-f-]{36}$/i.test(existingId)){
+     return reply(409,{message:'An account already uses this email. Review its current access in Staff access before sending another invitation.'});
+   }
+   const authUserResponse=await fetch(url+'/auth/v1/admin/users/'+existingId,{headers:adminHeaders,signal:AbortSignal.timeout(10000)});
+   if(!authUserResponse.ok)return reply(502,{message:'Could not check the existing invitation. Refresh Staff access before trying again.'});
+   const authResult=await authUserResponse.json();
+   const authUser=authResult.user??authResult;
+   if(authUser.id!==existingId||!authUser.invited_at||authUser.email_confirmed_at||authUser.confirmed_at){
+     return reply(409,{message:'This account has already completed setup or is not a pending staff invitation. Use account recovery if the staff member cannot sign in.'});
+   }
+ }
  const callback = origin + '/connected/account.html';
  const path = linkMode ? '/auth/v1/admin/generate_link' : '/auth/v1/invite';
  const generated = await call(path + '?redirect_to=' + encodeURIComponent(callback),
    { ...(linkMode ? { type: 'invite' } : {}), email, data: { display_name: name } }, true);
+ if (!generated.ok && !linkMode && generated.data?.error_code === 'email_address_not_authorized') {
+   return reply(503,{code:'staff_email_unavailable',message:'The school email sender is not configured for this address.'});
+ }
  if (!generated.ok) return reply(generated.status === 429 ? 429 : 400, {
    message: linkMode ? 'Could not create a setup link. Refresh the staff list before trying again.' : 'Invitation could not be sent. Check school email delivery settings and try again.'
  });
- const id = generated.data?.id;
- const token = generated.data?.hashed_token;
- if (!id || (linkMode && (typeof token !== 'string' || !/^[a-z0-9_-]{16,200}$/i.test(token)))) {
+ const id = generated.data?.user?.id ?? generated.data?.id;
+ const token = generated.data?.properties?.hashed_token ?? generated.data?.hashed_token;
+ if (!id || (existingId && id!==existingId) || (linkMode && (typeof token !== 'string' || !/^[a-z0-9_-]{16,200}$/i.test(token)))) {
    return reply(502, { message: 'Invitation setup could not be confirmed. Ask the administrator to review this account before retrying.' });
  }
- const saved = await call('/rest/v1/rpc/staff_account_save',
+ const saved = existingId ? {ok:true} : await call('/rest/v1/rpc/staff_account_save',
    { target_user: id, display_name: name, staff_roles: roles, enabled: true });
  if (!saved.ok) return reply(409, { message: linkMode
    ? 'An account was created, but school access could not be assigned. Ask the administrator to review the account.'

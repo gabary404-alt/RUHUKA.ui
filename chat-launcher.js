@@ -11,20 +11,20 @@
   <section id="ai-chat-panel" hidden role="region" aria-labelledby="ai-title">
     <header class="ai-header">
       <div class="ai-avatar" aria-hidden="true"><img src="${asset('assets/ldk-crest.png')}" width="38" height="38" alt=""></div>
-      <div class="ai-heading"><h2 id="ai-title">LDK’s AI assistant</h2><p>School help &amp; everyday learning</p></div>
+      <div class="ai-heading"><h2 id="ai-title">LDK’s AI assistant</h2><p>Ubufasha ku ishuri no mu myigire</p></div>
       <button type="button" class="ai-icon-button" onclick="toggleAI()" aria-label="Close assistant">Close</button>
     </header>
-    <div class="ai-toolbar"><span>School help & learning</span><button onclick="clearAIConversation()">New chat</button></div>
+    <div class="ai-toolbar"><span>Ubufasha ku ishuri no mu myigire</span><button onclick="clearAIConversation()">New chat</button></div>
     <div id="ai-messages" role="log" aria-label="Chat messages" aria-live="off" aria-busy="false" tabindex="0"></div>
     <p id="ai-announcement" class="ai-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
     <div class="ai-suggestions" aria-label="Suggested questions">
-      <button onclick="sendAIMessage('How do I take attendance?')">Attendance help</button>
-      <button onclick="sendAIMessage('Explain how to study effectively.')">Study tips</button>
+      <button onclick="sendAIMessage('Nakora nte igenzura ry’abanyeshuri bahari?')">Kugenzura abahari</button>
+      <button onclick="sendAIMessage('Nasubiramo amasomo nte neza?')">Inama zo kwiga</button>
     </div>
     <div class="ai-progress"><span id="ai-status" role="status" aria-live="polite">Ready</span><button id="ai-retry" hidden onclick="retryAIMessage()">Try again</button></div>
     <div class="ai-composer">
       <label class="ai-sr-only" for="ai-input">Your question</label>
-      <textarea id="ai-input" aria-describedby="ai-privacy-note" rows="2" maxlength="2000" placeholder="Ask a question…"></textarea>
+      <textarea id="ai-input" aria-describedby="ai-privacy-note" rows="2" maxlength="2000" placeholder="Andika ikibazo cyawe…"></textarea>
       <button id="ai-send" onclick="sendAIMessage()" aria-label="Send message">Send</button>
       <button id="ai-stop" hidden onclick="stopAIResponse()" aria-label="Stop response">Stop</button>
     </div>

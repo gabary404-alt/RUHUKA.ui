@@ -32,3 +32,17 @@ test('private links require a Headmaster and matching workspace, and withhold to
  assert.equal(response.status,409);
  assert.ok(!(await response.text()).includes('example_token'));
 });
+
+test('a pending staff invitation can be renewed without rewriting roles',async()=>{
+ const id='d916de02-1af2-429d-be9e-5fb8bdbbbdba';
+ const directory={body:[{id,roles:['teacher'],is_active:true,can_delete:true}]};
+ const pending=setup([{},directory,{body:id},{body:{id,invited_at:'2026-11-20'}},
+  {body:{user:{id},properties:{hashed_token:'example_token_123456789'}}}],false);
+ const response=await pending.send({...input,action:'invite_link'});
+ assert.equal(response.status,200);
+ assert.match((await response.json()).setup_url,/example_token/);
+ assert.equal(pending.calls.some(call=>call.url.includes('staff_account_save')),false);
+ const confirmed=setup([{},directory,{body:id},{body:{id,invited_at:'2026-11-20',email_confirmed_at:'2026-11-21'}}]);
+ assert.equal((await confirmed.send(input)).status,409);
+ assert.equal(confirmed.calls.some(call=>call.url.includes('/auth/v1/invite')),false);
+});

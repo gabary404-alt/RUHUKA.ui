@@ -9,12 +9,23 @@
     account: 'Staff use their school email. Students use their assigned ID and can request a private setup or reset code from the school. Never share passwords or setup codes here.',
     general: 'I can explain Lycée de Kigali and help with general learning questions when the AI service is available. Local help covers attendance, results, absence explanations and account setup. I cannot read private student records, export records, or verify current news.'
   };
-  function localHelp(message) {
-    if (/\b(attendance|register)\b/i.test(message)) return HELP.attendance;
-    if (/\b(results?|rankings?|marks?|discipline)\b/i.test(message)) return HELP.results;
-    if (/\b(absence|absent|justif\w*|excuse\w*)\b/i.test(message)) return HELP.absence;
-    if (/\b(account|password|login|sign.?in|code)\b/i.test(message)) return HELP.account;
-    return HELP.general;
+  const HELP_RW = {
+    attendance: 'Injira kuri konti yawe, ufungure Attendance, uhitemo ishuri n’itariki. Andika abahari n’abadahari, ugenzure imibare, hanyuma wemeze.',
+    results: 'Abanyeshuri bashobora kureba amanota yabo muri My records. Umwanya utarimo amanota usobanura ko atarandikwa.',
+    absence: 'Niba umunyeshuri atabonetse, menyesha ushinzwe imyitwarire. Ni we ushobora gukosora igitabo cy’abahari cyamaze kwemezwa.',
+    account: 'Abakozi bakoresha imeyili bahawe n’ishuri. Abanyeshuri bakoresha nimero yabo. Ntugashyire ijambo banga cyangwa kode hano.',
+    general: 'Nshobora kugufasha gusobanukirwa uko urubuga rwa Lycée de Kigali rukora. Sinshobora kubona inyandiko z’ibanga z’abanyeshuri cyangwa kugenzura amakuru mashya ako kanya.'
+  };
+  function asksForEnglish(message){
+    return /\b(?:in(?:to)? english|mu cyongereza|english only|switch to english)\b/i.test(message)||/^english(?: please)?[.!?]*$/i.test(message.trim());
+  }
+  function localHelp(message,english=asksForEnglish(message)) {
+    const help=english?HELP:HELP_RW;
+    if (/\b(attendance|register|abahari)\b/i.test(message)) return help.attendance;
+    if (/\b(results?|rankings?|marks?|discipline|amanota)\b/i.test(message)) return help.results;
+    if (/\b(absence|absent|justif\w*|excuse\w*|abadahari)\b/i.test(message)) return help.absence;
+    if (/\b(account|password|login|sign.?in|code|konti|kode)\b/i.test(message)) return help.account;
+    return help.general;
   }
   function extractReply(data) {
     const reply = data?.choices?.[0]?.message?.content ?? data?.message?.content ?? data?.response;
@@ -29,6 +40,7 @@
   let active = null;
   let history = [];
   let lastQuestion = '';
+  let englishReply = false;
   const requestTimeout = 45000;
   function setStatus(text) { byId('ai-status').textContent = text; }
   function announce(text) { byId('ai-announcement').textContent = text; }
@@ -105,7 +117,7 @@
     run.controller.abort();
     run.node.classList.remove('ai-waiting');
     run.node.removeAttribute('aria-label');
-    run.node.textContent = (run.node.textContent || '') + '\n[Stopped]';
+    run.node.textContent = (run.node.textContent || '') + (englishReply?'\n[Stopped]':'\n[Byahagaritswe]');
     // A partial/stopped reply is not added to future model context.
     release(run);
     if (run.finishReveal) run.finishReveal(false);
@@ -116,8 +128,9 @@
     root.stopAIResponse();
     history = [];
     lastQuestion = '';
+    englishReply = false;
     byId('ai-messages').replaceChildren();
-    append('Hello! Ask about Lycée de Kigali or a learning topic. I cannot access private records or check live web sources.', 'assistant');
+    append('Muraho! Baza ibijyanye na Lycée de Kigali cyangwa amasomo. Ntushyire amakuru y’ibanga hano. Nshobora kugusubiza mu Cyongereza ubinsabye.', 'assistant');
     byId('ai-retry').hidden = true;
     byId('ai-input').value = '';
     setStatus('Ready');announce(quiet?'':'New chat. Previous conversation cleared.');
@@ -129,6 +142,8 @@
     const message = (typeof suggestion === 'string' ? suggestion : input.value).trim();
     if (!message) return;
     if (message.length > 2000) { setStatus('Please keep your question under 2,000 characters.'); return; }
+    if(/\b(?:mu kinyarwanda|(?:reply|answer|respond|speak|write) in kinyarwanda)\b/i.test(message))englishReply=false;
+    else if(asksForEnglish(message))englishReply=true;
     lastQuestion = message;
     append(message, 'user');
     input.value = '';
@@ -141,7 +156,7 @@
     let online = false;
     try {
       if (!AI_CONFIG.USE_API || root.navigator.onLine === false) {
-        reply = localHelp(message);
+        reply = localHelp(message,englishReply);
         setStatus('Local help — AI service unavailable');
       } else {
         run.timeout = setTimeout(() => { run.timedOut = true; run.controller.abort(); }, requestTimeout);
@@ -165,8 +180,9 @@
       const reason = run.timedOut ? 'The AI took too long to respond.' :
         error?.message === 'Usage limit' ? 'The assistant has reached its usage limit. Try again later.' :
         'The AI service is unavailable right now.';
-      reply = reason + (error?.reference ? ' Support reference: ' + error.reference + '.' : '') +
-        '\n\nHere is local help.\n\n' + localHelp(message);
+      const messageForUser=englishReply?reason:run.timedOut?'Igisubizo cyatinze. Ongera ugerageze.':'Umufasha ntabonetse ubu. Ongera ugerageze nyuma.';
+      reply = messageForUser + (error?.reference ? (englishReply?' Support reference: ':' Nomero y’ubufasha: ') + error.reference + '.' : '') +
+        '\n\n' + localHelp(message,englishReply);
       byId('ai-retry').hidden = false;
     }
     if (active !== run) return;

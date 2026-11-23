@@ -70,3 +70,31 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
 @media(min-width:1000px){.school-form form{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}.school-form form>button{grid-column:1/-1;justify-self:start}.school-form label:has(textarea){grid-column:1/-1}}
 @media(max-width:800px){.school-workspace main{padding:16px}#workspace{display:block}.workspace-nav{position:static;max-height:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;padding:16px}.workspace-nav button{width:100%;font-size:14px}#workspace>section{padding:20px}.workspace-intro{padding-top:24px}}
 @media(prefers-reduced-motion:no-preference){.theme-ready .school-workspace section,.theme-ready .school-workspace input,.theme-ready .school-workspace button,.theme-ready .school-workspace nav{transition:background-color 280ms ease,color 280ms ease,border-color 280ms ease}}
+
+/* The admin hub groups existing, permission-controlled tools into board columns. */
+.tool-card-description { display: none; }
+#workspace[data-layout="board"] { display: block; }
+[data-layout="board"] .workspace-nav {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  align-items: start;
+  gap: 14px;
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+}
+[data-layout="board"] .nav-group {
+  align-content: start;
+  padding: 12px;
+  background: var(--s2);
+  border: 1px solid var(--b);
+  border-radius: 12px;
+}
+[data-layout="board"] .nav-group h2 { padding: 2px 4px; }
+[data-layout="board"] .workspace-nav button { min-height: 44px; border-radius: 8px; }
+[data-layout="board"] .workspace-nav button[aria-current="page"] { background: var(--s1); color: var(--t); box-shadow: inset 3px 0 var(--a2); font-weight: 750; }
+@media (min-width: 801px) {
+  [data-layout="board"] .tool-card-description { display: block; margin-top: 3px; color: var(--t2); font-size: 12px; font-weight: 400; line-height: 1.4; }
+}
