@@ -1,8 +1,8 @@
 (function(root){
 'use strict';
 const labels={teacher:'Teacher',discipline_staff:'Patron / matron',discipline_officer:'Discipline Officer',dean:'Dean of Studies',headmaster:'Headmaster'};
-function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>!stopped&&current();const el=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e};const say=t=>{if(valid())status.textContent=t};const status=el('p');status.setAttribute('role','status');host.append(el('h2','Staff accounts'),el('p','Only the Headmaster manages staff access. Staff choose their own passwords; no password is shown here.'),status);
- const invite=el('details'),summary=el('summary','Invite a staff member'),form=el('form');invite.open=true;invite.append(summary,form);const fields={};for(const [key,label,type]of [['display_name','Full name','text'],['email','Staff email','email']]){const l=el('label',label),i=el('input');i.type=type;i.required=true;i.maxLength=key==='email'?254:160;l.append(i);form.append(l);fields[key]=i;}const roleLabel=el('label','Role'),role=el('select');for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const o=el('option',labels[r]);o.value=r;role.append(o)}roleLabel.append(role);form.append(roleLabel);const review=el('p'),send=el('button','Review invitation');
+function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>!stopped&&current();const el=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e};const say=t=>{if(valid())status.textContent=t};const status=el('p');status.setAttribute('role','status');host.append(el('h2','Manage staff'),el('p','Find a staff member to edit their name, roles or account access.'),status);
+ const invite=el('details'),summary=el('summary','Invite a staff member'),form=el('form');invite.open=false;invite.className='staff-invite-panel';invite.append(summary,form);const fields={};for(const [key,label,type]of [['display_name','Full name','text'],['email','Staff email','email']]){const l=el('label',label),i=el('input');i.type=type;i.required=true;i.maxLength=key==='email'?254:160;l.append(i);form.append(l);fields[key]=i;}const roleLabel=el('label','Role'),role=el('select');for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const o=el('option',labels[r]);o.value=r;role.append(o)}roleLabel.append(role);form.append(roleLabel);const review=el('p'),send=el('button','Review invitation');
  const result=el('div'),setupLabel=el('label','Private setup link'),setupLink=el('input'),emailDraft=el('a','Send invite by email');
  emailDraft.className='button primary';
  result.hidden=true;
@@ -18,11 +18,47 @@ function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>
   form.append(el('p','Staff invitations are unavailable in this workspace.'));
  }
  host.append(invite);
- const list=el('div'),refresh=el('button','Refresh staff accounts');
+ const directory=el('section');
+ directory.className='staff-directory';
+ const toolbar=el('div');
+ toolbar.className='staff-toolbar';
+ const findLabel=el('label','Search staff'), find=el('input');
+ find.type='search';
+ find.placeholder='Name or email';
+ findLabel.append(find);
+ const filterLabel=el('label','Account status'), filter=el('select');
+ for(const [value,label] of [['all','All accounts'],['active','Active'],['disabled','Disabled']]){
+  const option=el('option',label);
+  option.value=value;
+  filter.append(option);
+ }
+ filter.value='all';
+ filterLabel.append(filter);
+ const refresh=el('button','Refresh staff accounts');
  refresh.type='button';
- refresh.onclick=load;
- host.append(refresh,list);
- let directoryRequest=0;
+ refresh.onclick=()=>load();
+ toolbar.append(findLabel,filterLabel,refresh);
+ const list=el('div'), empty=el('p');
+ empty.hidden=true;
+ empty.setAttribute('role','status');
+ directory.append(toolbar,empty,list);
+ host.append(directory);
+ let directoryRequest=0, cards=[];
+
+ function applyFilters(){
+  const query=(find.value||'').trim().toLowerCase();
+  let visible=0;
+  for(const {person,card} of cards){
+   const nameAndEmail=[person.display_name,person.email].filter(Boolean).join(' ').toLowerCase();
+   const matchesStatus=filter.value==='all'||person.is_active===(filter.value==='active');
+   card.hidden=!matchesStatus||!nameAndEmail.includes(query);
+   if(!card.hidden)visible++;
+  }
+  empty.hidden=visible>0;
+  if(!visible)empty.textContent=cards.length?'No staff accounts match these filters.':'No staff accounts to show.';
+ }
+ find.oninput=applyFilters;
+ filter.onchange=applyFilters;
 
  function staffDeleteControls(person,card){
   const controls=el('div');
@@ -33,7 +69,7 @@ function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>
   open.type=confirm.type=cancel.type='button';
   open.setAttribute('aria-label','Delete account for '+(person.display_name||person.email||'this staff member'));
   review.hidden=true;
-  review.append(el('p','Delete '+(person.display_name||'this account')+(person.email?' ('+person.email+')':'')+'? This ends school access and removes the account from Staff access. Past school records stay. This cannot be undone here, and the email stays reserved.'),cancel,confirm);
+  review.append(el('p','Delete '+(person.display_name||'this account')+(person.email?' ('+person.email+')':'')+'? This ends school access and removes the account from the staff list. Past school records stay. This cannot be undone here, and the email stays reserved.'),cancel,confirm);
   open.onclick=()=>{open.hidden=true;review.hidden=false;cancel.focus();};
   cancel.onclick=()=>{review.hidden=true;open.hidden=false;open.focus();};
   confirm.onclick=async()=>{
@@ -44,6 +80,8 @@ function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>
     if(!valid())return;
     if(result?.deleted!==true)throw new Error('Deletion could not be confirmed. Refresh staff accounts before trying again.');
     card.remove();
+    cards=cards.filter(entry=>entry.person.id!==person.id);
+    applyFilters();
     refresh.focus();
     say('Staff account deleted. Past school records were kept.');
     await load();
@@ -122,7 +160,7 @@ function mountStaffAccounts(host,api,current){let stopped=false;const valid=()=>
   emailDraft.href='mailto:'+encodeURIComponent(data.email)+'?subject='+encodeURIComponent('Lycée de Kigali staff invitation')+'&body='+encodeURIComponent(body);
   result.hidden=false;
  }
- async function load(){const request=++directoryRequest;try{const people=await api('/rest/v1/rpc/staff_directory',{method:'POST',body:'{}'});if(!valid()||request!==directoryRequest)return;list.replaceChildren();for(const p of people){const card=el('article');card.className='row';card.append(el('h3',p.display_name||'Unnamed account'),el('p',(p.email||'Email unavailable')+' · '+(p.is_active?'Active':'Disabled')),el('p',p.roles.map(r=>labels[r]||r).join(', ')));if(p.roles.includes('headmaster')){card.append(el('p','Headmaster ownership is managed separately.'));list.append(card);continue;}if(p.is_active&&p.roles.includes('discipline_officer')){const permission=el('p',p.roster_import_permission?'One roster import allowed until '+new Date(p.roster_import_permission.expires_at).toLocaleString():'Bulk roster imports require your permission. Adding one student does not require this grant.');const grant=el('button',p.roster_import_permission?'Revoke roster import permission':'Allow one roster import');grant.type='button';let confirmed=false;grant.onclick=async()=>{if(!confirmed){confirmed=true;grant.textContent=p.roster_import_permission?'Confirm revocation':'Confirm one import within 24 hours';return;}grant.disabled=true;try{await api('/rest/v1/rpc/roster_grant_save',{method:'POST',body:JSON.stringify({beneficiary:p.id,allow_import:!p.roster_import_permission})});say('Roster import permission updated. It turns off after one successful import; validation errors do not use it.');await load()}catch(e){say(e.message)}finally{grant.disabled=false}};card.append(permission,grant);}const f=el('form'),nameLabel=el('label','Full name'),name=el('input');name.value=p.display_name||'';name.required=true;name.maxLength=160;nameLabel.append(name);f.append(nameLabel);const choices=[];for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const l=el('label',labels[r]),i=el('input');l.className='inline-choice';i.type='checkbox';i.checked=p.roles.includes(r);l.append(i);f.append(l);choices.push({r,i})}const activeLabel=el('label','Account enabled'),active=el('input');active.type='checkbox';active.checked=p.is_active;activeLabel.className='inline-choice';activeLabel.append(active);f.append(activeLabel);const confirm=el('p'),save=el('button','Review access change');f.append(confirm,save);let pending=null;f.oninput=()=>{pending=null;confirm.textContent='';save.textContent='Review access change'};f.onsubmit=async event=>{event.preventDefault();const data={target_user:p.id,display_name:name.value.trim(),staff_roles:choices.filter(x=>x.i.checked).map(x=>x.r),enabled:active.checked};if(!data.staff_roles.length){say('Choose at least one staff role.');return;}const signature=JSON.stringify(data);if(pending!==signature){pending=signature;confirm.textContent='Save '+(data.enabled?'enabled':'disabled')+' access as '+data.staff_roles.map(r=>labels[r]).join(', ')+'? Disabled accounts lose access and must sign in again after re-enabling.';save.textContent='Confirm access change';return;}save.disabled=true;try{await api('/rest/v1/rpc/staff_account_save',{method:'POST',body:signature});say('Staff access saved with history.');await load()}catch(e){say(e.message)}finally{save.disabled=false}};card.append(f);if(p.can_delete===true)card.append(staffDeleteControls(p,card));list.append(card)}}catch(e){if(request===directoryRequest)say(e.message)}}
+ async function load(){const request=++directoryRequest;try{const people=await api('/rest/v1/rpc/staff_directory',{method:'POST',body:'{}'});if(!valid()||request!==directoryRequest)return;list.replaceChildren();cards=[];for(const p of people){const card=el('article');card.className='row staff-directory-card';cards.push({person:p,card});card.append(el('h3',p.display_name||'Unnamed account'),el('p',(p.email||'Email unavailable')+' · '+(p.is_active?'Active':'Disabled')),el('p',p.roles.map(r=>labels[r]||r).join(', ')));if(p.roles.includes('headmaster')){card.append(el('p','Headmaster ownership is managed separately.'));list.append(card);continue;}if(p.is_active&&p.roles.includes('discipline_officer')){const permission=el('p',p.roster_import_permission?'One roster import allowed until '+new Date(p.roster_import_permission.expires_at).toLocaleString():'Bulk roster imports require your permission. Adding one student does not require this grant.');const grant=el('button',p.roster_import_permission?'Revoke roster import permission':'Allow one roster import');grant.type='button';let confirmed=false;grant.onclick=async()=>{if(!confirmed){confirmed=true;grant.textContent=p.roster_import_permission?'Confirm revocation':'Confirm one import within 24 hours';return;}grant.disabled=true;try{await api('/rest/v1/rpc/roster_grant_save',{method:'POST',body:JSON.stringify({beneficiary:p.id,allow_import:!p.roster_import_permission})});say('Roster import permission updated. It turns off after one successful import; validation errors do not use it.');await load()}catch(e){say(e.message)}finally{grant.disabled=false}};card.append(permission,grant);}const editor=el('details');editor.className='staff-role-editor';editor.append(el('summary','Edit name, roles or access'));const f=el('form'),nameLabel=el('label','Full name'),name=el('input');name.value=p.display_name||'';name.required=true;name.maxLength=160;nameLabel.append(name);f.append(nameLabel);const choices=[];for(const r of Object.keys(labels).filter(r=>r!=='headmaster')){const l=el('label',labels[r]),i=el('input');l.className='inline-choice';i.type='checkbox';i.checked=p.roles.includes(r);l.append(i);f.append(l);choices.push({r,i})}const activeLabel=el('label','Account enabled'),active=el('input');active.type='checkbox';active.checked=p.is_active;activeLabel.className='inline-choice';activeLabel.append(active);f.append(activeLabel);const confirm=el('p'),save=el('button','Review access change');confirm.setAttribute('role','status');f.append(confirm,save);let pending=null;f.oninput=()=>{pending=null;confirm.textContent='';save.textContent='Review access change'};f.onsubmit=async event=>{event.preventDefault();if(!valid()||save.disabled)return;const data={target_user:p.id,display_name:name.value.trim(),staff_roles:choices.filter(x=>x.i.checked).map(x=>x.r),enabled:active.checked};if(!data.display_name||!data.staff_roles.length){confirm.textContent='Enter a name and choose at least one role.';return;}const signature=JSON.stringify(data);if(pending!==signature){pending=signature;confirm.textContent='Save '+(data.enabled?'enabled':'disabled')+' access as '+data.staff_roles.map(r=>labels[r]).join(', ')+'? Disabled accounts lose access and must sign in again after re-enabling.';save.textContent='Confirm access change';return;}save.disabled=true;try{await api('/rest/v1/rpc/staff_account_save',{method:'POST',body:signature});say('Staff access saved with history.');await load()}catch(e){say(e.message)}finally{save.disabled=false}};editor.append(f);card.append(editor);if(p.can_delete===true)card.append(staffDeleteControls(p,card));list.append(card)}applyFilters()}catch(e){if(request===directoryRequest)say(e.message)}}
  const ready=load();return{ready,dispose(){stopped=true;host.replaceChildren()}};
 }
 if(typeof module!=='undefined'&&module.exports)module.exports={mountStaffAccounts};else root.mountStaffAccounts=mountStaffAccounts;

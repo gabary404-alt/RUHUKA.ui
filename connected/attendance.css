@@ -98,3 +98,28 @@ textarea{width:100%;min-height:140px;padding:12px;border:1px solid var(--b);bord
 @media (min-width: 801px) {
   [data-layout="board"] .tool-card-description { display: block; margin-top: 3px; color: var(--t2); font-size: 12px; font-weight: 400; line-height: 1.4; }
 }
+
+.staff-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin-block: 14px 22px;
+}
+.school-workspace .staff-toolbar label { margin: 0; }
+.staff-toolbar button { margin: 0; min-height: 44px; }
+.staff-directory-card { padding-block: 18px; }
+.staff-directory-card h3 { margin-top: 0; }
+.staff-role-editor { margin-block: 12px; }
+.staff-invite-panel { margin-block: 16px; }
+.staff-role-editor summary, .staff-invite-panel summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--a2);
+}
+@media (max-width: 600px) {
+  .staff-toolbar { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .staff-toolbar button { justify-self: start; }
+}

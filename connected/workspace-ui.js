@@ -10,7 +10,7 @@ const tools={
  'open-attendance':['Attendance','Record attendance or check submitted class registers. Open a register to see who submitted it and any corrections.'],
  'open-school':['School setup & notices','Create classes, set dates, manage student details and read school notices. Open only the task you need.'],
  'open-my-records':['My records','See your own results, attendance and discipline records. Ask staff to correct missing or wrong information.'],
- 'open-accounts':['Staff access','Manage staff roles and access. Changing a role changes what that person can see and do.'],
+ 'open-accounts':['Manage staff','Find staff, update names or roles, and manage account access.'],
  'open-roster-import':['Import students','Add or update many students from one file. Download the template, fill it in, check the preview, then save.'],
  'open-academics':['Marks & results','Upload a named set of marks, check missing values, then publish results. A blank mark means not recorded; zero is a real mark.'],
  'open-discipline':['Discipline records','Record an incident or import official discipline totals. Keep incidents and official totals separate.'],
