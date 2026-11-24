@@ -49,7 +49,7 @@ test('Headmaster can send a setup link and use a manual fallback when email is u
 
   const elements = descendants(host);
   const invite = elements.find(node => node.tag === 'details');
-  assert.equal(invite.open, true);
+  assert.equal(invite.open, false);
   const form = elements.find(node => node.tag === 'form');
   const review = elements.find(node => node.textContent === 'Review invitation');
   const send = elements.find(node => node.textContent === 'Send invite by email');
@@ -131,4 +131,45 @@ test('staff deletion requires confirmation and removes only the chosen account',
   assert.ok(!rendered.includes(teacher.display_name));
   assert.ok(rendered.includes(headmaster.display_name));
   assert.ok(rendered.includes('Staff account deleted. Past school records were kept.'));
+});
+
+test('Manage staff searches, filters disabled accounts and reviews edits before saving', async () => {
+  const context = { document: { createElement } };
+  vm.runInNewContext(fs.readFileSync('connected/staff-accounts.js', 'utf8'), context);
+  const host = createElement('main');
+  const teacher = { id: 'a', display_name: 'Alice', email: 'alice@example.test', roles: ['teacher'], is_active: true, can_delete: true };
+  const officer = { id: 'b', display_name: 'Bob', email: 'bob@example.test', roles: ['discipline_officer'], is_active: false, can_delete: true };
+  const saved = [];
+  const panel = context.mountStaffAccounts(host, async (path, options) => {
+    if (path.endsWith('staff_directory')) return [teacher, officer];
+    assert.match(path, /staff_account_save$/);
+    saved.push(JSON.parse(options.body));
+  }, () => true);
+  await panel.ready;
+  const nodes = descendants(host);
+  const find = nodes.find(node => node.type === 'search');
+  const filter = nodes.find(node => node.tag === 'select' && node.value === 'all');
+  const cards = nodes.filter(node => node.tag === 'article');
+  find.value = 'BOB@example.test';
+  find.oninput();
+  assert.equal(cards[0].hidden, true);
+  assert.equal(cards[1].hidden, false);
+  find.value = '';
+  filter.value = 'active';
+  filter.onchange();
+  assert.equal(cards[0].hidden, false);
+  assert.equal(cards[1].hidden, true);
+
+  const editor = descendants(cards[0]).find(node => node.tag === 'form');
+  const name = descendants(editor).find(node => node.tag === 'input' && node.value === 'Alice');
+  name.value = 'Alice Smith';
+  const checkboxes = descendants(editor).filter(node => node.type === 'checkbox');
+  checkboxes[0].checked = false;
+  checkboxes[3].checked = true;
+  checkboxes[4].checked = false;
+  const submit = () => editor.onsubmit({ preventDefault() {} });
+  await submit();
+  assert.equal(saved.length, 0);
+  await submit();
+  assert.deepEqual(saved, [{target_user:'a',display_name:'Alice Smith',staff_roles:['dean'],enabled:false}]);
 });
