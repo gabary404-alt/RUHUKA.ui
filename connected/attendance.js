@@ -34,7 +34,7 @@ function saveTabSession(){
 async function renewSession(){
  if(!refreshToken)throw Error('Your session expired. Sign in again.');
  if(!refreshing){const version=epoch;const value=refreshToken;
- refreshing=(async()=>{const response=await fetch(config.url+'/auth/v1/token?grant_type=refresh_token',{signal:AbortSignal.timeout(20000),method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:value})});
+ refreshing=(async()=>{const response=await fetch(config.url+'/auth/v1/token?grant_type=refresh_token',{signal:typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'?AbortSignal.timeout(20000):undefined,method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:value})});
  if(version!==epoch)throw Error('Session changed. Sign in again.');
  if(!response.ok){
   if([400,401,403].includes(response.status)){clear();const message='Your session expired. Sign in again. Your saved draft stays on this device.';notify(message,true);throw Error(message);}
@@ -48,7 +48,7 @@ async function renewSession(){
  return data.user;})().finally(()=>{refreshing=null;});}return refreshing;
 }
 async function request(path,options={},retried=false){
- const response=await fetch(config.url+path,{signal:AbortSignal.timeout(20000),...options,headers:{apikey:config.key,...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json',...options.headers}});
+ const response=await fetch(config.url+path,{signal:typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'?AbortSignal.timeout(20000):undefined,...options,headers:{apikey:config.key,...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json',...options.headers}});
  if(response.status===204)return null;const data=await response.json();if(response.status===401&&path==='/auth/v1/user'){throw Error('Your session ended. Sign in again.');}if(response.status===401&&token&&!path.startsWith('/auth/')&&!retried){await renewSession();return request(path,options,true);}if(!response.ok){const e=new Error(response.status===401&&!path.endsWith('/student-access')?'Your session expired. Sign in again.':data.message||data.msg||data.error_description||'Request failed.');e.code=data.code;throw e;}return data;
 }
 const rpc=(name,args)=>request('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(args)});
@@ -218,7 +218,7 @@ async function openTodayTask(task){
 }
 $('attendance-kind').onchange=()=>{$('lesson-label').hidden=$('attendance-kind').value!=='followup';loaded=null;$('submit').hidden=true;$('students').replaceChildren();};$('lesson').oninput=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
 function dateChanged(){detailRequest++;$('overview').replaceChildren();$('followup-list').replaceChildren();todayDesk?.refresh();reviewedSignature=null;$('review-totals').textContent='';$('submit').textContent='Review attendance';loaded=null;$('submit').hidden=true;$('students').replaceChildren();$('details').replaceChildren();overview().catch(e=>notify(e.message,true));}
-$('day').value=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Kigali',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());$('day').onchange=dateChanged;$('class').onchange=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
+$('day').value=new Date(Date.now()+2*60*60*1000).toISOString().slice(0,10);$('day').onchange=dateChanged;$('class').onchange=()=>{loaded=null;$('submit').hidden=true;$('students').replaceChildren();};
 function attendanceReportDraft(className,from,to,totals){
  const sessions=Number(totals.main_sessions);
  const rate=totals.attendance_rate;

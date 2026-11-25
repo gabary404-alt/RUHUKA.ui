@@ -33,7 +33,7 @@ function mountDiscipline(host,api,roles,current){
  const editor=el('details'),form=el('form'),name=field('Name this upload'),date=field('Snapshot date','date'),ref=field('Official source reference'),file=field('Official totals CSV','file'),eventsFile=field('Official events CSV (optional)','file'),reason=field('Reason for correction');
  const correction=el('p'),cancel=button('Cancel correction',()=>{parent=null;reason.l.hidden=true;reason.i.required=false;correction.textContent='';cancel.hidden=true;invalidate()});cancel.hidden=true;reason.l.hidden=true;
  name.i.required=ref.i.required=date.i.required=file.i.required=true;name.i.maxLength=120;ref.i.maxLength=500;reason.i.maxLength=1000;
- date.i.value=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Kigali',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ date.i.value=new Date(Date.now()+2*60*60*1000).toISOString().slice(0,10);
  for(const f of[file,eventsFile])f.i.accept='.csv,text/csv';
  const check=el('button','Check discipline files'),publish=button('Save official import',save),previewBox=el('div'),list=el('div'),detail=el('section');publish.hidden=true;detail.hidden=true;
  editor.append(el('summary','Upload official discipline records'));form.append(correction,cancel,name.l,date.l,ref.l,el('p','Use the school document’s name or reference. Include every class student once in the totals CSV. Do not invent a total or type a deduction here. Events are optional evidence and do not change the supplied total.'));
