@@ -290,7 +290,7 @@
 
 /* Each effect is a separate layer. The original illustration never moves. */
 .hero-art { position: relative; }
-.branch-wind { position: absolute; inset: 0 auto auto 0; width: 30%; height: auto; pointer-events: none; border-top-left-radius: var(--editorial-image-radius); }
+.branch-wind { position: absolute; inset: 0 auto auto 0; width: 33.333333%; height: auto; pointer-events: none; border-top-left-radius: var(--editorial-image-radius); }
 .book-stage { position: relative; }
 .book-stage img { display: block; }
 .book-leaf { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
@@ -298,5 +298,5 @@
 .book-toggle { display: inline-block; min-height: 44px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--b); border-radius: 8px; background: var(--s1); color: var(--a2); font-weight: 700; font-size: 14px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .book-leaf, .book-toggle { display: none; }
+  .branch-wind, .book-leaf, .book-toggle { display: none; }
 }

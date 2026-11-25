@@ -7,6 +7,23 @@
   const asset = path => new URL(path, base).href;
   window.AI_CONFIG = { USE_API: true, API_URL: '/api/chat' };
 
+  const visitorQuestions = [
+    ["Kwiyandikisha","Nabaza he amakuru yo kwiyandikisha muri Lycée de Kigali?"],
+    ["Gusura ishuri","Nasura nte Lycée de Kigali?"],
+    ["Ibyiciro by’amashuri","Muri Lycée de Kigali higishwa ibihe byiciro by’amashuri?"]
+  ];
+  const staffQuestions = [
+    ["Kugenzura abahari","Nakora nte igenzura ry’abanyeshuri bahari?"],
+    ["Ubufasha kuri konti","Nakora iki iyo nibagiwe ijambo banga rya konti yanjye?"]
+  ];
+  const studentQuestions = [
+    ["Kureba amanota","Nareba nte amanota yanjye?"],
+    ["Inama zo kwiga","Nasubiramo amasomo nte neza?"]
+  ];
+  const renderQuestions = questions => questions.map(([label, prompt]) =>
+    '<button type="button" lang="rw" data-question="' + prompt + '">' + label + '</button>'
+  ).join('');
+
   document.body.insertAdjacentHTML('beforeend', `<div id="ai-assistant">
   <section id="ai-chat-panel" hidden role="region" aria-labelledby="ai-title">
     <header class="ai-header">
@@ -17,9 +34,8 @@
     <div class="ai-toolbar"><span>Ubufasha ku ishuri no mu myigire</span><button onclick="clearAIConversation()">New chat</button></div>
     <div id="ai-messages" role="log" aria-label="Chat messages" aria-live="off" aria-busy="false" tabindex="0"></div>
     <p id="ai-announcement" class="ai-sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-    <div class="ai-suggestions" aria-label="Suggested questions">
-      <button onclick="sendAIMessage('Nakora nte igenzura ry’abanyeshuri bahari?')">Kugenzura abahari</button>
-      <button onclick="sendAIMessage('Nasubiramo amasomo nte neza?')">Inama zo kwiga</button>
+    <div id="ai-suggestions" class="ai-suggestions" aria-label="Suggested questions">
+      ${renderQuestions(visitorQuestions)}
     </div>
     <div class="ai-progress"><span id="ai-status" role="status" aria-live="polite">Ready</span><button id="ai-retry" hidden onclick="retryAIMessage()">Try again</button></div>
     <div class="ai-composer">
@@ -36,6 +52,24 @@
   document.body.classList.add('ldk-chat-page');
   const button = document.getElementById('ai-fab');
   const status = document.getElementById('ai-load-status');
+
+  const suggestions = document.getElementById('ai-suggestions');
+  suggestions.addEventListener('click', event => {
+    const button = event.target.closest('button[data-question]');
+    if (button) window.sendAIMessage(button.dataset.question);
+  });
+  const workspace = document.querySelector?.('#workspace');
+  if (workspace) {
+    const attendance = document.getElementById('open-attendance');
+    const updateQuestions = () => {
+      const questions = workspace.hidden ? visitorQuestions :
+        attendance && !attendance.hidden ? staffQuestions : studentQuestions;
+      suggestions.innerHTML = renderQuestions(questions);
+    };
+    const observer = new MutationObserver(updateQuestions);
+    observer.observe(workspace, { attributes: true, attributeFilter: ['hidden'] });
+    updateQuestions();
+  }
 
   function loadChat() {
     return new Promise((resolve, reject) => {

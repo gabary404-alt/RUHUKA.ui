@@ -41,15 +41,24 @@ function replyOnly(data){
 function approvedTopic(question){
  if(/\b(?:school motto|school name|name of (?:the|this) school|(?:your|our|ldk) motto|lyc[ée]e de kigali.{0,40}motto|motto of (?:this|the) school)\b/i.test(question))return 'identity';
  if(/\b(?:school|lyc[ée]e de kigali|ldk)\b/i.test(question)){
+  if(/\b(?:kwiyandikisha|admissions?|enrolment|enrollment)\b/i.test(question))return 'enrollment';
+  if(/\b(?:nasura|gusura|visit)\b/i.test(question))return 'visit';
+  if(/\b(?:ibyiciro|byiciro|academic levels|grade levels|ordinary level|advanced level)\b/i.test(question))return 'levels';
   if(/\b(?:contact|address|phone|email|location)\b/i.test(question))return 'contact';
   if(/\b(?:clubs?|activities|sports)\b/i.test(question))return 'activities';
   if(/\b(?:programmes?|programs?|subjects?|combinations?|curriculum)\b/i.test(question))return 'academics';
   if(/\b(?:news|events?|updates?)\b/i.test(question))return 'news';
-  if(/\b(?:fees?|admissions?|enrolment|enrollment|polic(?:y|ies)|term dates)\b/i.test(question))return 'unavailable';
+  if(/\b(?:fees?|polic(?:y|ies)|term dates)\b/i.test(question))return 'unavailable';
  }
  return null;
 }
+const VISITOR_ANSWERS = {
+  enrollment: ['Ku bibazo byo kwiyandikisha muri Lycée de Kigali, baza ibiro by’ishuri. Reba ahavuga Visit & contact ku rubuga kugira ngo umenye uko wabageraho.', 'Ask the school office for current enrollment requirements and dates. The Visit & contact page explains how to reach the office.'],
+  visit: ['Lycée de Kigali iherereye kuri KK 2 Avenue, i Kigali. Banza uvugane n’ibiro by’ishuri mbere yo gusura. Ikarita iri ahavuga Visit & contact.', 'Lycée de Kigali is on KK 2 Avenue in Kigali. Contact the school office before visiting. The Visit & contact page has a map and directions.'],
+  levels: ['Lycée de Kigali yigisha ikiciro rusange (Ordinary Level, S1–S3) n’ikiciro cyisumbuye (Advanced Level, S4–S6). Ibisobanuro biri ahavuga Academics.', 'Lycée de Kigali offers Ordinary Level (S1–S3) and Advanced Level (S4–S6). See the Academics page for details.']
+};
 async function schoolAnswer(topic,lookup,english){
+ if(VISITOR_ANSWERS[topic])return VISITOR_ANSWERS[topic][english?1:0];
  if(!english){
   if(topic==='identity')return 'Iri shuri ni Lycée de Kigali. Intego yaryo ni “Strive to Excel.”';
   return 'Reba amakuru yatangajwe ku rubuga rwa Lycée de Kigali cyangwa ubaze ubuyobozi bw’ishuri. Sinshobora kugenzura amakuru mashya ako kanya.';

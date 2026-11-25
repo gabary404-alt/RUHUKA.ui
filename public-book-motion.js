@@ -6,68 +6,88 @@
   const svgNamespace = 'http://www.w3.org/2000/svg';
 
   function prepareBranch(figure) {
-    if (motionPreference.matches || !('IntersectionObserver' in window)) return;
     const art = figure.querySelector('img');
-    if (!art) return;
-
-    const watch = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      watch.disconnect();
-      Promise.resolve(typeof art.decode === 'function' ? art.decode() : undefined).then(() => {
-        if (art.naturalWidth && !motionPreference.matches) swayBranch(figure, art);
-      }).catch(() => { /* The still illustration remains visible. */ });
-    }, { threshold: 0.3 });
-    watch.observe(figure);
-  }
-
-  function swayBranch(figure, art) {
+    if (!art || !('IntersectionObserver' in window)) return;
     const patch = document.createElement('canvas');
-    patch.width = 360;
-    patch.height = 305;
+    patch.width = 400;
+    patch.height = 330;
     patch.className = 'branch-wind';
     patch.setAttribute('aria-hidden', 'true');
+    patch.hidden = true;
     const context = patch.getContext('2d', { alpha: false });
     if (!context) return;
-    const width = patch.width;
-    const height = patch.height;
-    // Normalize the responsive source once. Image srcset can report a
-    // density-adjusted naturalWidth, so sampling it directly shifts the patch.
+
+    // Use illustration coordinates independently of the responsive image size.
     const source = document.createElement('canvas');
-    source.width = 1200;
-    source.height = 800;
+    source.width = patch.width;
+    source.height = patch.height;
     const sourceContext = source.getContext('2d');
     if (!sourceContext) return;
-    sourceContext.drawImage(art, 0, 0, source.width, source.height);
-    const duration = 4100;
-    const step = 3;
+
+    const control = document.createElement('button');
+    control.type = 'button';
+    control.className = 'book-toggle branch-toggle';
+    art.after(patch);
+    figure.append(control);
+
+    let visible = false, paused = false, ready = false, animation;
+    let previous = 0;
+    const playing = () => ready && visible && !paused && !document.hidden && !motionPreference.matches;
 
     function paint(now) {
-      const progress = Math.min(1, (now - start) / duration);
-      if (progress === 1 || motionPreference.matches) {
-        patch.remove();
-        return;
+      if (!playing()) return;
+      if (!previous || now - previous >= 32) {
+        previous = now;
+        const breeze = 17 * Math.sin(now / 760) + 8 * Math.sin(now / 1480);
+        const {width, height} = patch;
+        const bend = 222;
+        const fade = 310;
+        // The trunk and paper stay still. Narrow strips let the tips rise and fall.
+        for (let x = 0; x < width; x += 4) {
+          const leverage = Math.min(1, x / 235, (width - x - 4) / 48);
+          const crest = bend + Math.round(leverage * (breeze + 4 * Math.sin(now / 490 - x / 125)));
+          context.drawImage(source, x, 0, 4, bend, x, 0, 4, crest);
+          context.drawImage(source, x, bend, 4, fade - bend, x, crest, 4, fade - crest);
+        }
+        patch.hidden = false;
       }
-      const gust = Math.sin(progress * Math.PI) * Math.sin(progress * Math.PI * 3) * 11;
-      for (let y = 0; y < height; y += step) {
-        const band = Math.min(step, height - y);
-        // The left edge is anchored. Fade the wind before the book begins.
-        const vertical = Math.max(0, Math.min(1, (305 - y) / 45));
-        const offset = gust * vertical * (0.35 + y / height * 0.65);
-        const pivot = width * 0.7;
-        context.drawImage(source, 0, y, pivot, band, 0, y, pivot + offset, band);
-        context.drawImage(source, pivot, y, (width - pivot), band,
-          pivot + offset, y, width - pivot - offset, band);
-      }
-      requestAnimationFrame(paint);
+      animation = requestAnimationFrame(paint);
     }
 
-    const start = performance.now();
-    figure.append(patch);
-    requestAnimationFrame(paint);
+    function sync() {
+      cancelAnimationFrame(animation);
+      previous = 0;
+      patch.hidden = true;
+      control.hidden = !ready || motionPreference.matches;
+      control.textContent = paused ? 'Resume the breeze' : 'Pause the breeze';
+      if (playing()) animation = requestAnimationFrame(paint);
+    }
+
+    function loadArt() {
+      if (!art.naturalWidth) return;
+      sourceContext.clearRect(0, 0, source.width, source.height);
+      sourceContext.drawImage(art, 0, 0, 1200, 800);
+      context.drawImage(source, 0, 0);
+      ready = true;
+      sync();
+    }
+
+    control.addEventListener('click', () => { paused = !paused; sync(); });
+    document.addEventListener('visibilitychange', sync);
+    if (motionPreference.addEventListener) motionPreference.addEventListener('change', sync);
+    else if (motionPreference.addListener) motionPreference.addListener(sync);
+    const watch = new IntersectionObserver(([entry]) => {
+      const inView = entry.isIntersecting && entry.intersectionRatio >= .18;
+      if (visible !== inView) { visible = inView; sync(); }
+    }, { threshold: .18 });
+    watch.observe(figure);
+    art.addEventListener('load', loadArt);
+    if (art.complete) loadArt();
+    sync();
   }
 
-  const turnInterval = 1000;
-  const turnDuration = 820;
+  const turnInterval = 1750;
+  const turnDuration = 1160;
   // Matching curve points follow the right page, curled page and left page.
   const poses = [
     [476,367, 514,288,633,283,748,311, 994,452, 982,449,962,450,951,450, 860,420,746,418,667,544],
