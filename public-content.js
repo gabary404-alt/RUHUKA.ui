@@ -18,6 +18,6 @@ function applyPublicText(document,data){
  }
  return updated;
 }
-async function load(){const config=root.RUHUKA_CONFIG;if(!config||typeof root.fetch!=='function')return;try{const response=await root.fetch(config.url+'/rest/v1/rpc/school_public_content',{method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(4000),cache:'no-store'});if(response.ok)applyPublicText(document,await response.json());}catch{/* Published facts are optional to rendering/navigation; no private data or raw error is logged. */}}
+async function load(){const config=root.RUHUKA_CONFIG;if(!config||typeof root.fetch!=='function')return;try{const response=await root.fetch(config.url+'/rest/v1/rpc/school_public_content',{method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:'{}',signal:typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'?AbortSignal.timeout(4000):undefined,cache:'no-store'});if(response.ok)applyPublicText(document,await response.json());}catch{/* Published facts are optional to rendering/navigation; no private data or raw error is logged. */}}
 if(typeof module!=='undefined'&&module.exports)module.exports={applyPublicText};else load();
 })(typeof window!=='undefined'?window:globalThis);
