@@ -64,10 +64,16 @@
     if (force || list.scrollHeight - list.scrollTop - list.clientHeight < 120) list.scrollTop = list.scrollHeight;
   }
   function waiting() {
-    const node = append('', 'assistant');
+    const label = englishReply ? 'Preparing a response…' : 'Ndimo gutegura igisubizo…';
+    const node = append(label, 'assistant');
     node.classList.add('ai-waiting');
-    node.setAttribute('aria-label', 'Preparing a response');
-    for (let i = 0; i < 3; i++) node.appendChild(document.createElement('span'));
+    // The progress region announces the state. The dots are decorative.
+    node.setAttribute('aria-label', label);
+    for (let i = 0; i < 3; i++) {
+      const dot = document.createElement('span');
+      dot.setAttribute('aria-hidden', 'true');
+      node.appendChild(dot);
+    }
     return node;
   }
   function release(run) {
@@ -75,6 +81,7 @@
     clearTimeout(run.tick);
     if (active !== run) return;
     active = null;
+    run.node.classList.remove('ai-writing');
     busy(false);
   }
   function reveal(run, text) {
@@ -85,6 +92,7 @@
       run.node.removeAttribute('aria-label');
       const chars = Array.from(text);
       const reduced = root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) run.node.classList.add('ai-writing');
       const step = Math.max(2, Math.ceil(chars.length / 160));
       let offset = 0;
       function next() {
@@ -117,7 +125,7 @@
     run.controller.abort();
     run.node.classList.remove('ai-waiting');
     run.node.removeAttribute('aria-label');
-    run.node.textContent = (run.node.textContent || '') + (englishReply?'\n[Stopped]':'\n[Byahagaritswe]');
+    run.node.textContent = (run.showingAnswer ? run.node.textContent : '') + (englishReply?'\n[Stopped]':'\n[Byahagaritswe]');
     // A partial/stopped reply is not added to future model context.
     release(run);
     if (run.finishReveal) run.finishReveal(false);
@@ -151,7 +159,7 @@
     const run = { controller: new AbortController(), node: waiting(), timeout: null, tick: null, timedOut: false };
     active = run;
     busy(true);announce('');input.focus();
-    setStatus('Preparing a response…');
+    setStatus(englishReply ? 'Preparing a response…' : 'Ndimo gutegura igisubizo…');
     let reply;
     let online = false;
     try {
@@ -186,7 +194,8 @@
       byId('ai-retry').hidden = false;
     }
     if (active !== run) return;
-    setStatus(online ? 'Writing response…' : 'Showing local help…');
+    setStatus(online ? (englishReply ? 'Writing response…' : 'Ndimo kwandika igisubizo…') : 'Showing local help…');
+    run.showingAnswer = true;
     try {
       const complete = await reveal(run, reply);
       if (complete && active === run) {
